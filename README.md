@@ -19,6 +19,10 @@ Thus summary finalizations cost `1/16 + 1/256 + ... = 1/15` writes per
 appended token amortized.  Parent radii can be maintained without rescanning
 old leaf K using `max_child(||child_prototype-parent_prototype|| + child_radius)`.
 
+The earlier `natural_a` and `natural_b` hierarchy contexts are deterministic
+repeated-text fallbacks. They are useful regression fixtures, but are not
+independent natural-language corpus samples and are not presented as such.
+
 ## Experiment 1: Progressive Partial-Dot Attention
 
 This experiment tests whether 16-, 32-, and 64-dimensional nested partial dot

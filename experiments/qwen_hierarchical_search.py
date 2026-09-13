@@ -147,10 +147,10 @@ def evaluate_one(query: torch.Tensor, keys: torch.Tensor, order: torch.Tensor, a
     for name, summary, p in (
         ("support_p1_k4_prototype_conservative", "support_set_k4_per_prototype", 1),
         ("support_p1_q8k4_conservative", "support_set_q8k4_per_prototype", 1),
-        ("support_p1_rtl_q8k4_conservative", "support_set_fixed_q8k4", 1),
+        ("support_p1_rtl_q8k4_global_conservative", "support_set_fixed_q8k4_global", 1),
         ("support_p2_k4_prototype_conservative", "support_set_k4_per_prototype", 2),
         ("support_p2_q8k4_conservative", "support_set_q8k4_per_prototype", 2),
-        ("support_p2_rtl_q8k4_conservative", "support_set_fixed_q8k4", 2),
+        ("support_p2_rtl_q8k4_global_conservative", "support_set_fixed_q8k4_global", 2),
     ):
         eight = tree.best_first_search(query, k=8, summary=summary, representatives=p)
         thirty_two = tree.best_first_search(query, k=min(32, keys.shape[0]), summary=summary, representatives=p)
@@ -168,7 +168,7 @@ def evaluate_one(query: torch.Tensor, keys: torch.Tensor, order: torch.Tensor, a
         if "k4_prototype" in name:
             support_summary = "support_set_k4_per_prototype"
         elif "rtl_" in name:
-            support_summary = "support_set_fixed_q8k4"
+            support_summary = "support_set_fixed_q8k4_global"
         elif "q8k4_conservative" in name:
             support_summary = "support_set_q8k4_per_prototype"
         is_support = name.startswith("support_p") and "beam" not in name

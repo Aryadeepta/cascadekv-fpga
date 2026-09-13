@@ -9,6 +9,7 @@ from cascadekv.hierarchical_index import (
     accounting_ratios,
     bottom_up_p1_summaries,
     bottom_up_radius,
+    p1_radius_inflation_statistics,
     radix_amortized_summary_updates,
     radix_completion_levels,
     radix_internal_node_count,
@@ -207,7 +208,60 @@ def test_bottom_up_p1_balls_cover_all_descendant_keys_and_have_inflation() -> No
             child_radii = torch.stack([radii[child] for child in node.children])
             assert radii[node.id] >= child_radii.max()
         else:
-            assert radii[node.id] == 0
+            # A singleton leaf pays for frozen-K4 center quantization.
+            assert radii[node.id] >= 0
+    assert tree.validate_bounds(
+        torch.randn(5, 128), summary="support_p1_bottom_up_conservative"
+    ) == 0
+
+
+def test_bottom_up_frozen_centers_and_rtl_bound_cover_adversarial_tree() -> None:
+    # Per-group extrema make center quantization nontrivial; all checks are
+    # against original FP keys, not reconstructed keys.
+    keys = torch.zeros(257, 128)
+    keys[:, ::16] = torch.linspace(-9.3, 11.7, 257).unsqueeze(1)
+    keys[:, 15::16] = torch.linspace(7.1, -8.9, 257).unsqueeze(1)
+    tree = HierarchicalIndex(keys, support_set_sizes=(1,))
+    for node in tree.nodes:
+        encoded, radius = tree.bottom_up_p1_summary(node.id)
+        center = encoded.dequantize()[0]
+        assert (tree.ordered_keys[node.start : node.end] - center).norm(dim=1).amax() <= radius + 1e-5
+    queries = torch.stack((torch.ones(128) * 0.01337, torch.randn(128), -torch.randn(128)))
+    assert tree.validate_bounds(queries, summary="support_p1_bottom_up_conservative") == 0
+
+
+def test_direct_vs_bottom_up_radius_statistics_handle_zero_direct_radius() -> None:
+    keys = torch.zeros(256, 128)
+    tree = HierarchicalIndex(keys, support_set_sizes=(1,))
+    statistics = p1_radius_inflation_statistics(tree)
+    assert statistics["16"]["zero_direct_radius_count"] == 16
+    assert statistics["16"]["finite_ratio_count"] == 0
+
+
+def test_authoritative_leaf_projection_is_fp16() -> None:
+    tree = HierarchicalIndex(torch.randn(37, 128), torch.randperm(128), support_set_sizes=(1,))
+    result = tree.best_first_search(torch.randn(128), k=8, summary="support_set_fixed_q8k4_global")
+    assert result.accounting.leaf_k_bytes_read == result.accounting.leaf_tokens_evaluated * 512
+    assert (
+        result.accounting.authoritative_leaf_k_bytes_read
+        == result.accounting.leaf_tokens_evaluated * 256
+    )
+    ratios = accounting_ratios(result.accounting, 37)
+    assert (
+        ratios["projected_authoritative_leaf_k_bytes"]
+        == result.accounting.leaf_tokens_evaluated * 256
+    )
+
+
+def test_fixed_q8k4_global_and_per_prototype_are_explicit() -> None:
+    tree = HierarchicalIndex(torch.randn(43, 128), support_set_sizes=(2,))
+    query = torch.randn(128)
+    node = tree.root_id
+    assert tree.node_bound(node, query, summary="support_set_fixed_q8k4", representatives=2) == tree.node_bound(
+        node, query, summary="support_set_fixed_q8k4_global", representatives=2
+    )
+    assert tree.validate_bounds(query.unsqueeze(0), summary="support_set_fixed_q8k4_global", representatives=2) == 0
+    assert tree.validate_bounds(query.unsqueeze(0), summary="support_set_fixed_q8k4_per_prototype", representatives=2) == 0
 
 
 def test_incremental_radix_completion_schedule_and_amortized_work() -> None:

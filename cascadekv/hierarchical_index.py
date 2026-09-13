@@ -20,7 +20,8 @@ Summary = Literal[
     "support_set_global", "support_set_per_prototype", "support_set_score",
     "support_set_k4_global", "support_set_k4_per_prototype",
     "support_set_q8k4_global", "support_set_q8k4_per_prototype",
-    "support_set_fixed_q8k4",
+    "support_set_fixed_q8k4", "support_set_fixed_q8k4_global",
+    "support_set_fixed_q8k4_per_prototype", "support_p1_bottom_up_conservative",
 ]
 AdaptivePolicy = Literal["descend_immediately", "ambiguity_refine"]
 
@@ -49,7 +50,11 @@ class SearchAccounting:
     metadata_bytes_read: int = 0
     unique_metadata_bytes: int = 0
     repeated_metadata_bytes: int = 0
+    # The FP32 field remains useful for reference-model accounting.  The
+    # separate authoritative field is the Architecture-B deployment cost:
+    # 128 FP16 values per fetched leaf.
     leaf_k_bytes_read: int = 0
+    authoritative_leaf_k_bytes_read: int = 0
     coordinate_operations: int = 0
     node_expansions: int = 0
     frontier_width_by_level: dict[int, int] = field(default_factory=dict)
@@ -179,6 +184,12 @@ class HierarchicalIndex:
         self._support_k4_rhat: dict[tuple[int, int], torch.Tensor] = {}
         self._support_k4_global: dict[tuple[int, int], torch.Tensor] = {}
         self._support_k4_per_prototype: dict[tuple[int, int], list[torch.Tensor]] = {}
+        # Online P1 state.  These entries are built strictly from the frozen
+        # summaries of immediate children; no parent construction reads a
+        # descendant key tensor.
+        self._bottom_up_p1_k4: dict[int, QuantizedTensor] = {}
+        self._bottom_up_p1_rhat: dict[int, torch.Tensor] = {}
+        self._bottom_up_p1_radius: dict[int, torch.Tensor] = {}
         self._key_norm_max = torch.empty(len(self.nodes), dtype=torch.float32)
         self._summarize()
 
@@ -284,6 +295,41 @@ class HierarchicalIndex:
                     nearest[assignment == p].amax() if torch.any(assignment == p) else torch.zeros(())
                     for p in range(rhat.shape[0])
                 ]
+        if 1 in self.support_set_sizes:
+            self._build_bottom_up_p1()
+
+    def _build_bottom_up_p1(self) -> None:
+        """Build P1 balls from frozen child balls, without leaf rescans.
+
+        A leaf's ball pays for its own K4 center quantization.  At every
+        parent, the selected candidate is one of its children’s *frozen*
+        centers, then is frozen in its own group-16 K4 record.  The triangle
+        envelope therefore covers original FP descendants transitively.
+        """
+        for level, node_ids in enumerate(self.levels):
+            for node_id in node_ids:
+                node = self.nodes[node_id]
+                if level == 0:
+                    original = self.ordered_keys[node.start : node.end]
+                    encoded = quantize_symmetric(original, 4, 16)
+                    rhat = encoded.dequantize()
+                    radius = (original - rhat).norm(dim=1).amax()
+                else:
+                    child_centers = torch.cat(
+                        [self._bottom_up_p1_rhat[child] for child in node.children], dim=0
+                    )
+                    center = child_centers.mean(0)
+                    choice = int(((child_centers - center).square().sum(1)).argmin())
+                    # The only input to the parent choice is child summaries.
+                    encoded = quantize_symmetric(child_centers[choice : choice + 1], 4, 16)
+                    rhat = encoded.dequantize()
+                    radius = bottom_up_radius(
+                        rhat[0], child_centers,
+                        torch.stack([self._bottom_up_p1_radius[child] for child in node.children]),
+                    )
+                self._bottom_up_p1_k4[node_id] = encoded
+                self._bottom_up_p1_rhat[node_id] = rhat
+                self._bottom_up_p1_radius[node_id] = radius
 
     @property
     def max_level(self) -> int:
@@ -299,6 +345,12 @@ class HierarchicalIndex:
 
     def quantized_support_reconstruction(self, node_id: int, representatives: int) -> torch.Tensor:
         return self._support_k4_rhat[representatives, node_id].clone()
+
+    def bottom_up_p1_summary(self, node_id: int) -> tuple[QuantizedTensor, torch.Tensor]:
+        """Frozen online P1 prototype and conservative original-key radius."""
+        if node_id not in self._bottom_up_p1_k4:
+            raise ValueError("tree must be constructed with P1 support summaries")
+        return self._bottom_up_p1_k4[node_id], self._bottom_up_p1_radius[node_id].clone()
 
     def _support_bound(self, node_id: int, query: torch.Tensor, width: int, representatives: int,
                        *, per_prototype: bool, conservative: bool) -> float:
@@ -355,6 +407,20 @@ class HierarchicalIndex:
             value = (scores + arithmetic_cushion).max() + dot_q.norm() * self._support_k4_global[representatives, node_id]
         return float(value + cushion)
 
+    def _bottom_up_p1_bound(self, node_id: int, query: torch.Tensor) -> float:
+        """Frozen Q8/K4 RTL bound for the online, child-summary-only P1 ball."""
+        q = query.float()[self.ordering]
+        q8 = quantize_symmetric(q, 8, 16)
+        qhat = q8.dequantize()
+        encoded = self._bottom_up_p1_k4[node_id]
+        rtl = q8k4_rtl_score(q8, encoded)[0]
+        arithmetic = q8k4_rtl_error_cushion(q8, encoded)[0]
+        # ||qhat|| R covers original K around the frozen center; ||q-qhat||
+        # Kmax covers the original-query quantization error.
+        radius = self._bottom_up_p1_radius[node_id]
+        query_error = (q - qhat).norm() * self._key_norm_max[node_id]
+        return float(rtl + arithmetic + qhat.norm() * radius + query_error)
+
     def node_bound(self, node_id: int, query: torch.Tensor, *, summary: Summary = "ordered_prefix_plus_residual_bound", dimensions: int | None = None, representatives: int = 1) -> float:
         """Return a score estimate/bound. Only box-plus-residual is conservative."""
         q = query.float()[self.ordering]
@@ -365,14 +431,18 @@ class HierarchicalIndex:
             return self._support_bound(node_id, query, width, representatives,
                                        per_prototype=summary == "support_set_per_prototype",
                                        conservative=summary != "support_set_score")
-        if summary in ("support_set_k4_global", "support_set_k4_per_prototype", "support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4"):
+        if summary == "support_p1_bottom_up_conservative":
+            if width != self.dimensions:
+                raise ValueError("bottom-up K4 bounds are whole-vector only")
+            return self._bottom_up_p1_bound(node_id, query)
+        if summary in ("support_set_k4_global", "support_set_k4_per_prototype", "support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4", "support_set_fixed_q8k4_global", "support_set_fixed_q8k4_per_prototype"):
             if width != self.dimensions:
                 raise ValueError("quantized support bounds are whole-vector only")
             return self._quantized_support_bound(
                 node_id, query, representatives,
-                per_prototype=summary in ("support_set_k4_per_prototype", "support_set_q8k4_per_prototype"),
-                quantized_query=summary in ("support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4"),
-                fixed=summary == "support_set_fixed_q8k4",
+                per_prototype=summary in ("support_set_k4_per_prototype", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4_per_prototype"),
+                quantized_query=summary in ("support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4", "support_set_fixed_q8k4_global", "support_set_fixed_q8k4_per_prototype"),
+                fixed=summary in ("support_set_fixed_q8k4", "support_set_fixed_q8k4_global", "support_set_fixed_q8k4_per_prototype"),
             )
         if summary == "mean_key":
             return float(torch.dot(q, self._mean[node_id]))
@@ -405,14 +475,14 @@ class HierarchicalIndex:
                representatives: int = 1) -> float:
         if self.nodes[node_id].is_leaf and summary in (
             "support_set_global", "support_set_per_prototype", "support_set_score"
-            , "support_set_k4_global", "support_set_k4_per_prototype", "support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4"
+            , "support_set_k4_global", "support_set_k4_per_prototype", "support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4", "support_set_fixed_q8k4_global", "support_set_fixed_q8k4_per_prototype", "support_p1_bottom_up_conservative"
         ):
             accounting.add_leaf_bound(node_id, self.nodes[node_id].level)
             return float(torch.dot(self.keys[self.nodes[node_id].start], query.float()))
-        if summary in ("support_set_global", "support_set_per_prototype", "support_set_score", "support_set_k4_global", "support_set_k4_per_prototype", "support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4"):
+        if summary in ("support_set_global", "support_set_per_prototype", "support_set_score", "support_set_k4_global", "support_set_k4_per_prototype", "support_set_q8k4_global", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4", "support_set_fixed_q8k4_global", "support_set_fixed_q8k4_per_prototype", "support_p1_bottom_up_conservative"):
             accounting.add_support_node(
                 node_id, self.nodes[node_id].level, width, representatives,
-                per_prototype=summary in ("support_set_per_prototype", "support_set_k4_per_prototype", "support_set_q8k4_per_prototype"), tail=width < self.dimensions,
+                per_prototype=summary in ("support_set_per_prototype", "support_set_k4_per_prototype", "support_set_q8k4_per_prototype", "support_set_fixed_q8k4_per_prototype"), tail=width < self.dimensions,
             )
         else:
             accounting.add_node(node_id, self.nodes[node_id].level, width, residual=summary == "ordered_prefix_plus_residual_bound")
@@ -436,6 +506,7 @@ class HierarchicalIndex:
         scores = self.keys[ids] @ query.float()
         accounting.leaf_tokens_evaluated = ids.numel()
         accounting.leaf_k_bytes_read = ids.numel() * self.dimensions * 4
+        accounting.authoritative_leaf_k_bytes_read = ids.numel() * self.dimensions * 2
         count = min(k, ids.numel())
         order = sorted(range(ids.numel()), key=lambda i: (-float(scores[i]), int(ids[i])))[:count]
         return SearchResult(ids[order], scores[order], accounting)
@@ -500,6 +571,7 @@ class HierarchicalIndex:
                     heapq.heapreplace(exact, (score, node.start))
                 accounting.leaf_tokens_evaluated += 1
                 accounting.leaf_k_bytes_read += self.dimensions * 4
+                accounting.authoritative_leaf_k_bytes_read += self.dimensions * 2
                 continue
             accounting.node_expansions += 1
             for child in node.children:
@@ -511,11 +583,14 @@ class HierarchicalIndex:
 
 
 def accounting_ratios(accounting: SearchAccounting, token_count: int, dimensions: int = 128) -> dict[str, float | int]:
-    """Comparable FP32-reference traffic ratios (dense FP16 K scan is 2 bytes/value)."""
+    """Expose FP32-reference accounting and FP16-authoritative projection."""
     dense_fp16 = token_count * dimensions * 2
     flat_q8k4 = token_count * 80  # existing group-16 Q8xK4 key format
     total = accounting.metadata_bytes_read + accounting.leaf_k_bytes_read
-    projected_total = accounting.projected_support_metadata_bytes + accounting.leaf_k_bytes_read
+    projected_total = (
+        accounting.projected_support_metadata_bytes
+        + accounting.authoritative_leaf_k_bytes_read
+    )
     return {
         "metadata_bytes_read": accounting.metadata_bytes_read,
         "unique_metadata_bytes": accounting.unique_metadata_bytes,
@@ -525,6 +600,7 @@ def accounting_ratios(accounting: SearchAccounting, token_count: int, dimensions
         "projected_q8k4_support_metadata_bytes": accounting.projected_support_metadata_bytes,
         "projected_total_bytes": projected_total,
         "projected_total_bytes_vs_dense_fp16": projected_total / dense_fp16,
+        "projected_authoritative_leaf_k_bytes": accounting.authoritative_leaf_k_bytes_read,
         "coordinate_operations": accounting.coordinate_operations + accounting.leaf_tokens_evaluated * dimensions,
         "fraction_leaf_k_read": accounting.leaf_tokens_evaluated / token_count,
         "ratio_vs_dense_fp16_k_scan": total / dense_fp16,
@@ -605,26 +681,46 @@ def bottom_up_p1_summaries(tree: HierarchicalIndex) -> dict[int, tuple[torch.Ten
     """
     if 1 not in tree._support_ids:
         raise ValueError("tree must have P1 support summaries")
-    prototypes: dict[int, torch.Tensor] = {}
-    radii: dict[int, torch.Tensor] = {}
-    for level, node_ids in enumerate(tree.levels):
-        for node_id in node_ids:
-            node = tree.nodes[node_id]
-            if level == 0:
-                prototypes[node_id] = tree.ordered_keys[node.start]
-                radii[node_id] = torch.zeros((), dtype=torch.float32)
-                continue
-            child_prototypes = torch.stack([prototypes[child] for child in node.children])
-            center = child_prototypes.mean(0)
-            choice = int(((child_prototypes - center).square().sum(1)).argmin())
-            parent = child_prototypes[choice]
-            prototypes[node_id] = parent
-            radii[node_id] = bottom_up_radius(
-                parent, child_prototypes, torch.stack([radii[child] for child in node.children])
-            )
-    return {node_id: (prototypes[node_id], radii[node_id]) for node_id in prototypes}
+    return {
+        node.id: (tree._bottom_up_p1_rhat[node.id][0].clone(), tree._bottom_up_p1_radius[node.id].clone())
+        for node in tree.nodes
+    }
 
 
 def bottom_up_p1_radii(tree: HierarchicalIndex) -> dict[int, torch.Tensor]:
     """Compatibility view of :func:`bottom_up_p1_summaries` containing radii."""
     return {node_id: radius for node_id, (_, radius) in bottom_up_p1_summaries(tree).items()}
+
+
+def p1_radius_inflation_statistics(tree: HierarchicalIndex) -> dict[str, dict[str, float | int]]:
+    """Quantized direct-P1 versus online bottom-up P1 radius inflation.
+
+    Ratios whose direct radius is zero are reported separately rather than
+    assigned an arbitrary finite value.
+    """
+    if 1 not in tree._support_ids:
+        raise ValueError("tree must be constructed with P1 support summaries")
+    result: dict[str, dict[str, float | int]] = {}
+    for level in range(1, tree.max_level + 1):
+        ratios: list[float] = []
+        zero_direct = 0
+        for node_id in tree.levels[level]:
+            direct = float(tree._support_k4_global[1, node_id])
+            bottom_up = float(tree._bottom_up_p1_radius[node_id])
+            if direct == 0.0:
+                zero_direct += 1
+            else:
+                ratios.append(bottom_up / direct)
+        values = sorted(ratios)
+        label = str(tree.fanout ** level)
+        row: dict[str, float | int] = {
+            "node_count": len(tree.levels[level]), "finite_ratio_count": len(values),
+            "zero_direct_radius_count": zero_direct,
+        }
+        if values:
+            row["mean"] = sum(values) / len(values)
+            for percentile in (50, 90, 95, 99):
+                row[f"p{percentile}"] = values[max(0, (percentile * len(values) + 99) // 100 - 1)]
+            row["max"] = values[-1]
+        result[label] = row
+    return result
