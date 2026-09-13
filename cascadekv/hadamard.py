@@ -44,6 +44,15 @@ def random_signs(
     return (signs.mul(2).sub(1)).to(device=device, dtype=dtype)
 
 
+def random_coordinate_indices(size: int, count: int, *, seed: int) -> torch.Tensor:
+    """Return a reproducible, sorted subset of original representation coordinates."""
+    if not 0 < count <= size:
+        raise ValueError(f"count must be in [1, {size}]")
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(seed)
+    return torch.randperm(size, generator=generator)[:count].sort().values
+
+
 def signed_hadamard(x: torch.Tensor, *, seed: int) -> torch.Tensor:
     """Apply ``H(Dx)`` where D is a deterministic random-sign diagonal.
 

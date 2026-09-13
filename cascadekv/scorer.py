@@ -79,3 +79,34 @@ def attention_mass_recall(approximate: torch.Tensor, full: torch.Tensor, k: int)
         raise ValueError(f"k must be in [1, {full.shape[-1]}]")
     indices = approximate.topk(k, dim=-1).indices
     return torch.softmax(full, dim=-1).gather(-1, indices).sum(-1).mean().item()
+
+
+def relative_attention_mass_recall(approximate: torch.Tensor, full: torch.Tensor, k: int) -> float:
+    """Mass of approximate top-k relative to the mass of exact top-k.
+
+    The ratio removes variation caused purely by the concentration of a sample's
+    dense attention distribution.  The exact ranking therefore has value one.
+    """
+    approximate, full = _flatten_pairs(approximate, full)
+    if not 0 < k <= full.shape[-1]:
+        raise ValueError(f"k must be in [1, {full.shape[-1]}]")
+    probabilities = torch.softmax(full, dim=-1)
+    approximate_mass = probabilities.gather(-1, approximate.topk(k, dim=-1).indices).sum(-1)
+    exact_mass = probabilities.gather(-1, full.topk(k, dim=-1).indices).sum(-1)
+    # Exact top-k maximizes mass, so numerical noise is the only reason this
+    # could very slightly exceed one.
+    return (approximate_mass / exact_mass).mean().clamp(0, 1).item()
+
+
+def has_nontrivial_top_k(candidate_count: int, k: int) -> bool:
+    """Whether a top-k result has at least four times as many candidates as k."""
+    return candidate_count >= 4 * k
+
+
+def gqa_kv_head_for_query(query_head: int, query_heads: int, kv_heads: int) -> int:
+    """Map a Qwen-style grouped-query query head to its shared KV head."""
+    if query_heads <= 0 or kv_heads <= 0 or query_heads % kv_heads:
+        raise ValueError("query head count must be a positive multiple of KV head count")
+    if not 0 <= query_head < query_heads:
+        raise ValueError(f"query_head must be in [0, {query_heads})")
+    return query_head // (query_heads // kv_heads)
