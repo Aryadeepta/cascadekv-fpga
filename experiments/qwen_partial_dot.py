@@ -115,6 +115,30 @@ def capture_post_rope_qk(
     return captured, handles
 
 
+def capture_layer0_post_rope_qk_low_memory(
+    model: torch.nn.Module, input_ids: torch.Tensor
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Exactly capture layer-0 Q/K without evaluating attention or later layers.
+
+    This follows the installed Qwen3 ``Qwen3Model``/``Qwen3Attention`` data
+    path: embeddings -> layer-0 input RMSNorm -> Q/K projections and Q/K
+    norms -> the model's own rotary embedding and ``apply_rotary_pos_emb``.
+    It deliberately does not construct a causal mask, values, attention scores,
+    or decoder layers 1 onward.
+    """
+    hidden_states = model.embed_tokens(input_ids)
+    position_ids = torch.arange(input_ids.shape[1], device=input_ids.device).unsqueeze(0)
+    layer = model.layers[0]
+    hidden_states = layer.input_layernorm(hidden_states)
+    attention = layer.self_attn
+    shape = (*hidden_states.shape[:-1], -1, attention.head_dim)
+    query = attention.q_norm(attention.q_proj(hidden_states).view(shape)).transpose(1, 2)
+    key = attention.k_norm(attention.k_proj(hidden_states).view(shape)).transpose(1, 2)
+    cos, sin = model.rotary_emb(hidden_states, position_ids)
+    query, key = apply_rotary_pos_emb(query, key, cos, sin)
+    return query.detach().float().cpu(), key.detach().float().cpu()
+
+
 def new_record() -> dict[str, list[float]]:
     return defaultdict(list)
 
