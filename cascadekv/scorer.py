@@ -28,6 +28,39 @@ def progressive_dot_scores(
     }
 
 
+def ordered_progressive_dot_scores(
+    q: torch.Tensor,
+    k: torch.Tensor,
+    ordering: torch.Tensor | list[int],
+    dimensions: tuple[int, ...] = (16, 32, 64, 128),
+    *,
+    unbiased: bool = True,
+) -> dict[int, torch.Tensor]:
+    """Nested partial scores via one ordered contribution stream.
+
+    A cumulative sum is the FPGA-relevant accumulator; requesting a wider
+    dimension only consumes its next coordinate contributions.  With the
+    default ``unbiased`` readout, each partial accumulator is multiplied by
+    ``head_dim / dimension``.  The 128-D output is always the exact dot score.
+    """
+    head_dim = q.shape[-1]
+    if k.shape[-1] != head_dim:
+        raise ValueError("query and key dimensions must match")
+    order = torch.as_tensor(ordering, device=q.device, dtype=torch.long)
+    if order.ndim != 1 or order.numel() != head_dim or not torch.equal(
+        order.sort().values.cpu(), torch.arange(head_dim)
+    ):
+        raise ValueError("ordering must be a permutation of [0, head_dim)")
+    if any(dimension <= 0 or dimension > head_dim for dimension in dimensions):
+        raise ValueError(f"dimensions must lie in [1, {head_dim}]")
+    contributions = q.index_select(-1, order).unsqueeze(-2) * k.index_select(-1, order)
+    cumulative = contributions.cumsum(-1)
+    return {
+        dimension: cumulative[..., dimension - 1] * (head_dim / dimension if unbiased else 1.0)
+        for dimension in dimensions
+    }
+
+
 def _flatten_pairs(
     approximate: torch.Tensor, full: torch.Tensor
 ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -101,6 +134,14 @@ def relative_attention_mass_recall(approximate: torch.Tensor, full: torch.Tensor
 def has_nontrivial_top_k(candidate_count: int, k: int) -> bool:
     """Whether a top-k result has at least four times as many candidates as k."""
     return candidate_count >= 4 * k
+
+
+def normalized_score_mse(approximate: torch.Tensor, full: torch.Tensor, epsilon: float = 1e-12) -> float:
+    """Mean per-sample MSE normalized by that full-score row's variance."""
+    approximate, full = _flatten_pairs(approximate, full)
+    mse = (approximate - full).square().mean(-1)
+    variance = full.var(-1, unbiased=False)
+    return (mse / (variance + epsilon)).mean().item()
 
 
 def gqa_kv_head_for_query(query_head: int, query_heads: int, kv_heads: int) -> int:
