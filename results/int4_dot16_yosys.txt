@@ -1,0 +1,322 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+
+-- Running command `
+read_verilog -sv rtl/int4_dot16.sv
+hierarchy -top int4_dot16
+proc
+opt
+techmap
+opt
+stat
+' --
+
+1. Executing Verilog-2005 frontend: rtl/int4_dot16.sv
+Parsing SystemVerilog input from `rtl/int4_dot16.sv' to AST representation.
+Generating RTLIL representation for module `\int4_dot16'.
+Warning: Replacing memory \sum8 with list of registers. See rtl/int4_dot16.sv:34
+Warning: Replacing memory \sum4 with list of registers. See rtl/int4_dot16.sv:30
+Warning: Replacing memory \sum2 with list of registers. See rtl/int4_dot16.sv:26
+Warning: Replacing memory \product with list of registers. See rtl/int4_dot16.sv:22
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \int4_dot16
+
+2.2. Analyzing design hierarchy..
+Top module:  \int4_dot16
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 30 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\int4_dot16.\product[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[2]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[3]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[4]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[5]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[6]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[7]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[8]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[9]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[10]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[11]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[12]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[13]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[14]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[15]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[2]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[3]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[4]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[5]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[6]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[7]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[2]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[3]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum8[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum8[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+Cleaned up 0 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module int4_dot16.
+
+4. Executing OPT pass (performing simple optimizations).
+
+4.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module int4_dot16.
+
+4.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\int4_dot16'.
+Removed a total of 0 cells.
+
+4.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \int4_dot16..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+4.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \int4_dot16.
+Performed a total of 0 changes.
+
+4.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\int4_dot16'.
+Removed a total of 0 cells.
+
+4.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \int4_dot16..
+Removed 0 unused cells and 61 unused wires.
+<suppressed ~1 debug messages>
+
+4.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module int4_dot16.
+
+4.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \int4_dot16..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+4.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \int4_dot16.
+Performed a total of 0 changes.
+
+4.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\int4_dot16'.
+Removed a total of 0 cells.
+
+4.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+4.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \int4_dot16..
+
+4.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module int4_dot16.
+
+4.16. Finished OPT passes. (There is nothing left to do.)
+
+5. Executing TECHMAP pass (map to technology primitives).
+
+5.1. Executing Verilog-2005 frontend: /usr/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/usr/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Successfully finished Verilog frontend.
+
+5.2. Continuing TECHMAP pass.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=1:A_WIDTH=16:B_SIGNED=1:B_WIDTH=16:Y_WIDTH=16:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=1:A_WIDTH=16:B_SIGNED=1:B_WIDTH=16:Y_WIDTH=16:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=1:A_WIDTH=16:B_SIGNED=1:B_WIDTH=16:Y_WIDTH=16:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$mul:A_SIGNED=1:A_WIDTH=12:B_SIGNED=1:B_WIDTH=12:Y_WIDTH=12:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$mul:A_SIGNED=1:A_WIDTH=12:B_SIGNED=1:B_WIDTH=12:Y_WIDTH=12:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$mul:A_SIGNED=1:A_WIDTH=12:B_SIGNED=1:B_WIDTH=12:Y_WIDTH=12:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=1:A_WIDTH=13:B_SIGNED=1:B_WIDTH=13:Y_WIDTH=13:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=1:A_WIDTH=13:B_SIGNED=1:B_WIDTH=13:Y_WIDTH=13:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=1:A_WIDTH=13:B_SIGNED=1:B_WIDTH=13:Y_WIDTH=13:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=1:A_WIDTH=14:B_SIGNED=1:B_WIDTH=14:Y_WIDTH=14:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=1:A_WIDTH=14:B_SIGNED=1:B_WIDTH=14:Y_WIDTH=14:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=1:A_WIDTH=14:B_SIGNED=1:B_WIDTH=14:Y_WIDTH=14:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=1:A_WIDTH=15:B_SIGNED=1:B_WIDTH=15:Y_WIDTH=15:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=1:A_WIDTH=15:B_SIGNED=1:B_WIDTH=15:Y_WIDTH=15:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=1:A_WIDTH=15:B_SIGNED=1:B_WIDTH=15:Y_WIDTH=15:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$381bfac1a8d048c2a82a5e9a8ba59722228aaa1f\_90_alu for cells of type $alu.
+Using template $paramod$0d7ff93aea395ec407d544a178a4b13ea860d212\_90_alu for cells of type $alu.
+Using template $paramod$f9c19ff4cb4a16225c995ba7d19f84b51b027f23\_90_alu for cells of type $alu.
+Using template $paramod$d4c0c20b0ee59f495e14575c4397dc0a6dd9e8e6\_90_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add { \q_flat [7] \q_flat [7] \q_flat [7] \q_flat [7] \q_flat [7:0] } * { \k_flat [3] \k_flat [3] \k_flat [3] \k_flat [3] \k_flat [3] \k_flat [3] \k_flat [3] \k_flat [3] \k_flat [3:0] } (12x12 bits, signed)
+  add { \q_flat [15] \q_flat [15] \q_flat [15] \q_flat [15] \q_flat [15:8] } * { \k_flat [7] \k_flat [7] \k_flat [7] \k_flat [7] \k_flat [7] \k_flat [7] \k_flat [7] \k_flat [7] \k_flat [7:4] } (12x12 bits, signed)
+  add { \q_flat [23] \q_flat [23] \q_flat [23] \q_flat [23] \q_flat [23:16] } * { \k_flat [11] \k_flat [11] \k_flat [11] \k_flat [11] \k_flat [11] \k_flat [11] \k_flat [11] \k_flat [11] \k_flat [11:8] } (12x12 bits, signed)
+  add { \q_flat [31] \q_flat [31] \q_flat [31] \q_flat [31] \q_flat [31:24] } * { \k_flat [15] \k_flat [15] \k_flat [15] \k_flat [15] \k_flat [15] \k_flat [15] \k_flat [15] \k_flat [15] \k_flat [15:12] } (12x12 bits, signed)
+  add { \q_flat [39] \q_flat [39] \q_flat [39] \q_flat [39] \q_flat [39:32] } * { \k_flat [19] \k_flat [19] \k_flat [19] \k_flat [19] \k_flat [19] \k_flat [19] \k_flat [19] \k_flat [19] \k_flat [19:16] } (12x12 bits, signed)
+  add { \q_flat [47] \q_flat [47] \q_flat [47] \q_flat [47] \q_flat [47:40] } * { \k_flat [23] \k_flat [23] \k_flat [23] \k_flat [23] \k_flat [23] \k_flat [23] \k_flat [23] \k_flat [23] \k_flat [23:20] } (12x12 bits, signed)
+  add { \q_flat [55] \q_flat [55] \q_flat [55] \q_flat [55] \q_flat [55:48] } * { \k_flat [27] \k_flat [27] \k_flat [27] \k_flat [27] \k_flat [27] \k_flat [27] \k_flat [27] \k_flat [27] \k_flat [27:24] } (12x12 bits, signed)
+  add { \q_flat [63] \q_flat [63] \q_flat [63] \q_flat [63] \q_flat [63:56] } * { \k_flat [31] \k_flat [31] \k_flat [31] \k_flat [31] \k_flat [31] \k_flat [31] \k_flat [31] \k_flat [31] \k_flat [31:28] } (12x12 bits, signed)
+  add { \q_flat [71] \q_flat [71] \q_flat [71] \q_flat [71] \q_flat [71:64] } * { \k_flat [35] \k_flat [35] \k_flat [35] \k_flat [35] \k_flat [35] \k_flat [35] \k_flat [35] \k_flat [35] \k_flat [35:32] } (12x12 bits, signed)
+  add { \q_flat [79] \q_flat [79] \q_flat [79] \q_flat [79] \q_flat [79:72] } * { \k_flat [39] \k_flat [39] \k_flat [39] \k_flat [39] \k_flat [39] \k_flat [39] \k_flat [39] \k_flat [39] \k_flat [39:36] } (12x12 bits, signed)
+  add { \q_flat [87] \q_flat [87] \q_flat [87] \q_flat [87] \q_flat [87:80] } * { \k_flat [43] \k_flat [43] \k_flat [43] \k_flat [43] \k_flat [43] \k_flat [43] \k_flat [43] \k_flat [43] \k_flat [43:40] } (12x12 bits, signed)
+  add { \q_flat [95] \q_flat [95] \q_flat [95] \q_flat [95] \q_flat [95:88] } * { \k_flat [47] \k_flat [47] \k_flat [47] \k_flat [47] \k_flat [47] \k_flat [47] \k_flat [47] \k_flat [47] \k_flat [47:44] } (12x12 bits, signed)
+  add { \q_flat [103] \q_flat [103] \q_flat [103] \q_flat [103] \q_flat [103:96] } * { \k_flat [51] \k_flat [51] \k_flat [51] \k_flat [51] \k_flat [51] \k_flat [51] \k_flat [51] \k_flat [51] \k_flat [51:48] } (12x12 bits, signed)
+  add { \q_flat [111] \q_flat [111] \q_flat [111] \q_flat [111] \q_flat [111:104] } * { \k_flat [55] \k_flat [55] \k_flat [55] \k_flat [55] \k_flat [55] \k_flat [55] \k_flat [55] \k_flat [55] \k_flat [55:52] } (12x12 bits, signed)
+  add { \q_flat [119] \q_flat [119] \q_flat [119] \q_flat [119] \q_flat [119:112] } * { \k_flat [59] \k_flat [59] \k_flat [59] \k_flat [59] \k_flat [59] \k_flat [59] \k_flat [59] \k_flat [59] \k_flat [59:56] } (12x12 bits, signed)
+  add { \q_flat [127] \q_flat [127] \q_flat [127] \q_flat [127] \q_flat [127:120] } * { \k_flat [63] \k_flat [63] \k_flat [63] \k_flat [63] \k_flat [63] \k_flat [63] \k_flat [63] \k_flat [63] \k_flat [63:60] } (12x12 bits, signed)
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001101 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $not.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001110 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001111 for cells of type $lcu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000010000 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001100 for cells of type $fa.
+Using template $paramod$ee3d784672cdb1cb32d9a801a3af776716f16b74\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001100 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~3915 debug messages>
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module int4_dot16.
+<suppressed ~8191 debug messages>
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\int4_dot16'.
+<suppressed ~3936 debug messages>
+Removed a total of 1312 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \int4_dot16..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \int4_dot16.
+Performed a total of 0 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\int4_dot16'.
+Removed a total of 0 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \int4_dot16..
+Removed 949 unused cells and 3439 unused wires.
+<suppressed ~950 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module int4_dot16.
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \int4_dot16..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \int4_dot16.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\int4_dot16'.
+Removed a total of 0 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \int4_dot16..
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module int4_dot16.
+
+6.16. Finished OPT passes. (There is nothing left to do.)
+
+7. Printing statistics.
+
+=== int4_dot16 ===
+
+   Number of wires:               1467
+   Number of wire bits:          10924
+   Number of public wires:          33
+   Number of public wire bits:     590
+   Number of ports:                  3
+   Number of port bits:            208
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               5926
+     $_AND_                       2711
+     $_NOT_                         16
+     $_OR_                         945
+     $_XOR_                       2254
+
+Warnings: 4 unique messages, 4 total
+End of script. Logfile hash: 8b99ebf616, CPU: user 1.23s system 0.03s, MEM: 53.06 MB peak
+Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+Time spent: 34% 17x opt_expr (0 sec), 26% 1x techmap (0 sec), ...
