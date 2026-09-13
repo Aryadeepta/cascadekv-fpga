@@ -1,0 +1,43 @@
+{
+  "model": "Qwen/Qwen3-0.6B",
+  "layer": 12,
+  "seed": 0,
+  "max_length": 128,
+  "num_query_positions": 4,
+  "samples": 32,
+  "capture": "post-q_norm/k_norm and post-RoPE, before cache update; KV heads are mapped for GQA",
+  "metrics": {
+    "16": {
+      "pearson": 0.2882062494754791,
+      "spearman": 0.23329149160417728,
+      "top_8_recall": 0.75,
+      "attention_mass_top_8": 0.7572573404759169,
+      "top_32_recall": 0.828125,
+      "attention_mass_top_32": 0.9341904670000076
+    },
+    "32": {
+      "pearson": 0.5569786722771823,
+      "spearman": 0.45352184982039034,
+      "top_8_recall": 0.7890625,
+      "attention_mass_top_8": 0.9092233618721366,
+      "top_32_recall": 0.7734375,
+      "attention_mass_top_32": 0.9145592451095581
+    },
+    "64": {
+      "pearson": 0.665920396335423,
+      "spearman": 0.6009272295050323,
+      "top_8_recall": 0.83203125,
+      "attention_mass_top_8": 0.9300597105175257,
+      "top_32_recall": 0.8046875,
+      "attention_mass_top_32": 0.9423389583826065
+    },
+    "128": {
+      "pearson": 0.9999999832361937,
+      "spearman": 0.9999999795109034,
+      "top_8_recall": 1.0,
+      "attention_mass_top_8": 0.9662841651588678,
+      "top_32_recall": 1.0,
+      "attention_mass_top_32": 0.9820100963115692
+    }
+  }
+}
