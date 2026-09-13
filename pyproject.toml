@@ -1,0 +1,42 @@
+[project]
+name = "cascadekv-fpga"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "aryadeepta", email = "aryadeeptade@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate>=1.15.0",
+    "datasets>=5.0.1",
+    "einops>=0.8.2",
+    "huggingface-hub>=1.31.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.4.6",
+    "pandas>=3.0.5",
+    "safetensors>=0.8.0",
+    "scipy>=1.17.1",
+    "torch>=2.14.0",
+    "tqdm>=4.70.1",
+    "transformers>=5.17.0",
+]
+
+[project.scripts]
+cascadekv-fpga = "cascadekv_fpga:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true

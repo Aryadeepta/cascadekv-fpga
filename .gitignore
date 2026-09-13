@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Hugging Face / models
+.cache/
+models/
+checkpoints/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Experiments
+results/raw/
+wandb/
+
+# RTL simulation
+obj_dir/
+sim_build/
+*.vcd
+*.fst
+*.wlf
+
+# FPGA synthesis
+*.jou
+*.log
+*.str
+.Xil/
+vivado*/
+vitis*/
+build/
+reports/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
