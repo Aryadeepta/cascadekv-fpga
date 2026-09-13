@@ -1,0 +1,215 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+
+-- Running command `
+read_verilog -sv rtl/k_group_cache.sv
+hierarchy -top k_group_cache
+proc
+memory_dff
+memory_collect
+opt
+stat
+' --
+
+1. Executing Verilog-2005 frontend: rtl/k_group_cache.sv
+Parsing SystemVerilog input from `rtl/k_group_cache.sv' to AST representation.
+Generating RTLIL representation for module `\k_group_cache'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \k_group_cache
+
+2.2. Analyzing design hierarchy..
+Top module:  \k_group_cache
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 3 switch rules as full_case in process $proc$rtl/k_group_cache.sv:62$4 in module k_group_cache.
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 3 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~4 debug messages>
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+     1/11: $0\response_scale[15:0]
+     2/11: $2$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_DATA[79:0]$12
+     3/11: $2$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_ADDR[10:0]$11
+     4/11: $1$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_EN[79:0]$10
+     5/11: $1$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_DATA[79:0]$9
+     6/11: $1$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_ADDR[10:0]$8
+     7/11: $0\response_group_index[2:0]
+     8/11: $0\response_candidate_id[7:0]
+     9/11: $0\response_k_flat[63:0]
+    10/11: $2$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_EN[79:0]$13
+    11/11: $0\response_valid[0:0]
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\k_group_cache.\response_valid' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$76' with positive edge clock.
+Creating register for signal `\k_group_cache.\response_k_flat' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$77' with positive edge clock.
+Creating register for signal `\k_group_cache.\response_scale' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$78' with positive edge clock.
+Creating register for signal `\k_group_cache.\response_candidate_id' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$79' with positive edge clock.
+Creating register for signal `\k_group_cache.\response_group_index' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$80' with positive edge clock.
+Creating register for signal `\k_group_cache.$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_ADDR' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$81' with positive edge clock.
+Creating register for signal `\k_group_cache.$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_DATA' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$82' with positive edge clock.
+Creating register for signal `\k_group_cache.$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_EN' using process `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+  created $dff cell `$procdff$83' with positive edge clock.
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 4 empty switches in `\k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+Removing empty process `k_group_cache.$proc$rtl/k_group_cache.sv:62$4'.
+Cleaned up 4 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module k_group_cache.
+
+4. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+Checking read port `\cache_mem'[0] in module `\k_group_cache': FF found, but with a mux select that doesn't seem to correspond to transparency logic.
+Checking read port address `\cache_mem'[0] in module `\k_group_cache': no address FF found.
+
+5. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module k_group_cache.
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\k_group_cache'.
+Removed a total of 0 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \k_group_cache..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$66.
+    dead port 1/2 on $mux $procmux$33.
+    dead port 1/2 on $mux $procmux$27.
+Removed 3 multiplexer ports.
+<suppressed ~8 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \k_group_cache.
+    Consolidated identical input bits for $mux cell $procmux$63:
+      Old ports: A=80'00000000000000000000000000000000000000000000000000000000000000000000000000000000, B=80'11111111111111111111111111111111111111111111111111111111111111111111111111111111, Y=$procmux$63_Y
+      New ports: A=1'0, B=1'1, Y=$procmux$63_Y [0]
+      New connections: $procmux$63_Y [79:1] = { $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] $procmux$63_Y [0] }
+  Optimizing cells in module \k_group_cache.
+    Consolidated identical input bits for $mux cell $procmux$36:
+      Old ports: A=$2$memwr$\cache_mem$rtl/k_group_cache.sv:71$1_EN[79:0]$13, B=80'00000000000000000000000000000000000000000000000000000000000000000000000000000000, Y=$procmux$36_Y
+      New ports: A=$procmux$63_Y [0], B=1'0, Y=$procmux$36_Y [0]
+      New connections: $procmux$36_Y [79:1] = { $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] $procmux$36_Y [0] }
+  Optimizing cells in module \k_group_cache.
+Performed a total of 2 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\k_group_cache'.
+Removed a total of 0 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$76 ($dff) from module k_group_cache (D = $procmux$71_Y, Q = \response_valid, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$87 ($sdff) from module k_group_cache (D = $procmux$71_Y, Q = \response_valid).
+Adding SRST signal on $procdff$77 ($dff) from module k_group_cache (D = $procmux$57_Y, Q = \response_k_flat, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$91 ($sdff) from module k_group_cache (D = $memrd$\cache_mem$rtl/k_group_cache.sv:74$15_DATA [63:0], Q = \response_k_flat).
+Adding SRST signal on $procdff$78 ($dff) from module k_group_cache (D = $procmux$18_Y, Q = \response_scale, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$93 ($sdff) from module k_group_cache (D = $memrd$\cache_mem$rtl/k_group_cache.sv:74$15_DATA [79:64], Q = \response_scale).
+Adding SRST signal on $procdff$79 ($dff) from module k_group_cache (D = $procmux$51_Y, Q = \response_candidate_id, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:266:slice$95 ($sdff) from module k_group_cache (D = \candidate_id, Q = \response_candidate_id).
+Adding SRST signal on $procdff$80 ($dff) from module k_group_cache (D = $procmux$45_Y, Q = \response_group_index, rval = 3'000).
+Adding EN signal on $auto$ff.cc:266:slice$97 ($sdff) from module k_group_cache (D = \group_index, Q = \response_group_index).
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \k_group_cache..
+Removed 12 unused cells and 50 unused wires.
+<suppressed ~13 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module k_group_cache.
+<suppressed ~1 debug messages>
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \k_group_cache..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~4 debug messages>
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \k_group_cache.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\k_group_cache'.
+Removed a total of 0 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \k_group_cache..
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module k_group_cache.
+
+6.16. Finished OPT passes. (There is nothing left to do.)
+
+7. Printing statistics.
+
+=== k_group_cache ===
+
+   Number of wires:                 32
+   Number of wire bits:            650
+   Number of public wires:          19
+   Number of public wire bits:     222
+   Number of ports:                 17
+   Number of port bits:            200
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 19
+     $logic_and                      2
+     $logic_not                      1
+     $logic_or                       1
+     $mem_v2                         1
+     $mux                            8
+     $reduce_bool                    1
+     $sdffe                          5
+
+End of script. Logfile hash: 1f61ea89d4, CPU: user 0.04s system 0.00s, MEM: 16.34 MB peak
+Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+Time spent: 28% 1x memory_dff (0 sec), 16% 2x opt_clean (0 sec), ...
