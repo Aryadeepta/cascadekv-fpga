@@ -37,7 +37,9 @@ def test_cumulative_scoring_agrees_with_direct_indexed_scoring() -> None:
     scores = ordered_progressive_dot_scores(q, k, order, unbiased=False)
     for dimension in (16, 32, 64, 128):
         direct = (q[..., order[:dimension]].unsqueeze(-2) * k[..., order[:dimension]]).sum(-1)
-        assert torch.allclose(scores[dimension], direct)
+        # Cumulative hardware-style accumulation and Torch's reduction tree
+        # differ by a few float32 ulps around near-zero cancellation.
+        assert torch.allclose(scores[dimension], direct, rtol=1e-5, atol=1e-6)
 
 
 def test_normalized_score_mse_for_exact_scores_is_zero() -> None:
