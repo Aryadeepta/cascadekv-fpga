@@ -1,0 +1,480 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+
+-- Running command `
+read_verilog -sv rtl/int4_dot16.sv rtl/progressive_dot.sv rtl/candidate_score_bank.sv
+hierarchy -top candidate_score_bank
+proc
+memory_dff
+memory_collect
+opt
+stat
+' --
+
+1. Executing Verilog-2005 frontend: rtl/int4_dot16.sv
+Parsing SystemVerilog input from `rtl/int4_dot16.sv' to AST representation.
+Generating RTLIL representation for module `\int4_dot16'.
+Warning: Replacing memory \sum8 with list of registers. See rtl/int4_dot16.sv:34
+Warning: Replacing memory \sum4 with list of registers. See rtl/int4_dot16.sv:30
+Warning: Replacing memory \sum2 with list of registers. See rtl/int4_dot16.sv:26
+Warning: Replacing memory \product with list of registers. See rtl/int4_dot16.sv:22
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: rtl/progressive_dot.sv
+Parsing SystemVerilog input from `rtl/progressive_dot.sv' to AST representation.
+Generating RTLIL representation for module `\progressive_dot'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: rtl/candidate_score_bank.sv
+Parsing SystemVerilog input from `rtl/candidate_score_bank.sv' to AST representation.
+Generating RTLIL representation for module `\candidate_score_bank'.
+Successfully finished Verilog frontend.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1. Analyzing design hierarchy..
+Top module:  \candidate_score_bank
+Used module:     \progressive_dot
+Used module:         \int4_dot16
+
+4.2. Analyzing design hierarchy..
+Top module:  \candidate_score_bank
+Used module:     \progressive_dot
+Used module:         \int4_dot16
+Removed 0 unused modules.
+
+5. Executing PROC pass (convert processes to netlists).
+
+5.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+5.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 3 switch rules as full_case in process $proc$rtl/candidate_score_bank.sv:63$42 in module candidate_score_bank.
+Marked 4 switch rules as full_case in process $proc$rtl/progressive_dot.sv:0$35 in module progressive_dot.
+Removed a total of 0 dead cases.
+
+5.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 1 redundant assignment.
+Promoted 38 assignments to connections.
+
+5.4. Executing PROC_INIT pass (extract init attributes).
+
+5.5. Executing PROC_ARST pass (detect async resets in processes).
+
+5.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~8 debug messages>
+
+5.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+     1/20: $2$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_EN[23:0]$51
+     2/20: $2$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_DATA[23:0]$50
+     3/20: $2$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_ADDR[7:0]$49
+     4/20: $0\result_valid[0:0]
+     5/20: $1$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_EN[23:0]$48
+     6/20: $1$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_DATA[23:0]$47
+     7/20: $1$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_ADDR[7:0]$46
+     8/20: $0\pending_score_saturated[0:0]
+     9/20: $0\pending_contribution_saturated[0:0]
+    10/20: $0\pending_score[23:0]
+    11/20: $0\previous_score[23:0]
+    12/20: $0\request_scale_product[15:0]
+    13/20: $0\request_k_flat[63:0]
+    14/20: $0\request_q_flat[127:0]
+    15/20: $0\request_id[7:0]
+    16/20: $0\state[1:0]
+    17/20: $0\result_score[23:0]
+    18/20: $0\result_candidate_id[7:0]
+    19/20: $0\score_saturated[0:0]
+    20/20: $0\contribution_saturated[0:0]
+Creating decoders for process `\progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+     1/8: $2\score_saturated[0:0]
+     2/8: $2\score_out[23:0]
+     3/8: $1\score_saturated[0:0]
+     4/8: $1\score_out[23:0]
+     5/8: $2\contribution_saturated[0:0]
+     6/8: $2\contribution[23:0]
+     7/8: $1\contribution_saturated[0:0]
+     8/8: $1\contribution[23:0]
+Creating decoders for process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+
+5.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\progressive_dot.\contribution' from process `\progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+No latch inferred for signal `\progressive_dot.\score_out' from process `\progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+No latch inferred for signal `\progressive_dot.\contribution_saturated' from process `\progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+No latch inferred for signal `\progressive_dot.\score_saturated' from process `\progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+No latch inferred for signal `\progressive_dot.\score_sum' from process `\progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+No latch inferred for signal `\int4_dot16.\product[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[2]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[3]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[4]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[5]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[6]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[7]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[8]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[9]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[10]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[11]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[12]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[13]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[14]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\product[15]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[2]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[3]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[4]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[5]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[6]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum2[7]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[2]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum4[3]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum8[0]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+No latch inferred for signal `\int4_dot16.\sum8[1]' from process `\int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+
+5.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\candidate_score_bank.\contribution_saturated' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$230' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\score_saturated' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$231' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\result_valid' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$232' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\result_candidate_id' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$233' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\result_score' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$234' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\state' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$235' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\request_id' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$236' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\request_q_flat' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$237' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\request_k_flat' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$238' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\request_scale_product' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$239' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\previous_score' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$240' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\pending_score' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$241' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\pending_contribution_saturated' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$242' with positive edge clock.
+Creating register for signal `\candidate_score_bank.\pending_score_saturated' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$243' with positive edge clock.
+Creating register for signal `\candidate_score_bank.$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_ADDR' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$244' with positive edge clock.
+Creating register for signal `\candidate_score_bank.$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_DATA' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$245' with positive edge clock.
+Creating register for signal `\candidate_score_bank.$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_EN' using process `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+  created $dff cell `$procdff$246' with positive edge clock.
+
+5.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+5.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 4 empty switches in `\candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+Removing empty process `candidate_score_bank.$proc$rtl/candidate_score_bank.sv:63$42'.
+Found and cleaned up 4 empty switches in `\progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+Removing empty process `progressive_dot.$proc$rtl/progressive_dot.sv:0$35'.
+Removing empty process `int4_dot16.$proc$rtl/int4_dot16.sv:0$2'.
+Cleaned up 8 empty switches.
+
+5.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module candidate_score_bank.
+<suppressed ~6 debug messages>
+Optimizing module progressive_dot.
+<suppressed ~1 debug messages>
+Optimizing module int4_dot16.
+
+6. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+Checking read port `\score_mem'[0] in module `\candidate_score_bank': FF found, but with a mux select that doesn't seem to correspond to transparency logic.
+Checking read port address `\score_mem'[0] in module `\candidate_score_bank': no address FF found.
+
+7. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+8. Executing OPT pass (performing simple optimizations).
+
+8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module candidate_score_bank.
+Optimizing module progressive_dot.
+Optimizing module int4_dot16.
+
+8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\candidate_score_bank'.
+<suppressed ~45 debug messages>
+Finding identical cells in module `\progressive_dot'.
+Finding identical cells in module `\int4_dot16'.
+Removed a total of 15 cells.
+
+8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \candidate_score_bank..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$69.
+    dead port 1/2 on $mux $procmux$63.
+    dead port 1/2 on $mux $procmux$57.
+Running muxtree optimizer on module \progressive_dot..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$222.
+    dead port 1/2 on $mux $procmux$216.
+    dead port 1/2 on $mux $procmux$204.
+    dead port 1/2 on $mux $procmux$198.
+Running muxtree optimizer on module \int4_dot16..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 7 multiplexer ports.
+<suppressed ~21 debug messages>
+
+8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \candidate_score_bank.
+    Consolidated identical input bits for $mux cell $procmux$54:
+      Old ports: A=24'000000000000000000000000, B=24'111111111111111111111111, Y=$procmux$54_Y
+      New ports: A=1'0, B=1'1, Y=$procmux$54_Y [0]
+      New connections: $procmux$54_Y [23:1] = { $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] $procmux$54_Y [0] }
+  Optimizing cells in module \candidate_score_bank.
+    Consolidated identical input bits for $mux cell $procmux$78:
+      Old ports: A=$2$memwr$\score_mem$rtl/candidate_score_bank.sv:102$41_EN[23:0]$51, B=24'000000000000000000000000, Y=$procmux$78_Y
+      New ports: A=$procmux$54_Y [0], B=1'0, Y=$procmux$78_Y [0]
+      New connections: $procmux$78_Y [23:1] = { $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] $procmux$78_Y [0] }
+  Optimizing cells in module \candidate_score_bank.
+  Optimizing cells in module \progressive_dot.
+  Optimizing cells in module \int4_dot16.
+Performed a total of 2 changes.
+
+8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\candidate_score_bank'.
+<suppressed ~6 debug messages>
+Finding identical cells in module `\progressive_dot'.
+Finding identical cells in module `\int4_dot16'.
+Removed a total of 2 cells.
+
+8.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$233 ($dff) from module candidate_score_bank (D = $procmux$177_Y, Q = \result_candidate_id, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:266:slice$250 ($sdff) from module candidate_score_bank (D = \request_id, Q = \result_candidate_id).
+Adding SRST signal on $procdff$230 ($dff) from module candidate_score_bank (D = $procmux$189_Y, Q = \contribution_saturated, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$252 ($sdff) from module candidate_score_bank (D = \pending_contribution_saturated, Q = \contribution_saturated).
+Adding SRST signal on $procdff$234 ($dff) from module candidate_score_bank (D = $procmux$171_Y, Q = \result_score, rval = 24'000000000000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$254 ($sdff) from module candidate_score_bank (D = \pending_score, Q = \result_score).
+Adding SRST signal on $procdff$231 ($dff) from module candidate_score_bank (D = $procmux$183_Y, Q = \score_saturated, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$256 ($sdff) from module candidate_score_bank (D = \pending_score_saturated, Q = \score_saturated).
+Adding SRST signal on $procdff$235 ($dff) from module candidate_score_bank (D = $procmux$162_Y, Q = \state, rval = 2'00).
+Adding EN signal on $auto$ff.cc:266:slice$258 ($sdff) from module candidate_score_bank (D = $procmux$162_Y, Q = \state).
+Adding SRST signal on $procdff$236 ($dff) from module candidate_score_bank (D = $procmux$155_Y, Q = \request_id, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:266:slice$262 ($sdff) from module candidate_score_bank (D = \candidate_id, Q = \request_id).
+Adding SRST signal on $procdff$237 ($dff) from module candidate_score_bank (D = $procmux$145_Y, Q = \request_q_flat, rval = 128'00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$266 ($sdff) from module candidate_score_bank (D = \q_flat, Q = \request_q_flat).
+Adding SRST signal on $procdff$238 ($dff) from module candidate_score_bank (D = $procmux$135_Y, Q = \request_k_flat, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$270 ($sdff) from module candidate_score_bank (D = \k_flat, Q = \request_k_flat).
+Adding SRST signal on $procdff$239 ($dff) from module candidate_score_bank (D = $procmux$125_Y, Q = \request_scale_product, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$274 ($sdff) from module candidate_score_bank (D = \scale_product, Q = \request_scale_product).
+Adding SRST signal on $procdff$240 ($dff) from module candidate_score_bank (D = $procmux$115_Y, Q = \previous_score, rval = 24'000000000000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$278 ($sdff) from module candidate_score_bank (D = $procmux$111_Y, Q = \previous_score).
+Adding SRST signal on $procdff$241 ($dff) from module candidate_score_bank (D = $procmux$102_Y, Q = \pending_score, rval = 24'000000000000000000000000).
+Adding EN signal on $auto$ff.cc:266:slice$282 ($sdff) from module candidate_score_bank (D = \dot_score_out, Q = \pending_score).
+Adding SRST signal on $procdff$242 ($dff) from module candidate_score_bank (D = $procmux$95_Y, Q = \pending_contribution_saturated, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$284 ($sdff) from module candidate_score_bank (D = \dot_contribution_saturated, Q = \pending_contribution_saturated).
+Adding SRST signal on $procdff$243 ($dff) from module candidate_score_bank (D = $procmux$88_Y, Q = \pending_score_saturated, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$286 ($sdff) from module candidate_score_bank (D = \dot_score_saturated, Q = \pending_score_saturated).
+
+8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \candidate_score_bank..
+Finding unused cells or wires in module \progressive_dot..
+Finding unused cells or wires in module \int4_dot16..
+Removed 33 unused cells and 200 unused wires.
+<suppressed ~36 debug messages>
+
+8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module candidate_score_bank.
+Optimizing module int4_dot16.
+Optimizing module progressive_dot.
+
+8.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \candidate_score_bank..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \int4_dot16..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \progressive_dot..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~9 debug messages>
+
+8.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \candidate_score_bank.
+  Optimizing cells in module \int4_dot16.
+  Optimizing cells in module \progressive_dot.
+Performed a total of 0 changes.
+
+8.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\candidate_score_bank'.
+<suppressed ~12 debug messages>
+Finding identical cells in module `\int4_dot16'.
+Finding identical cells in module `\progressive_dot'.
+Removed a total of 4 cells.
+
+8.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \candidate_score_bank..
+Finding unused cells or wires in module \int4_dot16..
+Finding unused cells or wires in module \progressive_dot..
+Removed 0 unused cells and 4 unused wires.
+<suppressed ~1 debug messages>
+
+8.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module candidate_score_bank.
+Optimizing module int4_dot16.
+Optimizing module progressive_dot.
+
+8.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \candidate_score_bank..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \int4_dot16..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \progressive_dot..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~9 debug messages>
+
+8.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \candidate_score_bank.
+  Optimizing cells in module \int4_dot16.
+  Optimizing cells in module \progressive_dot.
+Performed a total of 0 changes.
+
+8.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\candidate_score_bank'.
+Finding identical cells in module `\int4_dot16'.
+Finding identical cells in module `\progressive_dot'.
+Removed a total of 0 cells.
+
+8.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \candidate_score_bank..
+Finding unused cells or wires in module \int4_dot16..
+Finding unused cells or wires in module \progressive_dot..
+
+8.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module candidate_score_bank.
+Optimizing module int4_dot16.
+Optimizing module progressive_dot.
+
+8.23. Finished OPT passes. (There is nothing left to do.)
+
+9. Printing statistics.
+
+=== candidate_score_bank ===
+
+   Number of wires:                 42
+   Number of wire bits:            758
+   Number of public wires:          27
+   Number of public wire bits:     589
+   Number of ports:                 13
+   Number of port bits:            255
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 30
+     $dff                            1
+     $eq                             2
+     $logic_not                      1
+     $mem_v2                         1
+     $mux                            8
+     $ne                             1
+     $pmux                           1
+     $reduce_and                     1
+     $sdffe                         13
+     progressive_dot                 1
+
+=== int4_dot16 ===
+
+   Number of wires:                 33
+   Number of wire bits:            590
+   Number of public wires:          33
+   Number of public wire bits:     590
+   Number of ports:                  3
+   Number of port bits:            208
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 31
+     $add                           15
+     $mul                           16
+
+=== progressive_dot ===
+
+   Number of wires:                 20
+   Number of wire bits:            442
+   Number of public wires:          12
+   Number of public wire bits:     388
+   Number of ports:                  9
+   Number of port bits:            298
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 15
+     $add                            1
+     $gt                             2
+     $lt                             2
+     $mul                            1
+     $mux                            8
+     int4_dot16                      1
+
+=== design hierarchy ===
+
+   candidate_score_bank              1
+     progressive_dot                 1
+       int4_dot16                    1
+
+   Number of wires:                 95
+   Number of wire bits:           1790
+   Number of public wires:          72
+   Number of public wire bits:    1567
+   Number of ports:                 25
+   Number of port bits:            761
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 74
+     $add                           16
+     $dff                            1
+     $eq                             2
+     $gt                             2
+     $logic_not                      1
+     $lt                             2
+     $mem_v2                         1
+     $mul                           17
+     $mux                           16
+     $ne                             1
+     $pmux                           1
+     $reduce_and                     1
+     $sdffe                         13
+
+Warnings: 4 unique messages, 4 total
+End of script. Logfile hash: bc9ed78224, CPU: user 0.05s system 0.01s, MEM: 16.57 MB peak
+Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+Time spent: 19% 5x opt_expr (0 sec), 15% 3x opt_clean (0 sec), ...
