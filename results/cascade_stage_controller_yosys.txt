@@ -1,0 +1,686 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+
+-- Running command `
+read_verilog -sv rtl/cascade_stage_controller.sv
+hierarchy -top cascade_stage_controller
+proc
+memory_dff
+memory_collect
+opt
+stat
+' --
+
+1. Executing Verilog-2005 frontend: rtl/cascade_stage_controller.sv
+Parsing SystemVerilog input from `rtl/cascade_stage_controller.sv' to AST representation.
+Generating RTLIL representation for module `\cascade_stage_controller'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \cascade_stage_controller
+
+2.2. Analyzing design hierarchy..
+Top module:  \cascade_stage_controller
+Removed 0 unused modules.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 14 switch rules as full_case in process $proc$rtl/cascade_stage_controller.sv:68$8 in module cascade_stage_controller.
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 1 redundant assignment.
+Promoted 16 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~14 debug messages>
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+     1/74: $6\first_group$func$rtl/cascade_stage_controller.sv:114$6.$result[2:0]$105
+     2/74: $6\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.$result[7:0]$103
+     3/74: $5\first_group$func$rtl/cascade_stage_controller.sv:114$6.$result[2:0]$98
+     4/74: $5\first_group$func$rtl/cascade_stage_controller.sv:114$6.selected_stage[1:0]$99
+     5/74: $5\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.$result[7:0]$95
+     6/74: $5\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_index[7:0]$97
+     7/74: $5\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_stage[1:0]$96
+     8/74: $5\first_group$func$rtl/cascade_stage_controller.sv:107$4.$result[2:0]$90
+     9/74: $4\first_group$func$rtl/cascade_stage_controller.sv:107$4.$result[2:0]$82
+    10/74: $4\first_group$func$rtl/cascade_stage_controller.sv:107$4.selected_stage[1:0]$83
+    11/74: $4\first_group$func$rtl/cascade_stage_controller.sv:114$6.selected_stage[1:0]$88
+    12/74: $4\first_group$func$rtl/cascade_stage_controller.sv:114$6.$result[2:0]$87
+    13/74: $4\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_index[7:0]$86
+    14/74: $4\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_stage[1:0]$85
+    15/74: $4\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.$result[7:0]$84
+    16/74: $4\group_count$func$rtl/cascade_stage_controller.sv:105$3.$result[2:0]$79
+    17/74: $3\first_group$func$rtl/cascade_stage_controller.sv:114$6.selected_stage[1:0]$78
+    18/74: $3\first_group$func$rtl/cascade_stage_controller.sv:114$6.$result[2:0]$77
+    19/74: $3\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_index[7:0]$76
+    20/74: $3\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_stage[1:0]$75
+    21/74: $3\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.$result[7:0]$74
+    22/74: $3\first_group$func$rtl/cascade_stage_controller.sv:107$4.selected_stage[1:0]$73
+    23/74: $3\first_group$func$rtl/cascade_stage_controller.sv:107$4.$result[2:0]$72
+    24/74: $3\group_count$func$rtl/cascade_stage_controller.sv:105$3.$result[2:0]$70
+    25/74: $3\group_count$func$rtl/cascade_stage_controller.sv:105$3.selected_stage[1:0]$71
+    26/74: $5\first_group$func$rtl/cascade_stage_controller.sv:100$2.$result[2:0]$67
+    27/74: $5\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.$result[7:0]$65
+    28/74: $4\first_group$func$rtl/cascade_stage_controller.sv:100$2.selected_stage[1:0]$63
+    29/74: $4\first_group$func$rtl/cascade_stage_controller.sv:100$2.$result[2:0]$62
+    30/74: $4\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.selected_stage[1:0]$61
+    31/74: $4\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.$result[7:0]$60
+    32/74: $3\first_group$func$rtl/cascade_stage_controller.sv:100$2.selected_stage[1:0]$58
+    33/74: $3\first_group$func$rtl/cascade_stage_controller.sv:100$2.$result[2:0]$57
+    34/74: $3\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.selected_stage[1:0]$56
+    35/74: $3\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.$result[7:0]$55
+    36/74: $2\first_group$func$rtl/cascade_stage_controller.sv:100$2.selected_stage[1:0]$45
+    37/74: $2\first_group$func$rtl/cascade_stage_controller.sv:100$2.$result[2:0]$44
+    38/74: $2\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.selected_stage[1:0]$43
+    39/74: $2\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.$result[7:0]$42
+    40/74: $2\first_group$func$rtl/cascade_stage_controller.sv:114$6.selected_stage[1:0]$54
+    41/74: $2\first_group$func$rtl/cascade_stage_controller.sv:114$6.$result[2:0]$53
+    42/74: $2\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_index[7:0]$52
+    43/74: $2\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_stage[1:0]$51
+    44/74: $2\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.$result[7:0]$50
+    45/74: $2\first_group$func$rtl/cascade_stage_controller.sv:107$4.selected_stage[1:0]$49
+    46/74: $2\first_group$func$rtl/cascade_stage_controller.sv:107$4.$result[2:0]$48
+    47/74: $2\group_count$func$rtl/cascade_stage_controller.sv:105$3.selected_stage[1:0]$47
+    48/74: $2\group_count$func$rtl/cascade_stage_controller.sv:105$3.$result[2:0]$46
+    49/74: $0\done[0:0]
+    50/74: $1\first_group$func$rtl/cascade_stage_controller.sv:114$6.selected_stage[1:0]$40
+    51/74: $1\first_group$func$rtl/cascade_stage_controller.sv:114$6.$result[2:0]$39
+    52/74: $1\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_index[7:0]$38
+    53/74: $1\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_stage[1:0]$37
+    54/74: $1\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.$result[7:0]$36
+    55/74: $1\first_group$func$rtl/cascade_stage_controller.sv:107$4.selected_stage[1:0]$35
+    56/74: $1\first_group$func$rtl/cascade_stage_controller.sv:107$4.$result[2:0]$34
+    57/74: $1\group_count$func$rtl/cascade_stage_controller.sv:105$3.selected_stage[1:0]$33
+    58/74: $1\group_count$func$rtl/cascade_stage_controller.sv:105$3.$result[2:0]$32
+    59/74: $1\first_group$func$rtl/cascade_stage_controller.sv:100$2.selected_stage[1:0]$31
+    60/74: $1\first_group$func$rtl/cascade_stage_controller.sv:100$2.$result[2:0]$30
+    61/74: $1\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.selected_stage[1:0]$29
+    62/74: $1\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.$result[7:0]$28
+    63/74: $1$memwr$\survivor_mem$rtl/cascade_stage_controller.sv:70$7_EN[7:0]$27
+    64/74: $1$memwr$\survivor_mem$rtl/cascade_stage_controller.sv:70$7_DATA[7:0]$26
+    65/74: $1$memwr$\survivor_mem$rtl/cascade_stage_controller.sv:70$7_ADDR[7:0]$25
+    66/74: $0\group_offset[2:0]
+    67/74: $0\candidate_index[8:0]
+    68/74: $0\active_count[8:0]
+    69/74: $0\active_stage[1:0]
+    70/74: $0\busy[0:0]
+    71/74: $0\work_clear_before_update[0:0]
+    72/74: $0\work_group_index[2:0]
+    73/74: $0\work_candidate_id[7:0]
+    74/74: $0\work_valid[0:0]
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\cascade_stage_controller.\work_valid' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$827' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\work_candidate_id' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$828' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\work_group_index' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$829' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\work_clear_before_update' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$830' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\busy' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$831' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\done' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$832' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\active_stage' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$833' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\active_count' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$834' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\candidate_index' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$835' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\group_offset' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$836' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.$result' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$837' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\candidate_for$func$rtl/cascade_stage_controller.sv:99$1.selected_stage' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$838' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\first_group$func$rtl/cascade_stage_controller.sv:100$2.$result' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$839' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\first_group$func$rtl/cascade_stage_controller.sv:100$2.selected_stage' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$840' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\group_count$func$rtl/cascade_stage_controller.sv:105$3.$result' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$841' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\group_count$func$rtl/cascade_stage_controller.sv:105$3.selected_stage' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$842' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\first_group$func$rtl/cascade_stage_controller.sv:107$4.$result' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$843' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\first_group$func$rtl/cascade_stage_controller.sv:107$4.selected_stage' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$844' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.$result' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$845' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_stage' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$846' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\candidate_for$func$rtl/cascade_stage_controller.sv:111$5.selected_index' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$847' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\first_group$func$rtl/cascade_stage_controller.sv:114$6.$result' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$848' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.\first_group$func$rtl/cascade_stage_controller.sv:114$6.selected_stage' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$849' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.$memwr$\survivor_mem$rtl/cascade_stage_controller.sv:70$7_ADDR' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$850' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.$memwr$\survivor_mem$rtl/cascade_stage_controller.sv:70$7_DATA' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$851' with positive edge clock.
+Creating register for signal `\cascade_stage_controller.$memwr$\survivor_mem$rtl/cascade_stage_controller.sv:70$7_EN' using process `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+  created $dff cell `$procdff$852' with positive edge clock.
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 14 empty switches in `\cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+Removing empty process `cascade_stage_controller.$proc$rtl/cascade_stage_controller.sv:68$8'.
+Cleaned up 14 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cascade_stage_controller.
+<suppressed ~66 debug messages>
+
+4. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+Checking read port `\survivor_mem'[0] in module `\cascade_stage_controller': no output FF found.
+Checking read port `\survivor_mem'[1] in module `\cascade_stage_controller': no output FF found.
+Checking read port address `\survivor_mem'[0] in module `\cascade_stage_controller': no address FF found.
+Checking read port address `\survivor_mem'[1] in module `\cascade_stage_controller': no address FF found.
+
+5. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cascade_stage_controller.
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cascade_stage_controller'.
+<suppressed ~63 debug messages>
+Removed a total of 21 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cascade_stage_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $procmux$738: \busy -> 1'1
+      Replacing known input bits on port B of cell $procmux$736: \busy -> 1'1
+      Replacing known input bits on port B of cell $procmux$733: \busy -> 1'1
+      Replacing known input bits on port A of cell $procmux$745: \busy -> 1'0
+      Replacing known input bits on port B of cell $procmux$743: \busy -> 1'0
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$666.
+    dead port 2/2 on $mux $procmux$666.
+    dead port 1/2 on $mux $procmux$663.
+    dead port 2/2 on $mux $procmux$663.
+    dead port 1/2 on $mux $procmux$660.
+    dead port 2/2 on $mux $procmux$660.
+    dead port 1/2 on $mux $procmux$657.
+    dead port 2/2 on $mux $procmux$657.
+    dead port 1/2 on $mux $procmux$654.
+    dead port 2/2 on $mux $procmux$654.
+    dead port 1/2 on $mux $procmux$651.
+    dead port 2/2 on $mux $procmux$651.
+    dead port 1/2 on $mux $procmux$648.
+    dead port 2/2 on $mux $procmux$648.
+    dead port 1/2 on $mux $procmux$645.
+    dead port 2/2 on $mux $procmux$645.
+    dead port 1/2 on $mux $procmux$642.
+    dead port 2/2 on $mux $procmux$642.
+    dead port 1/2 on $mux $procmux$639.
+    dead port 2/2 on $mux $procmux$639.
+    dead port 1/2 on $mux $procmux$636.
+    dead port 2/2 on $mux $procmux$636.
+    dead port 1/2 on $mux $procmux$633.
+    dead port 2/2 on $mux $procmux$633.
+    dead port 1/2 on $mux $procmux$630.
+    dead port 2/2 on $mux $procmux$630.
+    dead port 1/2 on $mux $procmux$606.
+    dead port 2/2 on $mux $procmux$606.
+    dead port 1/2 on $mux $procmux$603.
+    dead port 2/2 on $mux $procmux$603.
+    dead port 1/2 on $mux $procmux$600.
+    dead port 2/2 on $mux $procmux$600.
+    dead port 1/2 on $mux $procmux$597.
+    dead port 2/2 on $mux $procmux$597.
+    dead port 1/2 on $mux $procmux$594.
+    dead port 2/2 on $mux $procmux$594.
+    dead port 1/2 on $mux $procmux$591.
+    dead port 2/2 on $mux $procmux$591.
+    dead port 1/2 on $mux $procmux$588.
+    dead port 2/2 on $mux $procmux$588.
+    dead port 1/2 on $mux $procmux$585.
+    dead port 2/2 on $mux $procmux$585.
+    dead port 1/2 on $mux $procmux$582.
+    dead port 2/2 on $mux $procmux$582.
+    dead port 1/2 on $mux $procmux$579.
+    dead port 2/2 on $mux $procmux$579.
+    dead port 1/2 on $mux $procmux$576.
+    dead port 2/2 on $mux $procmux$576.
+    dead port 1/2 on $mux $procmux$573.
+    dead port 2/2 on $mux $procmux$573.
+    dead port 1/2 on $mux $procmux$570.
+    dead port 2/2 on $mux $procmux$570.
+    dead port 1/2 on $mux $procmux$567.
+    dead port 2/2 on $mux $procmux$567.
+    dead port 1/2 on $mux $procmux$564.
+    dead port 2/2 on $mux $procmux$564.
+    dead port 1/2 on $mux $procmux$561.
+    dead port 2/2 on $mux $procmux$561.
+    dead port 1/2 on $mux $procmux$558.
+    dead port 2/2 on $mux $procmux$558.
+    dead port 1/2 on $mux $procmux$555.
+    dead port 2/2 on $mux $procmux$555.
+    dead port 1/2 on $mux $procmux$552.
+    dead port 2/2 on $mux $procmux$552.
+    dead port 1/2 on $mux $procmux$549.
+    dead port 2/2 on $mux $procmux$549.
+    dead port 1/2 on $mux $procmux$546.
+    dead port 2/2 on $mux $procmux$546.
+    dead port 1/2 on $mux $procmux$543.
+    dead port 2/2 on $mux $procmux$543.
+    dead port 1/2 on $mux $procmux$540.
+    dead port 2/2 on $mux $procmux$540.
+    dead port 1/2 on $mux $procmux$537.
+    dead port 2/2 on $mux $procmux$537.
+    dead port 1/2 on $mux $procmux$534.
+    dead port 2/2 on $mux $procmux$534.
+    dead port 1/2 on $mux $procmux$531.
+    dead port 2/2 on $mux $procmux$531.
+    dead port 1/2 on $mux $procmux$528.
+    dead port 2/2 on $mux $procmux$528.
+    dead port 1/2 on $mux $procmux$525.
+    dead port 2/2 on $mux $procmux$525.
+    dead port 1/2 on $mux $procmux$523.
+    dead port 2/2 on $mux $procmux$523.
+    dead port 1/2 on $mux $procmux$519.
+    dead port 2/2 on $mux $procmux$519.
+    dead port 1/2 on $mux $procmux$516.
+    dead port 2/2 on $mux $procmux$516.
+    dead port 1/2 on $mux $procmux$514.
+    dead port 2/2 on $mux $procmux$514.
+    dead port 1/2 on $mux $procmux$510.
+    dead port 2/2 on $mux $procmux$510.
+    dead port 1/2 on $mux $procmux$507.
+    dead port 2/2 on $mux $procmux$507.
+    dead port 1/2 on $mux $procmux$505.
+    dead port 2/2 on $mux $procmux$505.
+    dead port 1/2 on $mux $procmux$501.
+    dead port 2/2 on $mux $procmux$501.
+    dead port 1/2 on $mux $procmux$498.
+    dead port 2/2 on $mux $procmux$498.
+    dead port 1/2 on $mux $procmux$496.
+    dead port 2/2 on $mux $procmux$496.
+    dead port 1/2 on $mux $procmux$492.
+    dead port 2/2 on $mux $procmux$492.
+    dead port 1/2 on $mux $procmux$489.
+    dead port 2/2 on $mux $procmux$489.
+    dead port 1/2 on $mux $procmux$487.
+    dead port 2/2 on $mux $procmux$487.
+    dead port 1/2 on $mux $procmux$485.
+    dead port 2/2 on $mux $procmux$485.
+    dead port 1/2 on $mux $procmux$480.
+    dead port 2/2 on $mux $procmux$480.
+    dead port 1/2 on $mux $procmux$477.
+    dead port 2/2 on $mux $procmux$477.
+    dead port 1/2 on $mux $procmux$475.
+    dead port 2/2 on $mux $procmux$475.
+    dead port 1/2 on $mux $procmux$473.
+    dead port 2/2 on $mux $procmux$473.
+    dead port 1/2 on $mux $procmux$468.
+    dead port 2/2 on $mux $procmux$468.
+    dead port 1/2 on $mux $procmux$465.
+    dead port 2/2 on $mux $procmux$465.
+    dead port 1/2 on $mux $procmux$463.
+    dead port 2/2 on $mux $procmux$463.
+    dead port 1/2 on $mux $procmux$461.
+    dead port 2/2 on $mux $procmux$461.
+    dead port 1/2 on $mux $procmux$456.
+    dead port 2/2 on $mux $procmux$456.
+    dead port 1/2 on $mux $procmux$453.
+    dead port 2/2 on $mux $procmux$453.
+    dead port 1/2 on $mux $procmux$451.
+    dead port 2/2 on $mux $procmux$451.
+    dead port 1/2 on $mux $procmux$449.
+    dead port 2/2 on $mux $procmux$449.
+    dead port 1/2 on $mux $procmux$444.
+    dead port 1/2 on $mux $procmux$441.
+    dead port 2/2 on $mux $procmux$439.
+    dead port 1/2 on $mux $procmux$437.
+    dead port 1/2 on $mux $procmux$429.
+    dead port 1/2 on $mux $procmux$426.
+    dead port 2/2 on $mux $procmux$424.
+    dead port 1/2 on $mux $procmux$422.
+    dead port 1/2 on $mux $procmux$412.
+    dead port 2/2 on $mux $procmux$412.
+    dead port 1/2 on $mux $procmux$409.
+    dead port 2/2 on $mux $procmux$409.
+    dead port 1/2 on $mux $procmux$406.
+    dead port 2/2 on $mux $procmux$406.
+    dead port 1/2 on $mux $procmux$403.
+    dead port 2/2 on $mux $procmux$403.
+    dead port 1/2 on $mux $procmux$400.
+    dead port 2/2 on $mux $procmux$400.
+    dead port 1/2 on $mux $procmux$397.
+    dead port 2/2 on $mux $procmux$397.
+    dead port 1/2 on $mux $procmux$394.
+    dead port 2/2 on $mux $procmux$394.
+    dead port 1/2 on $mux $procmux$391.
+    dead port 2/2 on $mux $procmux$391.
+    dead port 1/2 on $mux $procmux$388.
+    dead port 2/2 on $mux $procmux$388.
+    dead port 1/2 on $mux $procmux$385.
+    dead port 2/2 on $mux $procmux$385.
+    dead port 1/2 on $mux $procmux$382.
+    dead port 2/2 on $mux $procmux$382.
+    dead port 1/2 on $mux $procmux$379.
+    dead port 2/2 on $mux $procmux$379.
+    dead port 1/2 on $mux $procmux$376.
+    dead port 2/2 on $mux $procmux$376.
+    dead port 1/2 on $mux $procmux$373.
+    dead port 2/2 on $mux $procmux$373.
+    dead port 1/2 on $mux $procmux$370.
+    dead port 2/2 on $mux $procmux$370.
+    dead port 1/2 on $mux $procmux$367.
+    dead port 2/2 on $mux $procmux$367.
+    dead port 1/2 on $mux $procmux$364.
+    dead port 2/2 on $mux $procmux$364.
+    dead port 1/2 on $mux $procmux$361.
+    dead port 2/2 on $mux $procmux$361.
+    dead port 1/2 on $mux $procmux$358.
+    dead port 2/2 on $mux $procmux$358.
+    dead port 1/2 on $mux $procmux$355.
+    dead port 2/2 on $mux $procmux$355.
+    dead port 1/2 on $mux $procmux$352.
+    dead port 2/2 on $mux $procmux$352.
+    dead port 1/2 on $mux $procmux$349.
+    dead port 2/2 on $mux $procmux$349.
+    dead port 1/2 on $mux $procmux$346.
+    dead port 2/2 on $mux $procmux$346.
+    dead port 1/2 on $mux $procmux$343.
+    dead port 2/2 on $mux $procmux$343.
+    dead port 1/2 on $mux $procmux$340.
+    dead port 2/2 on $mux $procmux$340.
+    dead port 1/2 on $mux $procmux$337.
+    dead port 2/2 on $mux $procmux$337.
+    dead port 1/2 on $mux $procmux$334.
+    dead port 2/2 on $mux $procmux$334.
+    dead port 1/2 on $mux $procmux$318.
+    dead port 2/2 on $mux $procmux$318.
+    dead port 1/2 on $mux $procmux$315.
+    dead port 2/2 on $mux $procmux$315.
+    dead port 1/2 on $mux $procmux$312.
+    dead port 2/2 on $mux $procmux$312.
+    dead port 1/2 on $mux $procmux$310.
+    dead port 2/2 on $mux $procmux$310.
+    dead port 1/2 on $mux $procmux$306.
+    dead port 2/2 on $mux $procmux$306.
+    dead port 1/2 on $mux $procmux$303.
+    dead port 2/2 on $mux $procmux$303.
+    dead port 1/2 on $mux $procmux$300.
+    dead port 2/2 on $mux $procmux$300.
+    dead port 1/2 on $mux $procmux$298.
+    dead port 2/2 on $mux $procmux$298.
+    dead port 1/2 on $mux $procmux$294.
+    dead port 2/2 on $mux $procmux$294.
+    dead port 1/2 on $mux $procmux$291.
+    dead port 2/2 on $mux $procmux$291.
+    dead port 1/2 on $mux $procmux$288.
+    dead port 2/2 on $mux $procmux$288.
+    dead port 1/2 on $mux $procmux$286.
+    dead port 2/2 on $mux $procmux$286.
+    dead port 1/2 on $mux $procmux$282.
+    dead port 2/2 on $mux $procmux$282.
+    dead port 1/2 on $mux $procmux$279.
+    dead port 2/2 on $mux $procmux$279.
+    dead port 1/2 on $mux $procmux$276.
+    dead port 2/2 on $mux $procmux$276.
+    dead port 1/2 on $mux $procmux$274.
+    dead port 2/2 on $mux $procmux$274.
+    dead port 1/2 on $mux $procmux$270.
+    dead port 2/2 on $mux $procmux$270.
+    dead port 1/2 on $mux $procmux$267.
+    dead port 2/2 on $mux $procmux$267.
+    dead port 1/2 on $mux $procmux$264.
+    dead port 2/2 on $mux $procmux$264.
+    dead port 1/2 on $mux $procmux$262.
+    dead port 2/2 on $mux $procmux$262.
+    dead port 1/2 on $mux $procmux$258.
+    dead port 2/2 on $mux $procmux$258.
+    dead port 1/2 on $mux $procmux$255.
+    dead port 2/2 on $mux $procmux$255.
+    dead port 1/2 on $mux $procmux$252.
+    dead port 2/2 on $mux $procmux$252.
+    dead port 1/2 on $mux $procmux$250.
+    dead port 2/2 on $mux $procmux$250.
+    dead port 1/2 on $mux $procmux$246.
+    dead port 2/2 on $mux $procmux$246.
+    dead port 1/2 on $mux $procmux$243.
+    dead port 2/2 on $mux $procmux$243.
+    dead port 1/2 on $mux $procmux$240.
+    dead port 2/2 on $mux $procmux$240.
+    dead port 1/2 on $mux $procmux$238.
+    dead port 2/2 on $mux $procmux$238.
+    dead port 1/2 on $mux $procmux$217.
+    dead port 2/2 on $mux $procmux$217.
+    dead port 1/2 on $mux $procmux$214.
+    dead port 2/2 on $mux $procmux$214.
+    dead port 1/2 on $mux $procmux$211.
+    dead port 2/2 on $mux $procmux$211.
+    dead port 1/2 on $mux $procmux$209.
+    dead port 2/2 on $mux $procmux$209.
+    dead port 1/2 on $mux $procmux$206.
+    dead port 2/2 on $mux $procmux$206.
+    dead port 1/2 on $mux $procmux$202.
+    dead port 2/2 on $mux $procmux$202.
+    dead port 1/2 on $mux $procmux$199.
+    dead port 2/2 on $mux $procmux$199.
+    dead port 1/2 on $mux $procmux$196.
+    dead port 2/2 on $mux $procmux$196.
+    dead port 1/2 on $mux $procmux$194.
+    dead port 2/2 on $mux $procmux$194.
+    dead port 1/2 on $mux $procmux$191.
+    dead port 2/2 on $mux $procmux$191.
+    dead port 1/2 on $mux $procmux$187.
+    dead port 2/2 on $mux $procmux$187.
+    dead port 1/2 on $mux $procmux$184.
+    dead port 2/2 on $mux $procmux$184.
+    dead port 1/2 on $mux $procmux$181.
+    dead port 2/2 on $mux $procmux$181.
+    dead port 1/2 on $mux $procmux$179.
+    dead port 2/2 on $mux $procmux$179.
+    dead port 1/2 on $mux $procmux$176.
+    dead port 2/2 on $mux $procmux$176.
+    dead port 1/2 on $mux $procmux$172.
+    dead port 2/2 on $mux $procmux$172.
+    dead port 1/2 on $mux $procmux$169.
+    dead port 2/2 on $mux $procmux$169.
+    dead port 1/2 on $mux $procmux$166.
+    dead port 2/2 on $mux $procmux$166.
+    dead port 1/2 on $mux $procmux$164.
+    dead port 2/2 on $mux $procmux$164.
+    dead port 1/2 on $mux $procmux$161.
+    dead port 2/2 on $mux $procmux$161.
+    dead port 1/2 on $mux $procmux$157.
+    dead port 2/2 on $mux $procmux$157.
+    dead port 1/2 on $mux $procmux$154.
+    dead port 2/2 on $mux $procmux$154.
+    dead port 1/2 on $mux $procmux$151.
+    dead port 2/2 on $mux $procmux$151.
+    dead port 1/2 on $mux $procmux$149.
+    dead port 2/2 on $mux $procmux$149.
+    dead port 1/2 on $mux $procmux$146.
+    dead port 2/2 on $mux $procmux$146.
+    dead port 1/2 on $mux $procmux$142.
+    dead port 2/2 on $mux $procmux$139.
+    dead port 2/2 on $mux $procmux$136.
+    dead port 1/2 on $mux $procmux$134.
+    dead port 2/2 on $mux $procmux$131.
+    dead port 1/2 on $mux $procmux$124.
+    dead port 2/2 on $mux $procmux$121.
+    dead port 2/2 on $mux $procmux$118.
+    dead port 1/2 on $mux $procmux$116.
+    dead port 2/2 on $mux $procmux$113.
+Removed 312 multiplexer ports.
+<suppressed ~19 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cascade_stage_controller.
+    Consolidated identical input bits for $mux cell $procmux$669:
+      Old ports: A=8'00000000, B=8'11111111, Y=$procmux$669_Y
+      New ports: A=1'0, B=1'1, Y=$procmux$669_Y [0]
+      New connections: $procmux$669_Y [7:1] = { $procmux$669_Y [0] $procmux$669_Y [0] $procmux$669_Y [0] $procmux$669_Y [0] $procmux$669_Y [0] $procmux$669_Y [0] $procmux$669_Y [0] }
+  Optimizing cells in module \cascade_stage_controller.
+Performed a total of 1 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cascade_stage_controller'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$831 ($dff) from module cascade_stage_controller (D = $procmux$747_Y, Q = \busy, rval = 1'0).
+Adding SRST signal on $procdff$832 ($dff) from module cascade_stage_controller (D = $procmux$624_Y, Q = \done, rval = 1'0).
+Adding SRST signal on $procdff$833 ($dff) from module cascade_stage_controller (D = $procmux$726_Y, Q = \active_stage, rval = 2'00).
+Adding EN signal on $auto$ff.cc:266:slice$860 ($sdff) from module cascade_stage_controller (D = \stage, Q = \active_stage).
+Adding SRST signal on $procdff$834 ($dff) from module cascade_stage_controller (D = $procmux$717_Y, Q = \active_count, rval = 9'000000000).
+Adding EN signal on $auto$ff.cc:266:slice$866 ($sdff) from module cascade_stage_controller (D = \stage_candidate_count, Q = \active_count).
+Adding SRST signal on $procdff$835 ($dff) from module cascade_stage_controller (D = $procmux$708_Y, Q = \candidate_index, rval = 9'000000000).
+Adding EN signal on $auto$ff.cc:266:slice$872 ($sdff) from module cascade_stage_controller (D = $procmux$708_Y, Q = \candidate_index).
+Adding SRST signal on $procdff$836 ($dff) from module cascade_stage_controller (D = $procmux$690_Y, Q = \group_offset, rval = 3'000).
+Adding EN signal on $auto$ff.cc:266:slice$884 ($sdff) from module cascade_stage_controller (D = $procmux$690_Y, Q = \group_offset).
+Adding SRST signal on $procdff$827 ($dff) from module cascade_stage_controller (D = $procmux$822_Y, Q = \work_valid, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$894 ($sdff) from module cascade_stage_controller (D = $procmux$822_Y, Q = \work_valid).
+Adding SRST signal on $procdff$828 ($dff) from module cascade_stage_controller (D = $procmux$801_Y, Q = \work_candidate_id, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:266:slice$906 ($sdff) from module cascade_stage_controller (D = $procmux$801_Y, Q = \work_candidate_id).
+Adding SRST signal on $procdff$829 ($dff) from module cascade_stage_controller (D = $procmux$780_Y, Q = \work_group_index, rval = 3'000).
+Adding EN signal on $auto$ff.cc:266:slice$920 ($sdff) from module cascade_stage_controller (D = $procmux$780_Y, Q = \work_group_index).
+Adding SRST signal on $procdff$830 ($dff) from module cascade_stage_controller (D = $procmux$759_Y, Q = \work_clear_before_update, rval = 1'0).
+Adding EN signal on $auto$ff.cc:266:slice$932 ($sdff) from module cascade_stage_controller (D = $eq$rtl/cascade_stage_controller.sv:101$68_Y, Q = \work_clear_before_update).
+Setting constant 1-bit at position 0 on $procdff$849 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 1 on $procdff$849 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 0 on $procdff$848 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 1 on $procdff$848 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 2 on $procdff$848 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 0 on $procdff$847 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 1 on $procdff$847 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 2 on $procdff$847 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 3 on $procdff$847 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 4 on $procdff$847 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 5 on $procdff$847 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 6 on $procdff$847 ($dff) from module cascade_stage_controller.
+Setting constant 1-bit at position 7 on $procdff$847 ($dff) from module cascade_stage_controller.
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cascade_stage_controller..
+Removed 21 unused cells and 528 unused wires.
+<suppressed ~22 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cascade_stage_controller.
+<suppressed ~5 debug messages>
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cascade_stage_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~14 debug messages>
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cascade_stage_controller.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cascade_stage_controller'.
+<suppressed ~51 debug messages>
+Removed a total of 17 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cascade_stage_controller..
+Removed 0 unused cells and 17 unused wires.
+<suppressed ~1 debug messages>
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cascade_stage_controller.
+
+6.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \cascade_stage_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~14 debug messages>
+
+6.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \cascade_stage_controller.
+Performed a total of 0 changes.
+
+6.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\cascade_stage_controller'.
+Removed a total of 0 cells.
+
+6.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \cascade_stage_controller..
+
+6.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module cascade_stage_controller.
+
+6.23. Finished OPT passes. (There is nothing left to do.)
+
+7. Printing statistics.
+
+=== cascade_stage_controller ===
+
+   Number of wires:                113
+   Number of wire bits:            371
+   Number of public wires:          26
+   Number of public wire bits:      90
+   Number of ports:                 15
+   Number of port bits:             47
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 96
+     $add                            5
+     $eq                             4
+     $logic_and                      1
+     $logic_not                      3
+     $lt                             2
+     $mem_v2                         1
+     $mux                           51
+     $ne                             5
+     $not                            2
+     $pmux                           3
+     $reduce_and                     7
+     $reduce_bool                    1
+     $reduce_or                      1
+     $sdff                           2
+     $sdffe                          8
+
+End of script. Logfile hash: 3163637406, CPU: user 0.03s system 0.00s, MEM: 15.67 MB peak
+Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+Time spent: 23% 5x opt_expr (0 sec), 15% 2x read_verilog (0 sec), ...

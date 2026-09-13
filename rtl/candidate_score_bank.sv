@@ -17,6 +17,7 @@ module candidate_score_bank #(
     input  logic                        clk,
     input  logic                        rst,
     input  logic                        update_valid,
+    output logic                        update_ready,
     input  logic [ID_WIDTH-1:0]         candidate_id,
     input  logic [127:0]                q_flat,
     input  logic [63:0]                 k_flat,
@@ -30,6 +31,10 @@ module candidate_score_bank #(
 );
     typedef enum logic [1:0] {IDLE, COMPUTE, WRITE_RESULT} state_t;
     state_t state;
+
+    // The bank has one request slot.  Keeping this separate from the
+    // registered result interface makes request acceptance unambiguous.
+    assign update_ready = (state == IDLE);
 
     // SCORE_WIDTH is 24 for the frozen progressive_dot Q11.13 interface.
     logic signed [SCORE_WIDTH-1:0] score_mem [0:CANDIDATE_COUNT-1];
@@ -80,7 +85,7 @@ module candidate_score_bank #(
             result_valid <= 1'b0;
             case (state)
                 IDLE: begin
-                    if (update_valid) begin
+                    if (update_valid && update_ready) begin
                         request_id <= candidate_id;
                         request_q_flat <= q_flat;
                         request_k_flat <= k_flat;

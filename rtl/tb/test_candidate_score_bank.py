@@ -41,6 +41,7 @@ async def update(
     # A preceding call observes its result in ReadOnly; move to a writable
     # phase before driving the next request.
     await FallingEdge(dut.clk)
+    assert int(dut.update_ready.value) == 1
     dut.candidate_id.value = candidate_id
     dut.q_flat.value = pack_lanes(q, 8)
     dut.k_flat.value = pack_lanes(k, 4)
@@ -48,17 +49,64 @@ async def update(
     dut.clear_before_update.value = int(clear)
     dut.update_valid.value = 1
     await RisingEdge(dut.clk)  # N: accepted
+    await ReadOnly()
+    assert int(dut.update_ready.value) == 0
+    await FallingEdge(dut.clk)
     dut.update_valid.value = 0
     await RisingEdge(dut.clk)  # N+1: arithmetic result captured
     await RisingEdge(dut.clk)  # N+2: write/result
     await ReadOnly()
     assert int(dut.result_valid.value) == 1
+    assert int(dut.update_ready.value) == 1
     return (
         int(dut.result_candidate_id.value),
         dut.result_score.value.to_signed(),
         bool(dut.contribution_saturated.value),
         bool(dut.score_saturated.value),
     )
+
+
+@cocotb.test()
+async def update_ready_only_accepts_idle_requests(dut: object) -> None:
+    """A request held during a busy interval must not become queued work."""
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
+    await reset(dut)
+    assert int(dut.update_ready.value) == 1
+
+    q, k, scale = vectors(123)
+    await FallingEdge(dut.clk)
+    dut.candidate_id.value = 9
+    dut.q_flat.value = pack_lanes(q, 8)
+    dut.k_flat.value = pack_lanes(k, 4)
+    dut.scale_product.value = scale & 0xFFFF
+    dut.clear_before_update.value = 1
+    dut.update_valid.value = 1
+    await RisingEdge(dut.clk)  # Candidate 9 is accepted.
+    await ReadOnly()
+    assert int(dut.update_ready.value) == 0
+
+    # Present candidate 10 while the bank is busy.  It is deliberately not
+    # held until ready; therefore it must be ignored rather than queued.
+    await FallingEdge(dut.clk)
+    dut.candidate_id.value = 10
+    dut.update_valid.value = 1
+    await RisingEdge(dut.clk)
+    await ReadOnly()
+    assert int(dut.update_ready.value) == 0
+    await FallingEdge(dut.clk)
+    dut.update_valid.value = 0
+
+    await RisingEdge(dut.clk)
+    await ReadOnly()
+    assert int(dut.result_valid.value) == 1
+    assert int(dut.result_candidate_id.value) == 9
+    assert int(dut.update_ready.value) == 1
+
+    # There is no deferred result for the request presented while not ready.
+    await RisingEdge(dut.clk)
+    await ReadOnly()
+    assert int(dut.result_valid.value) == 0
+    assert int(dut.update_ready.value) == 1
 
 
 def vectors(seed: int) -> tuple[list[int], list[int], int]:
