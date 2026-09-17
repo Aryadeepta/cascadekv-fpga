@@ -132,3 +132,65 @@ def test_frozen_hashes_and_consumed_test_not_fit():
     assert hashlib.sha256(v.V2.read_bytes()).hexdigest()==v.V2_SHA
     assert hashlib.sha256(v.V2_TEST.read_bytes()).hexdigest()==v.V2_TEST_SHA
     assert 'V2_TEST' not in v.aggregate.__code__.co_names
+
+def test_ordinary_merge_never_writes_v3_freeze_files(tmp_path):
+    # A partial merge is sufficient to exercise the ordinary merge writer.
+    merged=tmp_path/'ordinary-merge.json'
+    v.merge(tmp_path/'absent-shards',merged)
+    assert merged.exists()
+    assert not (tmp_path/'cascadekv_v3.json').exists()
+    assert not (tmp_path/'cascadekv_v3_vaware_dev_frozen.json').exists()
+
+def test_explicit_freeze_rejects_wrong_result_sha(tmp_path):
+    bad=tmp_path/'result.json'; bad.write_bytes(v.Path('results/cascadekv_v3_vaware_dev.json').read_bytes()+b' ')
+    config,frozen=tmp_path/'cascadekv_v3.json',tmp_path/'frozen.json'
+    with pytest.raises(RuntimeError,match='result hash'):
+        v.freeze_v3(bad,config,frozen)
+    assert not config.exists() and not frozen.exists()
+
+def test_explicit_freeze_rejects_wrong_manifest_sha(tmp_path):
+    bad=tmp_path/'manifest.json'; bad.write_bytes(v.MANIFEST.read_bytes()+b' ')
+    config,frozen=tmp_path/'cascadekv_v3.json',tmp_path/'frozen.json'
+    with pytest.raises(RuntimeError,match='manifest'):
+        v.freeze_v3(config_path=config,frozen_result_path=frozen,manifest_path=bad)
+    assert not config.exists() and not frozen.exists()
+
+def test_explicit_freeze_rejects_modified_t0_table(tmp_path,monkeypatch):
+    result=json.loads(v.Path('results/cascadekv_v3_vaware_dev.json').read_text())
+    original=result['calibration_frozen_tables']['T0']['table']['0:0']
+    result['calibration_frozen_tables']['T0']['table']['0:0']='A1' if original!='A1' else 'A0'
+    altered=tmp_path/'altered-result.json'; altered.write_text(json.dumps(result))
+    monkeypatch.setattr(v,'V3_RESULT_SHA',hashlib.sha256(altered.read_bytes()).hexdigest())
+    config,frozen=tmp_path/'cascadekv_v3.json',tmp_path/'frozen.json'
+    with pytest.raises(RuntimeError,match='reconstruction'):
+        v.freeze_v3(altered,config,frozen)
+    assert not config.exists() and not frozen.exists()
+
+def test_reconstruction_path_uses_calibration_only(tmp_path, monkeypatch):
+    seen=[]
+    def fake_schedule(rows, validation_rows=None):
+        seen.extend(row['sequence'] for row in rows)
+        return {},{}, {'T0':{'table':{f'{layer}:{kv}':'A0' for layer in v.LAYERS for kv in range(8)}}}
+    monkeypatch.setattr(v,'construct_calibration_schedule',fake_schedule)
+    monkeypatch.setattr(v,'validate_shard',lambda *args:(True,None))
+    monkeypatch.setattr(v,'shard_path',lambda root,s,l:tmp_path/f'{s}-{l}.json')
+    for s in v.CAL:
+        for l in v.LAYERS: (tmp_path/f'{s}-{l}.json').write_text(json.dumps({'rows':[{'sequence':s}]}))
+    assert len(v.reconstruct_t0_table(tmp_path))==40
+    assert set(seen)==set(v.CAL)
+
+def test_explicit_freeze_copies_source_bytes_and_writes_40_actions(tmp_path):
+    config,frozen=tmp_path/'cascadekv_v3.json',tmp_path/'frozen.json'
+    outcome=v.freeze_v3(config_path=config,frozen_result_path=frozen)
+    assert frozen.read_bytes()==v.Path('results/cascadekv_v3_vaware_dev.json').read_bytes()
+    assert outcome['frozen_result_sha256']==v.V3_RESULT_SHA
+    table=json.loads(config.read_text())['exact_layer_head_action_table']
+    assert len(table)==40 and set(table.values())<=set(v.ACTIONS)
+
+def test_explicit_freeze_is_idempotent_and_never_touches_production(tmp_path):
+    config,frozen=tmp_path/'cascadekv_v3.json',tmp_path/'frozen.json'
+    first=v.freeze_v3(config_path=config,frozen_result_path=frozen)
+    first_bytes=config.read_bytes(),frozen.read_bytes()
+    second=v.freeze_v3(config_path=config,frozen_result_path=frozen)
+    assert first['config_sha256']==second['config_sha256']
+    assert first_bytes==(config.read_bytes(),frozen.read_bytes())

@@ -1,0 +1,169 @@
+{
+  "architecture_version": "cascadekv-v3",
+  "model": "Qwen/Qwen3-0.6B",
+  "atom_size": 8,
+  "builder": "binary_counter",
+  "variance_groups": 4,
+  "routing_representation": "causal binary-counter streaming lifting forest; K4 lifting root/detail routing",
+  "k_routing_quantization": "K4/group16",
+  "priority_equation": "q_dot_mean + lambda * sqrt(sum_g(||q_g||^2 * (M2_g / (count * group_width)))) * sqrt(2 * log(max(count, 2)))",
+  "candidate_budgets": "max(8, floor(context_tokens * fraction / 8) * 8)",
+  "fractions": [
+    0.05,
+    0.1
+  ],
+  "reserve_schedule": {
+    "0.05": {
+      "sink": 16,
+      "local": 64,
+      "name": "sink16_local64"
+    },
+    "0.10": {
+      "sink": 32,
+      "local": 128,
+      "name": "sink32_local128"
+    }
+  },
+  "exact_rerank": {
+    "enabled": true,
+    "semantics": "score every fixed selected candidate using authoritative FP16 K; softmax is renormalized only over that selected set; no candidate, reserve, or lambda tuning is permitted"
+  },
+  "qwen3_0_6b": {
+    "layers": [
+      0,
+      7,
+      14,
+      21,
+      27
+    ],
+    "lambdas": {
+      "0": {
+        "0.05": 0.25,
+        "0.10": 1.0
+      },
+      "7": {
+        "0.05": 1.5,
+        "0.10": 1.0
+      },
+      "14": {
+        "0.05": 0.5,
+        "0.10": 1.0
+      },
+      "21": {
+        "0.05": 1.5,
+        "0.10": 0.75
+      },
+      "27": {
+        "0.05": 0.25,
+        "0.10": 0.25
+      }
+    }
+  },
+  "provenance": {
+    "source_result_path": "results/streaming_budget_schedule_gate.json",
+    "calibration_position_used": 2047,
+    "calibration_scope": "per layer and budget on the original development sequence only",
+    "timestamp_independent": true,
+    "notes": "Values are extracted from binary_counter.layers.{layer}.five_percent_lambda and ten_percent_reused.lambda. Fresh-sequence and 8K evaluation load these values unchanged."
+  },
+  "schedule_family": "LK_VAWARE",
+  "base_operating_family": 0.05,
+  "target_name": "T0",
+  "exact_layer_head_action_table": {
+    "(0, 0)": "A1",
+    "(0, 1)": "A0",
+    "(0, 2)": "A0",
+    "(0, 3)": "A3",
+    "(0, 4)": "A0",
+    "(0, 5)": "A2",
+    "(0, 6)": "A0",
+    "(0, 7)": "A0",
+    "(7, 0)": "A1",
+    "(7, 1)": "A0",
+    "(7, 2)": "A3",
+    "(7, 3)": "A3",
+    "(7, 4)": "A0",
+    "(7, 5)": "A0",
+    "(7, 6)": "A0",
+    "(7, 7)": "A3",
+    "(14, 0)": "A1",
+    "(14, 1)": "A4",
+    "(14, 2)": "A1",
+    "(14, 3)": "A3",
+    "(14, 4)": "A0",
+    "(14, 5)": "A4",
+    "(14, 6)": "A1",
+    "(14, 7)": "A4",
+    "(21, 0)": "A3",
+    "(21, 1)": "A3",
+    "(21, 2)": "A2",
+    "(21, 3)": "A0",
+    "(21, 4)": "A4",
+    "(21, 5)": "A2",
+    "(21, 6)": "A3",
+    "(21, 7)": "A1",
+    "(27, 0)": "A0",
+    "(27, 1)": "A2",
+    "(27, 2)": "A0",
+    "(27, 3)": "A0",
+    "(27, 4)": "A1",
+    "(27, 5)": "A0",
+    "(27, 6)": "A0",
+    "(27, 7)": "A0"
+  },
+  "action_definitions": {
+    "0.05": {
+      "A0": [
+        0.05,
+        "hierarchy"
+      ],
+      "A1": [
+        0.075,
+        "hierarchy"
+      ],
+      "A2": [
+        0.1,
+        "hierarchy"
+      ],
+      "A3": [
+        0.15,
+        "hierarchy"
+      ],
+      "A4": [
+        0.05,
+        "flat"
+      ]
+    },
+    "0.1": {
+      "B0": [
+        0.1,
+        "hierarchy"
+      ],
+      "B1": [
+        0.15,
+        "hierarchy"
+      ],
+      "B2": [
+        0.2,
+        "hierarchy"
+      ],
+      "B3": [
+        0.1,
+        "flat"
+      ]
+    }
+  },
+  "v1_config_sha256": "2964e4295719e696587f9853177c38399b64edc753e0630fc0d44208c719559b",
+  "structural_finalization_artifact_sha256": "3f0edabfd6f905d69a2ec6c1e177d9e7c6e985c25c8679d42a3f6efdc74a6947",
+  "qkv_dev_manifest_sha256": "37f9c1bd142e65ca59ce7da42df31ab5a80b159ff550605c4186b6d40d46f9fb",
+  "qkv_dev_result_sha256": "c90bed1cd6d5f1249162a88214621dad24804013c0d34d4c46996a4f910aefca",
+  "base_operating_concept": "T0 / frozen CascadeKV-v2 total-KV traffic envelope",
+  "v_aware_calibration_objective": "mean relative-L2",
+  "v3_manifest_sha256": "0bf48150465b3c6cc0e31c35181bda3e337397b2a9d327d0fc1c5de25b16de8a",
+  "v3_development_result_sha256": "1a5b0f78816b3748a832bc0cf9b6dc791795cfc3ee8c6050bc7130fad186268e",
+  "v2_parent_config_sha256": "ef36c5bd1b4211083ac5680e554877281f0a09e37f3dea9e4eb877afba18259c",
+  "v1_provenance_sha256": "2964e4295719e696587f9853177c38399b64edc753e0630fc0d44208c719559b",
+  "development_classification": "V-AWARE-STATIC-PROMISING",
+  "predeclared_development_candidates": "T0/T1/T2 were predeclared development candidates.",
+  "development_selection_rationale": "After development validation, T0 is chosen as the minimum-bandwidth predefined target satisfying the v3 development criteria. This is development selection and requires a new untouched holdout; it was not a predeclared selection rule before v3 results."
+}

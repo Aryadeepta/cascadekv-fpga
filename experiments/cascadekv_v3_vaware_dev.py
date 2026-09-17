@@ -23,6 +23,7 @@ MODEL_SHA='c1899de289a04d12100db370d81485cdf75e47ca'
 V1_SHA='2964e4295719e696587f9853177c38399b64edc753e0630fc0d44208c719559b'
 V2_SHA='ef36c5bd1b4211083ac5680e554877281f0a09e37f3dea9e4eb877afba18259c'
 V2_TEST_SHA='31690daff3d60f4be0bed73139818c0adb3b71bed4e04ede77b20accbe3b140c'
+V3_RESULT_SHA='1a5b0f78816b3748a832bc0cf9b6dc791795cfc3ee8c6050bc7130fad186268e'
 POSITIONS=(2047,3071,4095); QH=16; KVH=8
 MANIFEST=Path('results/cascadekv_v3_vaware_dev_manifest.json')
 # Updated after the source-only audit.  Every operational mode validates this
@@ -33,6 +34,9 @@ SPECS={'narrative':{'dataset':'emozilla/pg19','config':None,'split':'train','tex
 ACTIONS={'A0':(.05,'hierarchy'),'A1':(.075,'hierarchy'),'A2':(.10,'hierarchy'),'A3':(.15,'hierarchy'),'A4':(.05,'flat')}
 METHODS=('dense_exact','flat_q8k4_5','uniform_v1_10','frozen_cascadekv_v2',*ACTIONS)
 CAL=('narrative_calibration','report_calibration','qa_calibration'); VAL=('narrative_validation','report_validation','qa_validation')
+T0_METRICS={'mean_relative_l2':0.11098487845085982,'mean_cosine':0.9898174457252026,
+            'mean_kv_bytes':175642.35,'K+V/dense':0.11149707900153266,
+            'K+V/uniform10':0.9145324838053707,'K+V/flat5':0.5451029632051112}
 
 def immutable():
  if file_sha256(V1)!=V1_SHA: raise RuntimeError('STOP frozen CascadeKV-v1 hash differs')
@@ -261,6 +265,96 @@ def construct_calibration_schedule(cal, validation_rows=None):
   z=optimize(groups,t)
   tables[name]=None if z is None else {'nondeployable':False,'target_kv':t,'calibration_mean_relative_l2':z[1]/40,'table':{f'{l}:{kv}':a for (l,kv),a in zip(product(LAYERS,range(8)),z[3])}}
  return ag,targets,tables
+
+def _validate_t0_table(table):
+ expected={f'{layer}:{kv}' for layer in LAYERS for kv in range(8)}
+ if not isinstance(table,dict) or set(table)!=expected or any(action not in ACTIONS for action in table.values()):
+  raise RuntimeError('STOP T0 table is not exactly 40 layer/KV-head A0..A4 actions')
+
+def reconstruct_t0_table(shards):
+ """Read calibration shards only; validation rows can never reach the optimizer."""
+ calibration=[]
+ for sequence in CAL:
+  for layer in LAYERS:
+   path=shard_path(shards,sequence,layer)
+   ok,message=validate_shard(path,sequence,layer) if path.exists() else (False,'missing')
+   if not ok: raise RuntimeError(f'STOP calibration shard invalid: {sequence} layer {layer}: {message}')
+   calibration.extend(json.loads(path.read_text())['rows'])
+ _,_,tables=construct_calibration_schedule(calibration)
+ table=tables.get('T0',{}).get('table')
+ _validate_t0_table(table)
+ return table
+
+def _atomic_write(path, data):
+ path=Path(path); path.parent.mkdir(parents=True,exist_ok=True)
+ fd,name=tempfile.mkstemp(prefix=f'.{path.name}.',dir=path.parent)
+ try:
+  with os.fdopen(fd,'wb') as handle: handle.write(data)
+  os.replace(name,path)
+ except Exception:
+  try: os.unlink(name)
+  except FileNotFoundError: pass
+  raise
+
+def _v3_config(source_table, manifest_sha):
+ """Derive v3 from v2 without changing its router or representation settings."""
+ cfg=json.loads(V2.read_text())
+ cfg.update({'architecture_version':'cascadekv-v3','schedule_family':'LK_VAWARE',
+             'base_operating_concept':'T0 / frozen CascadeKV-v2 total-KV traffic envelope',
+             'target_name':'T0',
+             'exact_layer_head_action_table':{str((layer,kv)):source_table[f'{layer}:{kv}'] for layer in LAYERS for kv in range(8)},
+             'v_aware_calibration_objective':'mean relative-L2',
+             'v3_manifest_sha256':manifest_sha,'v3_development_result_sha256':V3_RESULT_SHA,
+             'v2_parent_config_sha256':V2_SHA,'v1_provenance_sha256':V1_SHA,
+             'development_classification':'V-AWARE-STATIC-PROMISING',
+             'predeclared_development_candidates':'T0/T1/T2 were predeclared development candidates.',
+             'development_selection_rationale':'After development validation, T0 is chosen as the minimum-bandwidth predefined target satisfying the v3 development criteria. This is development selection and requires a new untouched holdout; it was not a predeclared selection rule before v3 results.'})
+ # This v2-specific assertion must not be inherited as a false statement about v3.
+ cfg.pop('predeclared_selection_rule',None)
+ return cfg
+
+def validate_freeze_v3(result_path=Path('results/cascadekv_v3_vaware_dev.json'), manifest_path=MANIFEST,
+                       shards=Path('results/cascadekv_v3_vaware_dev_shards'),
+                       cache=Path('results/cascadekv_v3_vaware_dev_cache')):
+ """Fail closed before any production freeze output is written."""
+ result_path,manifest_path=Path(result_path),Path(manifest_path)
+ immutable()
+ if file_sha256(result_path)!=V3_RESULT_SHA: raise RuntimeError('STOP completed v3 result hash differs')
+ if file_sha256(manifest_path)!=V3_MANIFEST_SHA: raise RuntimeError('STOP frozen v3 manifest hash differs')
+ if manifest_path.resolve()!=MANIFEST.resolve():
+  # validate_shard/load_manifest intentionally bind to the immutable canonical manifest.
+  raise RuntimeError('STOP freeze manifest must be the immutable canonical manifest')
+ result=json.loads(result_path.read_text())
+ if result.get('status')!='complete' or result.get('classification')!='V-AWARE-STATIC-PROMISING': raise RuntimeError('STOP v3 status/classification differs')
+ if result.get('manifest_sha256')!=V3_MANIFEST_SHA: raise RuntimeError('STOP result manifest provenance differs')
+ t0=result.get('validation_frozen_table_metrics',{}).get('T0')
+ if not isinstance(t0,dict) or any(t0.get(key)!=value for key,value in T0_METRICS.items()): raise RuntimeError('STOP exact T0 development metrics differ')
+ v2=result.get('validation_baselines',{}).get('frozen_cascadekv_v2',{})
+ uniform=result.get('validation_baselines',{}).get('uniform_v1_10',{})
+ if not (t0['mean_relative_l2']<=.12 and t0['mean_cosine']>=.985 and t0['mean_kv_bytes']<=uniform.get('mean_kv_bytes',-1) and t0['mean_relative_l2']<v2.get('mean_relative_l2',-1)):
+  raise RuntimeError('STOP T0 development gate differs')
+ artifact_status=status(cache,shards)
+ if artifact_status['valid_caches']!=30 or artifact_status['valid_shards']!=30: raise RuntimeError('STOP v3 artifact status is not 30/30')
+ source_table=result.get('calibration_frozen_tables',{}).get('T0',{}).get('table')
+ _validate_t0_table(source_table)
+ reconstructed=reconstruct_t0_table(shards)
+ if reconstructed!=source_table: raise RuntimeError('STOP calibration-only T0 reconstruction differs')
+ return result,source_table,artifact_status
+
+def freeze_v3(result_path=Path('results/cascadekv_v3_vaware_dev.json'),
+              config_path=Path('configs/cascadekv_v3.json'),
+              frozen_result_path=Path('results/cascadekv_v3_vaware_dev_frozen.json'),
+              manifest_path=MANIFEST, shards=Path('results/cascadekv_v3_vaware_dev_shards'),
+              cache=Path('results/cascadekv_v3_vaware_dev_cache')):
+ """Explicitly freeze the existing completed development result; never evaluate or merge."""
+ result,table,artifact_status=validate_freeze_v3(result_path,manifest_path,shards,cache)
+ # Both byte payloads are prepared only after every validation above has passed.
+ config_bytes=(json.dumps(_v3_config(table,V3_MANIFEST_SHA),indent=2)+'\n').encode()
+ result_bytes=Path(result_path).read_bytes()
+ _atomic_write(config_path,config_bytes)
+ _atomic_write(frozen_result_path,result_bytes)
+ return {'config_sha256':file_sha256(config_path),'frozen_result_sha256':file_sha256(frozen_result_path),
+         'artifact_status':artifact_status,'t0_table':table,'classification':result['classification']}
 def merge(shards,out):
  load_manifest(); allrows=[]; bad=[]
  for s in CAL+VAL:
@@ -292,7 +386,7 @@ def merge(shards,out):
  payload={'experiment':'cascadekv_v3_vaware_development_only','status':'complete','manifest_sha256':file_sha256(MANIFEST),'calibration_lk_action_statistics':ag,'traffic_targets':targets,'calibration_frozen_tables':tables,'validation_frozen_table_metrics':frozen_validation,'validation_baselines':baseline,'layer_kv_mean_relative_l2':{'calibration':by_lk(cal),'validation':by_lk(val)},'oracles':{'posthoc_lk_static':posthoc,'per_query_action':per_query},'classification':classify(candidates,{'oracle_headroom':headroom},uval['mean_kv_bytes']),'classification_rule':'PROMISING iff validation relL2<=.12 cosine>=.985 KV<=uniform10 and improves v2; NOT-GENERALIZING iff oracle headroom but frozen tables miss; ACTION-MENU-LIMITED iff neither oracle meets both under uniform10'}
  out.write_text(json.dumps(payload,indent=2)+'\n')
 def main():
- p=argparse.ArgumentParser();[p.add_argument(x,action='store_true') for x in ('--preflight','--status','--capture','--evaluate','--merge','--validate-cache','--validate-shard')];p.add_argument('--sequence',choices=CAL+VAL);p.add_argument('--layer',type=int,choices=LAYERS);p.add_argument('--cache-dir',type=Path,default=Path('results/cascadekv_v3_vaware_dev_cache'));p.add_argument('--shard-dir',type=Path,default=Path('results/cascadekv_v3_vaware_dev_shards'));p.add_argument('--output',type=Path,default=Path('results/cascadekv_v3_vaware_dev.json'));p.add_argument('--status-output',type=Path);a=p.parse_args()
+ p=argparse.ArgumentParser();[p.add_argument(x,action='store_true') for x in ('--preflight','--status','--capture','--evaluate','--merge','--freeze','--validate-cache','--validate-shard')];p.add_argument('--sequence',choices=CAL+VAL);p.add_argument('--layer',type=int,choices=LAYERS);p.add_argument('--cache-dir',type=Path,default=Path('results/cascadekv_v3_vaware_dev_cache'));p.add_argument('--shard-dir',type=Path,default=Path('results/cascadekv_v3_vaware_dev_shards'));p.add_argument('--output',type=Path,default=Path('results/cascadekv_v3_vaware_dev.json'));p.add_argument('--status-output',type=Path);p.add_argument('--freeze-result',type=Path,default=Path('results/cascadekv_v3_vaware_dev.json'));p.add_argument('--freeze-config',type=Path,default=Path('configs/cascadekv_v3.json'));p.add_argument('--frozen-result',type=Path,default=Path('results/cascadekv_v3_vaware_dev_frozen.json'));a=p.parse_args()
  if a.preflight:preflight()
  elif a.status:
   x=json.dumps(status(a.cache_dir,a.shard_dir),indent=2);print(x)
@@ -300,6 +394,7 @@ def main():
  elif a.capture:capture(a.sequence,a.layer,a.cache_dir)
  elif a.evaluate:evaluate(a.sequence,a.layer,a.cache_dir,a.shard_dir)
  elif a.merge:merge(a.shard_dir,a.output)
+ elif a.freeze: print(json.dumps(freeze_v3(a.freeze_result,a.freeze_config,a.frozen_result,MANIFEST,a.shard_dir,a.cache_dir),indent=2))
  elif a.validate_cache:
   ok,msg=validate_cache(cache_path(a.cache_dir,a.sequence,a.layer),a.sequence,a.layer); print('valid' if ok else f'invalid: {msg}')
   if not ok: raise SystemExit(1)
