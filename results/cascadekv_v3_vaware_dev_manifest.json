@@ -1,0 +1,141 @@
+{
+  "schema_version": 2,
+  "purpose": "CascadeKV-v3 development-only V-aware LK calibration; identity/length-only selection",
+  "model": {
+    "name": "Qwen/Qwen3-0.6B",
+    "resolved_commit_sha": "c1899de289a04d12100db370d81485cdf75e47ca"
+  },
+  "context_length": 4096,
+  "selection_constraints": "first two examples index >= 3 whose explicit identities are absent from prior manifests; only identity/index, text existence, character count, and token length inspected; indices 0/1/2 forbidden",
+  "split_policy": "first eligible per family is calibration; second is validation; validation must not influence schedule construction, traffic targets, or tie-breaks",
+  "prior_explicit_identity_inventory": [
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "ccdv/govreport-summarization", "config": null, "split": "train", "index": 0, "stable_example_id": 0},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "ccdv/govreport-summarization", "config": null, "split": "train", "index": 1, "stable_example_id": 1},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "ccdv/govreport-summarization", "config": null, "split": "train", "index": 2, "stable_example_id": 2},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "emozilla/pg19", "config": null, "split": "train", "index": 0, "stable_example_id": 0},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "emozilla/pg19", "config": null, "split": "train", "index": 1, "stable_example_id": 1},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "emozilla/pg19", "config": null, "split": "train", "index": 2, "stable_example_id": 2},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "zai-org/LongBench", "config": "narrativeqa", "split": "test", "index": 0, "stable_example_id": 0},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "zai-org/LongBench", "config": "narrativeqa", "split": "test", "index": 1, "stable_example_id": 1},
+    {"manifest": "results/cascadekv_v2_4k_test_manifest.json", "dataset": "zai-org/LongBench", "config": "narrativeqa", "split": "test", "index": 2, "stable_example_id": 2},
+    {"manifest": "results/fresh_sequence_benchmark_manifest.json", "dataset": "ccdv/govreport-summarization", "config": null, "split": "train", "index": 0, "stable_example_id": 0},
+    {"manifest": "results/fresh_sequence_benchmark_manifest.json", "dataset": "emozilla/pg19", "config": null, "split": "train", "index": 0, "stable_example_id": 0},
+    {"manifest": "results/fresh_sequence_benchmark_manifest.json", "dataset": "zai-org/LongBench", "config": "narrativeqa", "split": "test", "index": 0, "stable_example_id": 0},
+    {"manifest": "results/structural_schedule_v2_qkv_dev_manifest.json", "dataset": "ccdv/govreport-summarization", "config": null, "split": "train", "index": 1, "stable_example_id": 1},
+    {"manifest": "results/structural_schedule_v2_qkv_dev_manifest.json", "dataset": "emozilla/pg19", "config": null, "split": "train", "index": 1, "stable_example_id": 1},
+    {"manifest": "results/structural_schedule_v2_qkv_dev_manifest.json", "dataset": "zai-org/LongBench", "config": "narrativeqa", "split": "test", "index": 1, "stable_example_id": 1}
+  ],
+  "sources": {
+    "narrative_calibration": {
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "exact_revision": "c021754c8e01c5b1cc83a1f549c1f97fbbb756b8",
+      "index": 3,
+      "stable_example_id": 3,
+      "text_field": "text",
+      "character_count": 353473,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "split_assignment": "calibration"
+    },
+    "narrative_validation": {
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "exact_revision": "c021754c8e01c5b1cc83a1f549c1f97fbbb756b8",
+      "index": 4,
+      "stable_example_id": 4,
+      "text_field": "text",
+      "character_count": 276595,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "split_assignment": "validation"
+    },
+    "report_calibration": {
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "exact_revision": "4e21184e01ae8017e2c036e180fe5e541fef60a0",
+      "index": 3,
+      "stable_example_id": 3,
+      "text_field": "report",
+      "character_count": 26503,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "split_assignment": "calibration"
+    },
+    "report_validation": {
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "exact_revision": "4e21184e01ae8017e2c036e180fe5e541fef60a0",
+      "index": 5,
+      "stable_example_id": 5,
+      "text_field": "report",
+      "character_count": 29216,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "split_assignment": "validation"
+    },
+    "qa_calibration": {
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "exact_revision": "75b6d5bffbcaa2cf4da85a9fa99939b13ee5b00b",
+      "index": 3,
+      "stable_example_id": 3,
+      "text_field": "context",
+      "character_count": 35668,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "split_assignment": "calibration"
+    },
+    "qa_validation": {
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "exact_revision": "75b6d5bffbcaa2cf4da85a9fa99939b13ee5b00b",
+      "index": 4,
+      "stable_example_id": 4,
+      "text_field": "context",
+      "character_count": 150152,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "split_assignment": "validation"
+    }
+  },
+  "frozen_inputs": {
+    "cascadekv_v1": {
+      "path": "configs/cascadekv_v1.json",
+      "sha256": "2964e4295719e696587f9853177c38399b64edc753e0630fc0d44208c719559b"
+    },
+    "cascadekv_v2": {
+      "path": "configs/cascadekv_v2.json",
+      "sha256": "ef36c5bd1b4211083ac5680e554877281f0a09e37f3dea9e4eb877afba18259c"
+    },
+    "consumed_test_provenance_only": {
+      "path": "results/cascadekv_v2_4k_test.json",
+      "sha256": "31690daff3d60f4be0bed73139818c0adb3b71bed4e04ede77b20accbe3b140c",
+      "row_metrics_used_for_fitting": false
+    }
+  }
+}
