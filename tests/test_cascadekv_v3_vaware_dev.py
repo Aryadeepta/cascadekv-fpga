@@ -8,12 +8,32 @@ def test_consumed_indices_and_split_are_rejected(tmp_path, monkeypatch):
        'prior_explicit_identity_inventory':[], 'frozen_inputs':{'cascadekv_v1':{'sha256':v.V1_SHA}},
        'sources':{k:{'index':3,'split_assignment':k.rsplit('_',1)[1],'dataset':v.SPECS[k.rsplit('_',1)[0]]['dataset']} for k in v.CAL+v.VAL}}
     p=tmp_path/'m.json';p.write_text(json.dumps(d));monkeypatch.setattr(v,'MANIFEST',p);monkeypatch.setattr(v,'immutable',lambda:None)
-    monkeypatch.setattr(v,'prior_manifest_identity_inventory',lambda:[])
+    monkeypatch.setattr(v,'prior_manifest_identity_inventory',lambda *args:[])
     monkeypatch.setattr(v,'V3_MANIFEST_SHA',hashlib.sha256(p.read_bytes()).hexdigest())
     assert v.load_manifest()['sources']['narrative_calibration']['index']==3
     d['sources']['qa_validation']['index']=2;p.write_text(json.dumps(d))
     monkeypatch.setattr(v,'V3_MANIFEST_SHA',hashlib.sha256(p.read_bytes()).hexdigest())
     with pytest.raises(ValueError):v.load_manifest()
+
+def test_frozen_inventory_ignores_future_manifests_but_checks_its_named_history(tmp_path, monkeypatch):
+    historical=tmp_path/'historical_manifest.json'
+    historical.write_text(json.dumps({'sources':{'a':{'dataset':'d','config':None,'split':'train','index':3,'stable_example_id':3}}}))
+    snapshot=v.prior_manifest_identity_inventory([historical])
+    frozen={'schema_version':2,'model':{'resolved_commit_sha':v.MODEL_SHA},'context_length':4096,
+            'prior_explicit_identity_inventory':snapshot,
+            'frozen_inputs':{'cascadekv_v1':{'sha256':v.V1_SHA}},
+            'sources':{k:{'index':3,'split_assignment':k.rsplit('_',1)[1],
+                          'dataset':v.SPECS[k.rsplit('_',1)[0]]['dataset']}
+                       for k in v.CAL+v.VAL}}
+    manifest=tmp_path/'frozen.json'; manifest.write_text(json.dumps(frozen))
+    monkeypatch.setattr(v,'MANIFEST',manifest); monkeypatch.setattr(v,'immutable',lambda:None)
+    monkeypatch.setattr(v,'V3_MANIFEST_SHA',hashlib.sha256(manifest.read_bytes()).hexdigest())
+    # This future file is deliberately not named by the frozen snapshot.
+    future=tmp_path/'future_manifest.json'
+    future.write_text(json.dumps({'sources':{'new':{'dataset':'future','config':None,'split':'test','index':99,'stable_example_id':99}}}))
+    assert v.load_manifest()['prior_explicit_identity_inventory']==snapshot
+    historical.write_text(json.dumps({'sources':{'a':{'dataset':'d','config':None,'split':'train','index':4,'stable_example_id':3}}}))
+    with pytest.raises(ValueError,match='inventory mismatch'): v.load_manifest()
 
 def test_selection_is_two_per_domain_and_split_is_predeclared():
     assert len(v.CAL)==len(v.VAL)==3

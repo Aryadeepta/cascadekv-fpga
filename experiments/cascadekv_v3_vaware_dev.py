@@ -52,10 +52,17 @@ def _identity_from_mapping(x):
  return {'dataset':x['dataset'],'config':x['config'],'split':x['split'],
          'index':index,'stable_example_id':stable}
 
-def prior_manifest_identity_inventory():
- """Inventory only JSON manifests with declared dataset/config/split/index fields."""
+def prior_manifest_identity_inventory(paths=None):
+ """Inventory explicit identities from the declared historical manifests only.
+
+ ``paths`` is intentionally supplied by the frozen manifest during validation.
+ A manifest created after that freeze is not historical evidence and must not
+ change the frozen inventory protected by ``V3_MANIFEST_SHA``.
+ """
  found=[]
- for path in sorted(Path('results').glob('*manifest*.json')):
+ paths = (sorted(Path('results').glob('*manifest*.json')) if paths is None
+          else [Path(path) for path in paths])
+ for path in paths:
   if path.resolve()==MANIFEST.resolve(): continue
   try: document=json.loads(path.read_text())
   except (OSError,json.JSONDecodeError): continue
@@ -106,7 +113,11 @@ def load_manifest():
  d=json.loads(MANIFEST.read_text())
  if d.get('schema_version')!=2 or d.get('model',{}).get('resolved_commit_sha')!=MODEL_SHA or d.get('context_length')!=4096: raise ValueError('manifest model/context mismatch')
  if set(d.get('sources',{}))!=set(CAL+VAL): raise ValueError('manifest split schema mismatch')
- if d.get('prior_explicit_identity_inventory')!=prior_manifest_identity_inventory(): raise ValueError('prior explicit identity inventory mismatch')
+ snapshot=d.get('prior_explicit_identity_inventory')
+ if not isinstance(snapshot,list): raise ValueError('prior explicit identity inventory missing')
+ historical_paths=sorted({x.get('manifest') for x in snapshot if isinstance(x,dict) and isinstance(x.get('manifest'),str)})
+ if any(not isinstance(x,dict) or x.get('manifest') not in historical_paths for x in snapshot): raise ValueError('prior explicit identity inventory malformed')
+ if snapshot!=prior_manifest_identity_inventory(historical_paths): raise ValueError('prior explicit identity inventory mismatch')
  if d.get('frozen_inputs',{}).get('cascadekv_v1',{}).get('sha256')!=V1_SHA: raise ValueError('manifest v1 binding mismatch')
  for k,x in d['sources'].items():
   family=k.rsplit('_',1)[0]

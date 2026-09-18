@@ -1,0 +1,362 @@
+{
+  "schema_version": 1,
+  "purpose": "untouched confirmatory test of frozen CascadeKV-v3 T0",
+  "model": {
+    "name": "Qwen/Qwen3-0.6B",
+    "resolved_commit_sha": "c1899de289a04d12100db370d81485cdf75e47ca"
+  },
+  "context_length": 4096,
+  "frozen_inputs": {
+    "v1_config_sha256": "2964e4295719e696587f9853177c38399b64edc753e0630fc0d44208c719559b",
+    "v2_config_sha256": "ef36c5bd1b4211083ac5680e554877281f0a09e37f3dea9e4eb877afba18259c",
+    "v3_config_sha256": "5d364bc4e351061c243a9166c0a9ccdd68c7cefd74265e4135d937b323e6e505",
+    "v3_development_result_sha256": "1a5b0f78816b3748a832bc0cf9b6dc791795cfc3ee8c6050bc7130fad186268e",
+    "v3_development_manifest_sha256": "0bf48150465b3c6cc0e31c35181bda3e337397b2a9d327d0fc1c5de25b16de8a",
+    "consumed_v2_test_result_sha256": "31690daff3d60f4be0bed73139818c0adb3b71bed4e04ede77b20accbe3b140c",
+    "consumed_v2_test_provenance_only": true
+  },
+  "git_freeze_tag": {
+    "name": "cascadekv-v3-t0-dev-freeze",
+    "resolved_pre_test_commit_sha": "ada0613080839fb8cbdea7db4bc47ab30122ece2"
+  },
+  "complete_prior_explicit_identity_inventory": [
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 2,
+      "stable_example_id": 2
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 2,
+      "stable_example_id": 2
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/cascadekv_v2_4k_test_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 2,
+      "stable_example_id": 2
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 2,
+      "stable_example_id": 2
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 3,
+      "stable_example_id": 3
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 5,
+      "stable_example_id": 5
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 2,
+      "stable_example_id": 2
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 3,
+      "stable_example_id": 3
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 4,
+      "stable_example_id": 4
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 2,
+      "stable_example_id": 2
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 3,
+      "stable_example_id": 3
+    },
+    {
+      "manifest": "results/cascadekv_v3_vaware_dev_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 4,
+      "stable_example_id": 4
+    },
+    {
+      "manifest": "results/fresh_sequence_benchmark_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/fresh_sequence_benchmark_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/fresh_sequence_benchmark_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 0,
+      "stable_example_id": 0
+    },
+    {
+      "manifest": "results/structural_schedule_v2_qkv_dev_manifest.json",
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/structural_schedule_v2_qkv_dev_manifest.json",
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 1,
+      "stable_example_id": 1
+    },
+    {
+      "manifest": "results/structural_schedule_v2_qkv_dev_manifest.json",
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 1,
+      "stable_example_id": 1
+    }
+  ],
+  "selection_rule": "deterministic dataset index order; first explicit identity absent from every prior explicit manifest identity with text str and bounded frozen-tokenizer proof >=4096; selection inspected only explicit identity/index, text existence/type, character count, and bounded tokenizer length; no model/routing/output data entered selection",
+  "sources": {
+    "narrative": {
+      "dataset": "emozilla/pg19",
+      "config": null,
+      "split": "train",
+      "index": 5,
+      "stable_example_id": 5,
+      "exact_revision": "c021754c8e01c5b1cc83a1f549c1f97fbbb756b8",
+      "text_field": "text",
+      "character_count": 406645,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "prior_manifest_disjointness": {
+        "identity_not_present": true,
+        "prior_explicit_identity_count": 30
+      }
+    },
+    "report": {
+      "dataset": "ccdv/govreport-summarization",
+      "config": null,
+      "split": "train",
+      "index": 6,
+      "stable_example_id": 6,
+      "exact_revision": "4e21184e01ae8017e2c036e180fe5e541fef60a0",
+      "text_field": "report",
+      "character_count": 23349,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "prior_manifest_disjointness": {
+        "identity_not_present": true,
+        "prior_explicit_identity_count": 30
+      }
+    },
+    "qa": {
+      "dataset": "zai-org/LongBench",
+      "config": "narrativeqa",
+      "split": "test",
+      "index": 5,
+      "stable_example_id": 5,
+      "exact_revision": "75b6d5bffbcaa2cf4da85a9fa99939b13ee5b00b",
+      "text_field": "context",
+      "character_count": 55745,
+      "token_length_proof": {
+        "minimum": 4096,
+        "observed_capped": 4096,
+        "at_least": true
+      },
+      "prior_manifest_disjointness": {
+        "identity_not_present": true,
+        "prior_explicit_identity_count": 30
+      }
+    }
+  },
+  "methods": [
+    "dense_exact",
+    "flat_q8k4_5",
+    "flat_q8k4_10",
+    "uniform_v1_5",
+    "uniform_v1_10",
+    "frozen_cascadekv_v2",
+    "frozen_cascadekv_v3"
+  ],
+  "metrics": [
+    "relative_exact_attention_mass",
+    "top8_recall",
+    "cosine_similarity",
+    "relative_l2_error",
+    "absolute_l2_error",
+    "total_k_bytes",
+    "selected_v_fp16_bytes",
+    "total_kv_bytes",
+    "total_k_vs_dense_fp16_k",
+    "total_kv_vs_dense"
+  ],
+  "classification": {
+    "absolute": {
+      "pooled_mean_cosine_gte": 0.985,
+      "pooled_mean_relative_l2_lte": 0.12
+    },
+    "comparative": {
+      "v3_total_kv_bytes_mean_lte_uniform_v1_10": true,
+      "v3_relative_l2_mean_lt_frozen_cascadekv_v2": true
+    },
+    "outcomes": {
+      "pass": "TEST-PASSED",
+      "absolute_fail": "TEST-OUTPUT-GATE-FAILED",
+      "comparative_fail": "TEST-COMPARATIVE-GATE-FAILED",
+      "invalid": "TEST-INVALID"
+    },
+    "diagnostics": "report-only and never classification inputs"
+  }
+}
