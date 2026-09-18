@@ -1,42 +1,29 @@
-# CascadeKV-FPGA
+## Current status
 
-## Frozen routing-scale contract
+CascadeKV-v3 T0 has passed a frozen untouched 4K confirmatory test on
+Qwen3-0.6B.
 
-Each 16-coordinate Q8×K4 group uses a nonnegative scale. Query scale codes
-are group-specific U0.16 (`real = code / 2^16`); a query has eight Q8 groups
-and therefore eight corresponding `q_scale` codes. Each code is shared by all
-candidate keys for that query group. K-group-cache scale metadata is unsigned
-U7.9 (`real = code / 2^9`). `rtl/scale_product.sv` multiplies those codes and
-rounds `(q_code * k_code + 2^12) >> 13` into saturated positive signed Q4.12
-for `progressive_dot`.
+Frozen-v3 results:
 
-## Online radix-16 hierarchy schedule
+- Mean relative-L2 output error: 0.1072
+- Mean cosine similarity: 0.9900
+- Mean total K+V traffic: 175,465 bytes/query
+- Dense total K+V traffic: 1,572,864 bytes/query
+- Total K+V traffic vs dense: 11.13%
+- Reduction vs dense: 88.87%
 
-An append writes its ordinary authoritative leaf K every token.  A completed
-16-token P1/P2 summary is finalized every 16 tokens; a parent is finalized
-from its 16 child summaries every 256 tokens, then at 4096 and 65536 tokens.
-Thus summary finalizations cost `1/16 + 1/256 + ... = 1/15` writes per
-appended token amortized.  Parent radii can be maintained without rescanning
-old leaf K using `max_child(||child_prototype-parent_prototype|| + child_radius)`.
+Compared with frozen CascadeKV-v2 at essentially identical traffic:
 
-The earlier `natural_a` and `natural_b` hierarchy contexts are deterministic
-repeated-text fallbacks. They are useful regression fixtures, but are not
-independent natural-language corpus samples and are not presented as such.
+- Relative-L2: 0.1275 -> 0.1072 (-15.9%)
+- Absolute-L2: 0.7834 -> 0.5707 (-27.2%)
+- Cosine: 0.9836 -> 0.9900
 
-## Experiment 1: Progressive Partial-Dot Attention
+The v3 architecture and T0 layer×KV-head schedule were frozen before the
+untouched test. The test contained 720 queries per method and 5,040 total
+method/query measurements.
 
-This experiment tests whether 16-, 32-, and 64-dimensional nested partial dot
-products predict rankings of full 128-dimensional Qwen3 attention scores. A
-shared randomized signed Hadamard rotation spreads each vector's information
-across coordinates while preserving full dot products. The nested
-16/32/64/128 prefixes model a progressively refined hardware score.
+Result SHA256:
+01c0bbda902a723599b709c8bc6be159c6191706a9c3531fd2da5fbb3fe5f09d
 
-Run it on CPU with:
-
-```bash
-uv run python3 experiments/qwen_partial_dot.py --layer 12 --seed 0 --max-length 256 --num-query-positions 8
-```
-
-Inspect Pearson and Spearman score correlation, top-8/top-32 recall, and the
-dense full-attention probability mass captured by approximate top-8/top-32
-selection. Results are saved under `results/`.
+Status:
+CASCADEKV-V3-4K-CONFIRMATORY-TEST-PASSED
