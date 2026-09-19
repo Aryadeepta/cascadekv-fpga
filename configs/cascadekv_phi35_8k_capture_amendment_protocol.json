@@ -1,0 +1,44 @@
+{
+  "amended_source_manifest": {
+    "schema": "cascadekv-phi35-8k-dev-sources-v2",
+    "sha256": "31f1d14d4b33b6e5b6a48d34e294f0effbab2eeadf6c4d4eabfabe16ae879478"
+  },
+  "base_capture": {
+    "approval_sha256": "dc9b36abd206bd84cf02d2d9494dd0d955ae61fa915deb32fcf1e7ef1675551f",
+    "artifact_payload_bytes": 150994944,
+    "backend_id": "184109f4e8edec3c34455bd86a787e7838bef2eb75424cf0a4f57a183f313a95",
+    "final_capture_manifest_sha256": "e9208dd6d50eaf3273b8365b1e075d2a25cfa65ddb923715a341630ff5be2250",
+    "qualification_sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e",
+    "schema": "cascadekv-phi35-8k-kaggle-capture-v2"
+  },
+  "capture": {
+    "adapter": "phi3-post-rope-qkv-v1",
+    "attention": "sdpa",
+    "compute_dtype": "float16",
+    "layers": [0, 8, 16, 24, 31],
+    "one_forward": true,
+    "qa16": {"dataset_index": 16, "family": "qa", "input_ids_sha256": "d9bcac44581785b0d180fdcd46cbcc5dcecd50e0e2c4285d81d949d1b35bc3ac", "role": "validation"},
+    "quantization": "none",
+    "shape": [1, 32, 8192, 96],
+    "storage_dtype": "float16",
+    "target": {"model": "microsoft/Phi-3.5-mini-instruct", "revision": "2fe192450127e6a83f7441aef6e3ca586c338b77"},
+    "use_cache": false
+  },
+  "freeze_bindings": {
+    "c1": {"commit": "667900a5307fe231565033a774d7788942fb869d", "manifest_sha256": "af8e805bad5c85a1f9d6ae5571b378e4df46fdb1de778a5ec7b5b68b13dc4a8e", "tag": "cascadekv-phi35-8k-sources-freeze"},
+    "c2_v2": {"commit": "fa54b581ee5ee581dd51b8085db8b5233467450a", "protocol_sha256": "315453e8446e8f41611fc23544a4a5093da13a7dba344dfc66a840eebf17857d", "runtime_manifest_sha256": "a5a96915f8cab588e5d1dd6af15855d4d090366f94282022bff7bc1b856957fd", "tag": "cascadekv-phi35-8k-kaggle-c2-prep-v2"},
+    "phase_b": {"commit": "d94cff8e1e11048ff3d8edc9fb1c605dfe422d6e", "protocol_sha256": "0e3a2e7b51e01c64dca292c7dd667ed9899c5bacc08e470e2b19e12433363c8b", "runtime_manifest_sha256": "e4e10f7659180471eb791eeafa97e8f525b6c14a3ff311798349c07438ec7c92", "tag": "cascadekv-phi35-8k-phaseb-protocol-freeze"},
+    "source_amendment": {"commit": "a26c76de596d6f0074556ae630679ffca0021e69", "protocol_sha256": "f43b2311d0decf2a579bf886848572bf53d58ab98e058b1da1be5a2912b85e8e", "runtime_manifest_sha256": "d35817df8a7c8a7a48539cac252344dbe4f94cf97b9a3a50aa307e88a3640edf", "tag": "cascadekv-phi35-8k-source-dedup-amendment-prep-v1"},
+    "supplement": {"tag": "cascadekv-phi35-8k-capture-amendment-prep-v1"}
+  },
+  "logical_capture": {"logical_artifacts": 45, "logical_tensor_payload_bytes": 6794772480, "new_tensor_payload_bytes": 754974720, "new_tensors": 5, "qa14_logical_artifacts": 0, "reused_tensors": 40},
+  "qa15_historical_artifacts": {
+    "0": {"provenance_sha256": "24a59131130c880ad45e81b2bb4093d61d0aa7f174cadbe89ecc4162f5da4ad6", "tensor_sha256": "c496e5a8883ab2b194752e6853ea84be52045cb83c3de7217db3e7e187c52c7b"},
+    "8": {"provenance_sha256": "f4394d86d20750671078f3d0d0d587c6d04f98e440f272fe359f44776a479ec2", "tensor_sha256": "b52f1b101726c02a0d9e48b2eda688ef4a34fa13c040d23b594517cca842f76b"},
+    "16": {"provenance_sha256": "da92d043a4f611a061c213e7075cfdeb1d892dfad6cf35f886edbe47fb242beb", "tensor_sha256": "2810ba39836521e74072605941a2ec006ece540c5c09db32309dd22612e28c36"},
+    "24": {"provenance_sha256": "d25313d3d951dfdbb2b3eb46a789d34cb7b3fd56531a37ad6fc0b89f09d79414", "tensor_sha256": "ad172cef3a0f26072790fa2f337a02dc52624e79b418a575ba173ef002f5611b"},
+    "31": {"provenance_sha256": "03b3b9fcdddea6e0bad92bb57ea9ae988decc574bf3b39722e7eea4f4c78c092", "tensor_sha256": "e3c21514c00aa0e625483519b21327f3c9b9a61c77dab94075907046ece44db0"}
+  },
+  "schema_version": "cascadekv-phi35-8k-capture-amendment-protocol-v1",
+  "scientific_state": {"cascadekv_quality_metrics_observed": false, "schedule_optimized": false}
+}
