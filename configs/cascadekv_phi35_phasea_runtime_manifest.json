@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "purpose": "Prospective Phase-A runtime-source closure for future CascadeKV Phi-3.5 scientific mechanics.",
+  "target_family": "phi3",
+  "target_model": {
+    "name": "microsoft/Phi-3.5-mini-instruct",
+    "revision": "2fe192450127e6a83f7441aef6e3ca586c338b77"
+  },
+  "phase_a_scientific_status": "NO_PHI_DATA_CONSUMED",
+  "routing_profile_status": "UNFROZEN; no Phi lambda, sink/local, or action schedule is bound by this manifest.",
+  "bound_files": [
+    {
+      "path": "cascadekv/model_agnostic.py",
+      "sha256": "24e113274c1f5ad4e163f575f9a0f7c53a73b33028a930151863018658391da5"
+    },
+    {
+      "path": "cascadekv/evaluation_core.py",
+      "sha256": "a736298e657577cae44466e461270e91aedfce2e44626506587e7ea82409406a"
+    },
+    {
+      "path": "cascadekv/adaptive_lifting.py",
+      "sha256": "ad47c76449840a19932ade1d1f60c730f4e270dab379159ca12234b1088b4919"
+    },
+    {
+      "path": "cascadekv/quantize.py",
+      "sha256": "49dfbc10a02ecf11ad4fa6956976aab49f5177a4ef757a61e5e0fc918e81f059"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "a6b0dca47df4790b897410892da143ce6f7cb485640ccabc79d69ca221b2d41a"
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "bd9858de274b586ed5f24ae38f279f684549741fc8f0fbbdc26b00a3dd897296"
+    }
+  ]
+}

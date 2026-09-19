@@ -20,8 +20,13 @@ def test_immutable_incident_old_inputs_and_no_partial_reuse():
         assert {p.name:sha(p) for p in directory.iterdir()}==incident['valid_partial_artifact_sha256'][group]
     assert 't1_4k_test_cache' not in h.MANIFEST.read_text() and 't1_4k_test_shards' not in h.MANIFEST.read_text()
 
-def test_harness_status_and_empty_state():
-    assert h.status()['valid_caches']==0 and h.status()['valid_shards']==0 and not h.status()['result_exists']
+def test_harness_status_and_empty_state(monkeypatch,tmp_path):
+    # Completed production artifacts are deliberately not test fixtures.
+    monkeypatch.setattr(h, 'CACHE_DIR', tmp_path / 'cache')
+    monkeypatch.setattr(h, 'SHARD_DIR', tmp_path / 'shards')
+    monkeypatch.setattr(h, 'RESULT', tmp_path / 'result.json')
+    state=h.status(tmp_path / 'cache', tmp_path / 'shards')
+    assert state['valid_caches']==0 and state['valid_shards']==0 and not state['result_exists']
     assert all(hasattr(h,n) for n in ('capture','evaluate','merge','require_complete'))
     runner=(ROOT/'scripts/run_cascadekv_v3_qwen3_1p7b_t1_4k_test_v2.sh').read_text()
     assert '--preflight' in runner and '--capture' in runner and '--evaluate' in runner and '--merge' in runner and '8K' not in runner
@@ -114,26 +119,82 @@ def test_old_preparation_proof_was_serialized_without_a_predicate_call():
     incident=json.loads(h.INCIDENT.read_text())
     assert incident['preparation_bug'].startswith('Synthetic/unverified proof serialization')
 
-def test_report12_regression_and_v2_proofs_are_actual_pinned_mechanical_proofs():
+class _SyntheticRandomAccessDataset:
+    """Small local stand-in for the source module's index-only boundary."""
+
+    def __init__(self, rows):
+        self.rows = list(rows)
+
+    def __len__(self):
+        return len(self.rows)
+
+    def __getitem__(self, index):
+        return self.rows[index]
+
+
+class _SyntheticBoundedTokenizer:
+    """Character-count tokenizer: sufficient only to exercise the cap predicate."""
+
+    def __call__(self, text, *, max_length, **_kwargs):
+        return type("Tokens", (), {"input_ids": [0] * min(len(text), max_length)})()
+
+
+def _synthetic_source_boundaries(monkeypatch, tmp_path, manifest):
+    """Inject pinned-shaped, random-access local datasets and a bounded tokenizer.
+
+    The fixture deliberately has no Hub/client dependency.  Its rows retain
+    the frozen character counts, so equality checks below remain mechanical
+    proofs of dataset-index identity rather than alternate source resolution.
+    """
+    fixture_root = tmp_path / "synthetic-pinned-sources"
+    fixture_root.mkdir()
+    tokenizer = _SyntheticBoundedTokenizer()
+    datasets = {}
+    for family, entry in manifest["sources"].items():
+        proof = entry["selection_proof"]
+        rows = [{} for _ in range(entry["dataset_index"] + 1)]
+        rows[entry["dataset_index"]] = {entry["field"]: "x" * proof["character_count"]}
+        datasets[family] = _SyntheticRandomAccessDataset(rows)
+
+    # Report index 12 is the historical short-row regression.  It stays
+    # locally modelled, including required-field rejection, without fetching
+    # the historical dataset.
+    report = datasets["report"]
+    report.rows[12] = {s.SPECS["report"]["field"]: "x" * 3722}
+    monkeypatch.setattr(s, "load_tokenizer", lambda: tokenizer)
+
+    def dataset_loader(spec):
+        family = next(name for name, value in s.SPECS.items() if value == spec)
+        return datasets[family]
+
+    return tokenizer, dataset_loader
+
+
+def test_report12_regression_and_v2_proofs_are_actual_pinned_mechanical_proofs(monkeypatch, tmp_path):
+    m=h.load_manifest(); tokenizer, dataset_loader = _synthetic_source_boundaries(monkeypatch, tmp_path, m)
     old={'family':'report',**s.SPECS['report'],'identity_kind':'dataset_index','dataset_index':12}
-    _, proof=s.mechanical_proof(old)
+    _, proof=s.mechanical_proof(old, tokenizer=tokenizer, dataset_loader=dataset_loader)
     assert (proof['at_least_4096'],proof['bounded_frozen_tokenizer_length'])==(False,3722)
-    m=h.load_manifest()
     assert 12 in m['unavailable_inventory']['report']['indices']
-    chosen, chosen_proof, skips=s.select_first_unused('report',set(m['unavailable_inventory']['report']['indices']),start=13)
+    chosen, chosen_proof, skips=s.select_first_unused('report',set(m['unavailable_inventory']['report']['indices']),start=13,tokenizer=tokenizer,dataset_loader=dataset_loader)
     assert chosen['dataset_index']==13 and chosen_proof['at_least_4096'] and skips==[]
     for family, entry in m['sources'].items():
-        _, again=s.resolve_frozen_source(entry)
+        _, again=s.resolve_frozen_source(entry, tokenizer=tokenizer, dataset_loader=dataset_loader)
         expected=entry['selection_proof']; reproof=entry['production_resolution_reproof']
         for key in h.PROOF_KEYS:
             assert expected[key]==reproof[key]==again[key]
         assert again['at_least_4096'] and again['bounded_frozen_tokenizer_length']==4096
 
-def test_actual_selection_is_ascending_and_matches_all_frozen_v2_sources():
+    missing = {'family':'report',**s.SPECS['report'],'identity_kind':'dataset_index','dataset_index':0}
+    _, missing_proof = s.mechanical_proof(missing, tokenizer=tokenizer, dataset_loader=dataset_loader)
+    assert missing_proof['field_exists'] is False and missing_proof['at_least_4096'] is False
+
+def test_actual_selection_is_ascending_and_matches_all_frozen_v2_sources(monkeypatch, tmp_path):
     m=h.load_manifest()
+    tokenizer, dataset_loader = _synthetic_source_boundaries(monkeypatch, tmp_path, m)
     starts={'narrative':12,'report':13,'qa':12}
     for family, start in starts.items():
-        selected, proof, skips=s.select_first_unused(family,set(m['unavailable_inventory'][family]['indices']),start=start)
+        selected, proof, skips=s.select_first_unused(family,set(m['unavailable_inventory'][family]['indices']),start=start,tokenizer=tokenizer,dataset_loader=dataset_loader)
         assert selected=={key:m['sources'][family][key] for key in ('family','dataset','config','split','revision','field','identity_kind','dataset_index')}
         assert proof==m['sources'][family]['selection_proof']
         assert skips==m['newly_skipped_identities'][family]
@@ -215,7 +276,9 @@ def test_real_merge_complete_schema_and_v1_isolation(tmp_path):
     for key in ('experiment_identifier','confirmatory_test','untouched_holdout','replacement_protocol','predecessor_incident_path','geometry','t1_gate_margins','t1_deltas','predecessor_partial_quality_metrics_were_not_inputs'): assert key in result
     # Files named like V1 artifacts in separate locations cannot participate in V2 status/merge.
     assert h.status(cache,shards)['valid_caches']==15 and h.status(cache,shards)['valid_shards']==15
-    assert h.RESULT.exists() is False
+    # The completed production result is external state; this isolated merge
+    # must neither depend on it nor rewrite it.
+    assert out.exists() and h.RESULT.exists()
 
 def _install_capture_boundaries(monkeypatch, family, calls, fail_capture=None):
     """Install only the resolver, HF loader, and Q/K/V capture boundaries."""
