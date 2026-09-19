@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "experiment_purpose": "MODEL-GENERALIZATION TEST: Does the exact CascadeKV-v3 T0 architecture, schedule, router, calibration constants, action semantics, and traffic accounting frozen on Qwen3-0.6B transfer zero-shot to Qwen3-1.7B?",
+  "parent_v3": {
+    "config_path": "configs/cascadekv_v3.json",
+    "config_sha256": "5d364bc4e351061c243a9166c0a9ccdd68c7cefd74265e4135d937b323e6e505",
+    "test_result_path": "results/cascadekv_v3_4k_test.json",
+    "test_result_sha256": "01c0bbda902a723599b709c8bc6be159c6191706a9c3531fd2da5fbb3fe5f09d",
+    "test_manifest_sha256": "2181ca5b7b501926479901b4b56098481adbb2fe790183919e926e54c4e629aa",
+    "required_status": "complete",
+    "required_classification": "TEST-PASSED"
+  },
+  "target_model": {
+    "name": "Qwen/Qwen3-1.7B",
+    "resolved_commit_sha": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "config_filename": "config.json",
+    "config_sha256": "1ddb5b89ebc90dcb417a45c213d818577e65976454d29385c8f6140771d95197",
+    "architecture": {"model_type": "qwen3", "num_hidden_layers": 28, "num_attention_heads": 16, "num_key_value_heads": 8, "head_dim": 128, "hidden_size": 2048},
+    "selection_reason": "same attention-routing geometry as Qwen3-0.6B, permitting literal zero-shot transfer of the exact frozen 40-entry layer×KV-head schedule with no remapping, fitting, or interpolation"
+  },
+  "context_length": 4096,
+  "source_manifests_scanned": ["results/fresh_sequence_benchmark_manifest.json", "results/structural_schedule_v2_qkv_dev_manifest.json", "results/cascadekv_v2_4k_test_manifest.json", "results/cascadekv_v3_vaware_dev_manifest.json", "results/cascadekv_v3_4k_test_manifest.json"],
+  "complete_prior_explicit_identity_inventory": [
+    {"dataset":"emozilla/pg19","config":null,"split":"train","index":0,"stable_example_id":0},{"dataset":"emozilla/pg19","config":null,"split":"train","index":1,"stable_example_id":1},{"dataset":"emozilla/pg19","config":null,"split":"train","index":2,"stable_example_id":2},{"dataset":"emozilla/pg19","config":null,"split":"train","index":3,"stable_example_id":3},{"dataset":"emozilla/pg19","config":null,"split":"train","index":4,"stable_example_id":4},{"dataset":"emozilla/pg19","config":null,"split":"train","index":5,"stable_example_id":5},
+    {"dataset":"ccdv/govreport-summarization","config":null,"split":"train","index":0,"stable_example_id":0},{"dataset":"ccdv/govreport-summarization","config":null,"split":"train","index":1,"stable_example_id":1},{"dataset":"ccdv/govreport-summarization","config":null,"split":"train","index":2,"stable_example_id":2},{"dataset":"ccdv/govreport-summarization","config":null,"split":"train","index":3,"stable_example_id":3},{"dataset":"ccdv/govreport-summarization","config":null,"split":"train","index":5,"stable_example_id":5},{"dataset":"ccdv/govreport-summarization","config":null,"split":"train","index":6,"stable_example_id":6},
+    {"dataset":"zai-org/LongBench","config":"narrativeqa","split":"test","index":0,"stable_example_id":0},{"dataset":"zai-org/LongBench","config":"narrativeqa","split":"test","index":1,"stable_example_id":1},{"dataset":"zai-org/LongBench","config":"narrativeqa","split":"test","index":2,"stable_example_id":2},{"dataset":"zai-org/LongBench","config":"narrativeqa","split":"test","index":3,"stable_example_id":3},{"dataset":"zai-org/LongBench","config":"narrativeqa","split":"test","index":4,"stable_example_id":4},{"dataset":"zai-org/LongBench","config":"narrativeqa","split":"test","index":5,"stable_example_id":5}
+  ],
+  "selection_policy": "Deterministic dataset index order; select the first explicit identity absent from the complete inventory with the required text field as str and a bounded target-model frozen-tokenizer length proof >=4096. Selection inspected only identity, text field existence/type, character count, and bounded tokenizer length; it did not inspect Q/K/V, attention, CascadeKV metrics, semantics, difficulty, topic, or target-model quality. Existing manifest preflight never reselects sources.",
+  "sources": {
+    "narrative": {"dataset":"emozilla/pg19","config":null,"split":"train","index":6,"stable_example_id":6,"exact_revision":"c021754c8e01c5b1cc83a1f549c1f97fbbb756b8","text_field":"text","character_count":73507,"token_length_proof":{"tokenizer_model":"Qwen/Qwen3-1.7B","tokenizer_revision":"70d244cc86ccca08cf5af4e1e306ecf908b1ad5e","minimum":4096,"observed_capped":4096,"at_least":true}},
+    "report": {"dataset":"ccdv/govreport-summarization","config":null,"split":"train","index":7,"stable_example_id":7,"exact_revision":"4e21184e01ae8017e2c036e180fe5e541fef60a0","text_field":"report","character_count":57846,"token_length_proof":{"tokenizer_model":"Qwen/Qwen3-1.7B","tokenizer_revision":"70d244cc86ccca08cf5af4e1e306ecf908b1ad5e","minimum":4096,"observed_capped":4096,"at_least":true},"skipped_unconsumed_identity":{"index":4,"reason":"bounded tokenizer length 3584 < 4096"}},
+    "qa": {"dataset":"zai-org/LongBench","config":"narrativeqa","split":"test","index":6,"stable_example_id":6,"exact_revision":"75b6d5bffbcaa2cf4da85a9fa99939b13ee5b00b","text_field":"context","character_count":102175,"token_length_proof":{"tokenizer_model":"Qwen/Qwen3-1.7B","tokenizer_revision":"70d244cc86ccca08cf5af4e1e306ecf908b1ad5e","minimum":4096,"observed_capped":4096,"at_least":true}}
+  },
+  "literal_schedule_transfer_policy": "Read configs/cascadekv_v3.json unchanged. Transfer atom8; causal binary-counter lifting hierarchy; G4 variance; K4/group16 routing; reserves; lambdas; A0-A4; the exact 40-entry T0 LK action table; authoritative FP16-K rerank; FP16-V output; and traffic accounting literally, with no target-model calibration, remapping, fitting, interpolation, tuning, or 8K run.",
+  "methods": ["dense_exact","flat_q8k4_5","flat_q8k4_10","uniform_v1_5","uniform_v1_10","frozen_cascadekv_v2","frozen_cascadekv_v3"],
+  "metrics": ["relative_exact_attention_mass","top8_recall","cosine_similarity","relative_l2_error","absolute_l2_error","total_k_bytes","selected_v_fp16_bytes","total_kv_bytes"],
+  "classification": {"absolute":{"pooled_cosine_gte":0.985,"pooled_relative_l2_lte":0.12},"comparative":{"v3_kv_bytes_lte_uniform10":true,"v3_relative_l2_lt_v2":true},"outcomes":{"pass":"TARGET-MODEL-TRANSFER-PASSED","absolute_fail":"TARGET-MODEL-OUTPUT-GATE-FAILED","comparative_fail":"TARGET-MODEL-COMPARATIVE-GATE-FAILED","invalid":"TARGET-MODEL-TEST-INVALID"},"diagnostics":"report-only and never classification inputs"},
+  "no_fitting_statement": "No target-model parameter may be adapted. No optimizer, calibration, fitting, tuning, source selection by results, capture, shard evaluation, or classification execution occurred while freezing this manifest."
+}
