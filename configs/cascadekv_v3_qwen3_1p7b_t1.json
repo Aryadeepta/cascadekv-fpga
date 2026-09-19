@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "config_kind": "immutable-target-specific-confirmatory-schedule",
+  "target_model": {"name": "Qwen/Qwen3-1.7B", "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e", "config_sha256": "1ddb5b89ebc90dcb417a45c213d818577e65976454d29385c8f6140771d95197"},
+  "architecture_identity": "atom8; causal binary-counter lifting hierarchy; G4 grouped variance; K4/group16 routing; frozen reserve semantics; frozen lambda semantics; authoritative FP16 K rerank; FP16 V; existing measured traffic accounting",
+  "frozen_config_sha256": {"v1": "2964e4295719e696587f9853177c38399b64edc753e0630fc0d44208c719559b", "v2": "ef36c5bd1b4211083ac5680e554877281f0a09e37f3dea9e4eb877afba18259c", "v3": "5d364bc4e351061c243a9166c0a9ccdd68c7cefd74265e4135d937b323e6e505"},
+  "action_semantics": {"A0": {"candidate_budget": 0.05, "routing_profile": "frozen 5%-routing profile", "mode": "hierarchy"}, "A1": {"candidate_budget": 0.075, "routing_profile": "frozen 5%-routing profile", "mode": "hierarchy"}, "A2": {"candidate_budget": 0.10, "routing_profile": "frozen 5%-routing profile", "mode": "hierarchy"}, "A3": {"candidate_budget": 0.15, "routing_profile": "frozen 5%-routing profile", "mode": "hierarchy"}, "A4": {"candidate_budget": 0.05, "routing_profile": null, "mode": "flat"}},
+  "uniform10_is_separate": {"candidate_budget": 0.10, "routing_profile": "10% routing profile"},
+  "exact_layer_head_action_table": {"0:0":"A3","0:1":"A0","0:2":"A0","0:3":"A1","0:4":"A1","0:5":"A2","0:6":"A0","0:7":"A2","7:0":"A1","7:1":"A0","7:2":"A3","7:3":"A2","7:4":"A0","7:5":"A0","7:6":"A0","7:7":"A3","14:0":"A4","14:1":"A1","14:2":"A1","14:3":"A4","14:4":"A0","14:5":"A4","14:6":"A1","14:7":"A4","21:0":"A3","21:1":"A4","21:2":"A1","21:3":"A0","21:4":"A4","21:5":"A4","21:6":"A4","21:7":"A1","27:0":"A1","27:1":"A0","27:2":"A0","27:3":"A2","27:4":"A0","27:5":"A0","27:6":"A1","27:7":"A1"},
+  "schedule_cell_count": 40,
+  "composition": {"A0": 13, "A1": 11, "A2": 4, "A3": 4, "A4": 8},
+  "development_provenance": {"winner_name": "target_wide_T1", "result_path": "results/cascadekv_v3_qwen3_1p7b_wide_vaware_dev.json", "result_sha256": "16dad49612d5e02742e8b6cf75f7cac3f3a692668228fe36056beb32a02b4b2e", "manifest_path": "results/cascadekv_v3_qwen3_1p7b_wide_vaware_dev_manifest.json", "manifest_sha256": "654596830b06bfc6e9740c5363273bcbc408b769fabd92a69ef80fb182a84fb9", "protocol_tag": "cascadekv-v3-qwen3-1p7b-wide-vaware-dev-protocol-freeze", "commit": "f0c5b5666ad089531fca68862c5be959088d49ef"},
+  "immutability_statement": "Derived from development only; immutable before confirmatory-test scoring. No confirmatory-test metric may alter this config, schedule, architecture, action semantics, router, reserves, lambdas, or gates."
+}
