@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "incident_classification": "CONFIRMATORY-PROTOCOL-INVALID-AFTER-EXECUTION-START",
+  "old_manifest": {"path": "results/cascadekv_v3_qwen3_1p7b_t1_4k_test_manifest.json", "sha256": "53af3b7dfe1dc7ccdd994851e4e22d329cf888f02c11d7f76e858735e106890b"},
+  "old_protocol_tag": {"name": "cascadekv-v3-qwen3-1p7b-t1-4k-test-protocol-freeze", "commit": "a45918680e45026c180ce3696d16009603398183"},
+  "old_execution_tag": {"name": "cascadekv-v3-qwen3-1p7b-t1-4k-test-execution-freeze", "commit": "335ca4a6b7fd7d925ff2d5be0fa9d526319edf9c"},
+  "t1_config_sha256": "5995a0f7fd6c3ebe762f27959d10de0398980e1aa013b669379f6b794cf5e88e",
+  "execution_started": true,
+  "final_valid_state": {"valid_caches": "5/15", "valid_shards": "5/15", "result": "no result", "last_completed_pair": "narrative layer 27", "failed_pair": "report layer 0"},
+  "root_cause": "Report index 12 production predicate false, bounded frozen tokenizer length 3722 < 4096.",
+  "preparation_bug": "Synthetic/unverified proof serialization: the protocol-freeze commit introduced the manifest literals (including Report 12 at_least_4096=true and bounded length=4096), while its pre-data harness explicitly had no selection implementation and only trusted the serialized boolean. No preparation code invoked the pinned dataset/tokenizer predicate for that entry.",
+  "no_confirmatory_quality_classification_exists": true,
+  "partial_method_metrics_prohibited": "No partial method metrics may be used for fitting, protocol design, or scientific claims.",
+  "existing_partial_artifacts_preserved": true,
+  "partial_artifact_preservation_statement": "All existing partial artifacts remain preserved; none is input, cache, shard, or result data for V2.",
+  "valid_partial_artifact_sha256": {
+    "caches": {"narrative_L4096_layer0_qkv.pt": "97588446aad6d6dc63db0f13dd27ec407bfe3a828aaf012767e297a62a0fd85d", "narrative_L4096_layer7_qkv.pt": "a8d1edfb979062ad185ba114b1a3642cf2c02902a93c28aa250a7618cbce7cc6", "narrative_L4096_layer14_qkv.pt": "dd8303aa04d124a66682cbcfa365a38913e6463d34d7c02b1ac44443ba67a262", "narrative_L4096_layer21_qkv.pt": "3c3ca08f36ea970541e65f4ce0635083a1d6f1269f7c08d65f3b441c5d936248", "narrative_L4096_layer27_qkv.pt": "51f1874906299668b536cd4baab877008ef70ff25136da2558640e4fadd85e28"},
+    "shards": {"narrative_L4096_layer0.json": "292091d418aff7792a3fbd8a7e6544d61c739bcc57ae9ab3388c02db83a7ed61", "narrative_L4096_layer7.json": "b21cc55f99b594db6cc3328155e1e85e2a69ce46be0a860e5f88c5a5cbe00883", "narrative_L4096_layer14.json": "a84490fc9fa3a00c38be85bbf4202aae0ff043800a18dd2353efdfe117e5e964", "narrative_L4096_layer21.json": "b617a07c3ac0eb3a836641e9b8937d52ca44bc1ee4aacdf46cc22e629a639279", "narrative_L4096_layer27.json": "9bbba61abdf6657bb657a6e2663f646768db715808f0ad21c2c79cca7b9bc40b"}
+  }
+}
