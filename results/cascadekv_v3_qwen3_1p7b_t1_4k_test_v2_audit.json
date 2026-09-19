@@ -1,0 +1,141 @@
+{
+  "schema_version": "cascadekv-result-audit-v1",
+  "audit_classification": "RESULT-AUDIT-PASSED",
+  "result": {
+    "path": "results/cascadekv_v3_qwen3_1p7b_t1_4k_test_v2.json",
+    "sha256": "076f8fac9f4d6b16c5acfbd4235cc26215f44af3068a0f20e16d4adfa61a2e12",
+    "status": "complete",
+    "classification": "T1-CONFIRMATORY-TEST-PASSED"
+  },
+  "protocol_tag": {
+    "name": "cascadekv-v3-qwen3-1p7b-t1-4k-test-v2-protocol-freeze",
+    "commit": "999eb9a2c8767188c2b3d922f415194bd2a5bf54"
+  },
+  "execution_freeze_tag": {
+    "name": "cascadekv-v3-qwen3-1p7b-t1-4k-test-v2-execution-freeze",
+    "commit": "fe578c8ed56a2b635e389de841b08a5cd4c35169"
+  },
+  "immutable_inputs": {
+    "t1_config": {
+      "path": "configs/cascadekv_v3_qwen3_1p7b_t1.json",
+      "sha256": "5995a0f7fd6c3ebe762f27959d10de0398980e1aa013b669379f6b794cf5e88e"
+    },
+    "v2_manifest": {
+      "path": "results/cascadekv_v3_qwen3_1p7b_t1_4k_test_v2_manifest.json",
+      "sha256": "5b72734c1efa3ebac000856f1d73ec91e6defa08ca560796c6804839028286f3"
+    },
+    "incident": {
+      "path": "results/cascadekv_v3_qwen3_1p7b_t1_4k_test_incident.json",
+      "sha256": "b58dd37fa9951cb7b4c03adddc22522e0eaa779b5917f6bd9da855ff9485e0b3"
+    },
+    "old_invalid_manifest": {
+      "path": "results/cascadekv_v3_qwen3_1p7b_t1_4k_test_manifest.json",
+      "sha256": "53af3b7dfe1dc7ccdd994851e4e22d329cf888f02c11d7f76e858735e106890b"
+    },
+    "frozen_config_sha256": {
+      "v1": "2964e4295719e696587f9853177c38399b64edc753e0630fc0d44208c719559b",
+      "v2": "ef36c5bd1b4211083ac5680e554877281f0a09e37f3dea9e4eb877afba18259c",
+      "v3": "5d364bc4e351061c243a9166c0a9ccdd68c7cefd74265e4135d937b323e6e505"
+    }
+  },
+  "frozen_sources": {
+    "narrative": { "dataset_index": 12 },
+    "report": { "dataset_index": 13 },
+    "qa": { "dataset_index": 12 }
+  },
+  "validated_artifacts": {
+    "valid_caches": 15,
+    "total_caches": 15,
+    "valid_shards": 15,
+    "total_shards": 15,
+    "cache_sha256": {
+      "narrative_L4096_layer0_qkv.pt": "dee5799cffc1e076872f9b0ea63d3b15f344976aae888b29c19f901e03acfd8a",
+      "narrative_L4096_layer7_qkv.pt": "325d7e7524bea20087385343b36dcef61372cdf604d6ac1aa9f0128b4c1c20d1",
+      "narrative_L4096_layer14_qkv.pt": "fbc5c34632449dd606042f87a46414247cb04fd85ad462fb3e7ef523488f019c",
+      "narrative_L4096_layer21_qkv.pt": "cc870f742587a67b6bbb4d5858d68c7791ebdf825ba85b5d5cf6110925ac3cd7",
+      "narrative_L4096_layer27_qkv.pt": "b835900ab5c4e9bfe920e87c159aa4e4103eb28f9732af914b7a3ed2ebf8a0a0",
+      "report_L4096_layer0_qkv.pt": "005b70d5f91bdafcc49e22af708c5d7b7e534ed6fe8cbb2ec68ab8bc1ecd656a",
+      "report_L4096_layer7_qkv.pt": "d7ecefb4ab6d719201835397b2010196ab36b43fba9ba45f4880c488452eb53c",
+      "report_L4096_layer14_qkv.pt": "e675a9b7f2e9164f6c4047c6c9e4726a53e8ac762447ff2e844a9b1a09933cd8",
+      "report_L4096_layer21_qkv.pt": "99451d0f857ddbb74d39cdf405ff274030825cc321dafd154978a87d049d0d1e",
+      "report_L4096_layer27_qkv.pt": "be5949961e0bfec197ea9c9b1f7106b8b8d7a133b6382d07a275ef223caa98f8",
+      "qa_L4096_layer0_qkv.pt": "a1c6bd61ce1ef281469b94244b181b9cfe9c38bd434eecdc521129d0b001df4c",
+      "qa_L4096_layer7_qkv.pt": "33e60eae9fac949f4ed948e625dc153fb7ead7f5c028bed002bc9a28edccf5c7",
+      "qa_L4096_layer14_qkv.pt": "c89ff51d2aab94d62e8aa421832ce1dc03900e07431361a4db815ddc2d5eae05",
+      "qa_L4096_layer21_qkv.pt": "4a6bf660f8ba9ca6c640ef18eb87ca38213450db16791ce96d95e603f7b4c244",
+      "qa_L4096_layer27_qkv.pt": "d1f35023530122050025a631573f7a38781ca9b328882b2fab9a8f234546b7f8"
+    },
+    "shard_sha256": {
+      "narrative_L4096_layer0.json": "431586e01ad7c74b3148c0be22ee3e6af3082b980636ce5b67190fac3626eca2",
+      "narrative_L4096_layer7.json": "e3b0327ef401d94edb0a93a7e0977c3f44025ec701052a61f24ceca2d2ca5f86",
+      "narrative_L4096_layer14.json": "d2d91e55a6cd6447bcefa2da0649e36f874e5d48d6eed741d0c45f4d4c649159",
+      "narrative_L4096_layer21.json": "1dc474d58c67a2ce7f7d8f7bc73eaa3b44eb8afb5e0c7ee7066d2fb8b48a9df4",
+      "narrative_L4096_layer27.json": "5e259f52a74e91d69642a2b3bac291e33a440cd13d2671d8a537066cbf1696bf",
+      "report_L4096_layer0.json": "098e3a3d19a673d5faf5bfb816d266a102d00b31aee4a1512170129fd4085b7b",
+      "report_L4096_layer7.json": "7bab497650a3aa0ff699ffc957d9253c42a354e3ca1006a0533c9d3fd6174eef",
+      "report_L4096_layer14.json": "566c0754066027db66360c497ae9aefc107f11e440d041fe954f2162996a19ac",
+      "report_L4096_layer21.json": "98a9a1ecf98c0c8d467d4a1a3ff91c456604982626bad43970b4995c49cb0dee",
+      "report_L4096_layer27.json": "863a06138ad6692df624c293e2f54e9ebe4f4281b0241caa3f6c277f9df16757",
+      "qa_L4096_layer0.json": "0b4849cb151eb1c166f7b3b9c9bd81609f96a87e4d307e3d2cca70ce224e9562",
+      "qa_L4096_layer7.json": "7666ed15dcfd2de4ad30be46e8c732346e88670b881d48943ab930de9dcd937d",
+      "qa_L4096_layer14.json": "f56f837b8ef6c77fcfc4197e96995c610d68f392f0fa72097cf9cc038686a205",
+      "qa_L4096_layer21.json": "ea1083421a419d7d4caed9db5052f3979d163c82cf2bd5db407008b51b29643b",
+      "qa_L4096_layer27.json": "71f46efe60a0ea83c9359a743b572a5990478fb69551aa48cf556544a79c960c"
+    }
+  },
+  "pooled_rows_per_method": 720,
+  "independently_recomputed_t1": {
+    "cosine_mean": 0.9898603107366297,
+    "cosine_p5": 0.9534431099891663,
+    "relative_l2_mean": 0.1133983864604733,
+    "relative_l2_p95": 0.3321053850742079,
+    "relative_l2_worst": 0.6241753690873845,
+    "absolute_l2_mean": 1.5011560137379194,
+    "attention_mass_mean": 0.8867453529602951,
+    "top8_recall_mean": 0.9597222222222223,
+    "total_k_mean": 127584.98333333334,
+    "selected_v_mean": 55483.73333333333,
+    "total_kv_mean": 183068.71666666667
+  },
+  "independently_recomputed_gate_margins": {
+    "cosine_over_minimum": 0.004860310736629736,
+    "relative_l2_under_maximum": 0.006601613539526693
+  },
+  "independently_recomputed_deltas": {
+    "frozen_v2": { "relative_l2_error": -0.02056653680206426, "total_kv_bytes": 8153.950000000012 },
+    "original_frozen_v3": { "relative_l2_error": -0.007539832367693469, "total_kv_bytes": 8047.966666666674 },
+    "uniform10": { "relative_l2_error": -0.024284106750751114, "total_kv_bytes": -8506.316666666651 },
+    "flat5": { "relative_l2_error": 0.007666611112348717, "total_kv_bytes": -139149.95 },
+    "dense": { "relative_l2_error": 0.1133983864604733, "total_kv_bytes": -1389795.2833333332 }
+  },
+  "descriptive_percentage_comparisons": {
+    "relative_l2_reduction_vs_v2": "approximately 15.3522%",
+    "relative_l2_reduction_vs_original_v3": "approximately 6.2344%",
+    "relative_l2_reduction_vs_uniform10": "approximately 17.6378%",
+    "total_kv_change_vs_v2": "approximately +4.6617%",
+    "total_kv_change_vs_original_v3": "approximately +4.5983%",
+    "total_kv_savings_vs_uniform10": "approximately 4.4402%",
+    "total_kv_savings_vs_flat5": "approximately 43.1849%",
+    "total_kv_fraction_of_dense": "approximately 11.6392%",
+    "measured_total_kv_reduction_vs_dense": "approximately 88.3608%"
+  },
+  "frozen_gate_recomputation_passed": true,
+  "result_classification_recomputed_independently": true,
+  "pooled_summaries_recomputed_from_shards": true,
+  "execution_freeze_files_match_completed_run": true,
+  "no_post_test_tuning": true,
+  "no_repository_mutation_during_read_only_audit": true,
+  "predecessor_partial_quality_metrics_were_not_inputs": true,
+  "scientific_scope": "Same-model, target-specific Qwen3-1.7B confirmation on a fresh untouched three-domain 4K holdout; three source examples and 720 layer/position/head observations per method.",
+  "explicit_nonclaims": [
+    "cross-family transfer",
+    "cross-architecture transfer",
+    "new zero-shot model-scale transfer",
+    "8K behavior",
+    "tokens/sec performance",
+    "wall-clock speedup",
+    "energy savings",
+    "dollar savings"
+  ],
+  "traffic_ratio_interpretation": "Measured traffic ratios must not be described as speedup, energy savings, or cost savings."
+}
