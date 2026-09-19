@@ -1,0 +1,91 @@
+{
+  "base_c1_freeze": {
+    "commit": "667900a5307fe231565033a774d7788942fb869d",
+    "manifest_sha256": "af8e805bad5c85a1f9d6ae5571b378e4df46fdb1de778a5ec7b5b68b13dc4a8e",
+    "tag": "cascadekv-phi35-8k-sources-freeze"
+  },
+  "c2_v2_freeze": {
+    "commit": "fa54b581ee5ee581dd51b8085db8b5233467450a",
+    "protocol_sha256": "315453e8446e8f41611fc23544a4a5093da13a7dba344dfc66a840eebf17857d",
+    "runtime_manifest_sha256": "a5a96915f8cab588e5d1dd6af15855d4d090366f94282022bff7bc1b856957fd",
+    "tag": "cascadekv-phi35-8k-kaggle-c2-prep-v2"
+  },
+  "future_role_provenance": {
+    "historical_tensor_bytes_invalidated": false,
+    "later_capture_amendment_required": "new_role_correct_provenance_wrapper_or_reference_or_recapture",
+    "qa15_amended_role": "calibration_2",
+    "qa15_historical_role": "validation"
+  },
+  "immutable_prior_hashes": {
+    "qwen_audit_sha256": "c513e44299f07ae32ac17be92600791d3a89d1823d4e6bcff9fbbd65be51ad64",
+    "qwen_result_sha256": "076f8fac9f4d6b16c5acfbd4235cc26215f44af3068a0f20e16d4adfa61a2e12"
+  },
+  "incident_evidence": {
+    "observation_kind": "mechanical_identity_only",
+    "qa13_qa14_identical_qkv_artifact_sha256": {
+      "0": "2774937b969deecb80354c07ffdcdd36b5de9ebaf7b5532a8431247fd831dcf7",
+      "8": "5d9992290a57a954a9da969cedba7df0b324e82f65eb0517d6ba2deede00e741",
+      "16": "4623ff39b375cbc9d32fb04d7e940174da5b38ea2fb8fd509d4067238f38b2ee",
+      "24": "975dfa94aa6f456f291c3f8ddb22a9b92faea6c5fabdccdc61d966098bf60685",
+      "31": "8681007e512143e9a48b9dd1e951c9fbdb5eedcb6b69a820b1a4e86245408477"
+    },
+    "qa_input_ids_sha256": {
+      "13": "6efe85ed32e8f8e28ba946fa301f65bb7559f7ed596da3f62a519833ce3a80a4",
+      "14": "6efe85ed32e8f8e28ba946fa301f65bb7559f7ed596da3f62a519833ce3a80a4",
+      "15": "29e61e009d96dc7e70261a07b197aaee190073884aaf8a8e1a53d4c1265b62b7"
+    }
+  },
+  "kaggle_entrypoint": {
+    "interpreter": "uv run python3",
+    "module": "cascadekv.phi35_8k_source_amendment"
+  },
+  "phase_b_freeze": {
+    "commit": "d94cff8e1e11048ff3d8edc9fb1c605dfe422d6e",
+    "protocol_sha256": "0e3a2e7b51e01c64dca292c7dd667ed9899c5bacc08e470e2b19e12433363c8b",
+    "runtime_manifest_sha256": "e4e10f7659180471eb791eeafa97e8f525b6c14a3ff311798349c07438ec7c92",
+    "tag": "cascadekv-phi35-8k-phaseb-protocol-freeze"
+  },
+  "purpose": "source-input dedup amendment only",
+  "qualification": {
+    "backend_id": "184109f4e8edec3c34455bd86a787e7838bef2eb75424cf0a4f57a183f313a95",
+    "sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e"
+  },
+  "schema_version": "cascadekv-phi35-8k-source-dedup-amendment-protocol-v1",
+  "scientific_state": {
+    "cascadekv_quality_metrics_observed": false,
+    "schedule_optimized": false
+  },
+  "selection_rules": {
+    "global_selected_input_uniqueness": "all_nine_input_ids_sha256_are_unique",
+    "narrative_fixed": {
+      "duplicate_input": "fail_closed",
+      "indices": [13, 14, 15],
+      "roles": ["calibration_1", "calibration_2", "validation"]
+    },
+    "qa": {
+      "calibration_1_index": 13,
+      "calibration_2_index": 15,
+      "duplicate_of_dataset_index": 13,
+      "reject_duplicate_index": 14,
+      "validation": "first_mechanically_eligible_globally_new_exact_input_ascending_from_16_then_stop"
+    },
+    "report_fixed": {
+      "duplicate_input": "fail_closed",
+      "indices": [16, 17, 18],
+      "roles": ["calibration_1", "calibration_2", "validation"]
+    }
+  },
+  "target": {
+    "model": "microsoft/Phi-3.5-mini-instruct",
+    "model_revision": "2fe192450127e6a83f7441aef6e3ca586c338b77",
+    "tokenizer_revision": "2fe192450127e6a83f7441aef6e3ca586c338b77"
+  },
+  "tokenization_contract": {
+    "add_special_tokens": true,
+    "canonicalization": "CPU contiguous int64 bytes",
+    "max_length": 8192,
+    "required_input_ids_length": 8192,
+    "truncation": true
+  },
+  "uniqueness_kind": "input_ids_sha256"
+}
