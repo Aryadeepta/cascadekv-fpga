@@ -12,6 +12,7 @@ import gc
 import hashlib
 import json
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -25,28 +26,29 @@ from cascadekv.phi35_8k_source_selection import (
     RUNTIME_MANIFEST_SHA256, TARGET_MODEL, TARGET_REVISION, load_dataset_for_spec,
     load_frozen_tokenizer, mechanical_proof, validate_manifest,
 )
-from cascadekv.runtime_provenance import RuntimeProvenanceError, verify_runtime_manifest
 
 ROOT = Path(__file__).resolve().parents[1]
 C1_TAG = "cascadekv-phi35-8k-sources-freeze"
 C1_COMMIT = "667900a5307fe231565033a774d7788942fb869d"
 C1_MANIFEST = ROOT / "results/cascadekv_phi35_8k_dev_sources.json"
 C1_MANIFEST_SHA256 = "af8e805bad5c85a1f9d6ae5571b378e4df46fdb1de778a5ec7b5b68b13dc4a8e"
-C2_PREP_TAG = "cascadekv-phi35-8k-kaggle-c2-prep"
-C2_PROTOCOL = "cascadekv-phi35-8k-kaggle-c2-protocol-v1"
+C2_PREP_TAG = "cascadekv-phi35-8k-kaggle-c2-prep-v2"
+C2_PROTOCOL = "cascadekv-phi35-8k-kaggle-c2-protocol-v2"
 C2_PROTOCOL_FILE = ROOT / "configs/cascadekv_phi35_8k_kaggle_c2_protocol.json"
-C2_PROTOCOL_SHA256 = "dcf9002d2622de81c453f39b8aad9db33f035ddeee410474d757548c96c83e5a"
+C2_PROTOCOL_SHA256 = "315453e8446e8f41611fc23544a4a5093da13a7dba344dfc66a840eebf17857d"
 C2_RUNTIME_MANIFEST = ROOT / "configs/cascadekv_phi35_8k_kaggle_c2_runtime_manifest.json"
-QUALIFICATION_SCHEMA = "cascadekv-phi35-8k-kaggle-qualification-v1"
-CAPTURE_SCHEMA = "cascadekv-phi35-8k-kaggle-capture-v1"
-APPROVAL_SCHEMA = "cascadekv-phi35-8k-qualification-approval-v1"
+QUALIFICATION_SCHEMA = "cascadekv-phi35-8k-kaggle-qualification-v2"
+CAPTURE_SCHEMA = "cascadekv-phi35-8k-kaggle-capture-v2"
+APPROVAL_SCHEMA = "cascadekv-phi35-8k-qualification-approval-v2"
 LAYERS = (0, 8, 16, 24, 31)
 LENGTHS = (512, 2048, 8192)
 SHAPE = (1, 32, 8192, 96)
 ARTIFACT_PAYLOAD_BYTES = 3 * 1 * 32 * 8192 * 96 * 2
 TOTAL_ARTIFACT_PAYLOAD_BYTES = 45 * ARTIFACT_PAYLOAD_BYTES
 DEFAULT_OUTPUT = Path("/kaggle/working/cascadekv_phi35_8k_capture")
-MAX_MEMORY = {0: "13GiB", 1: "13GiB"}  # Three GiB/device remains for activations.
+# Recorded provenance policy.  Explicit ``device_map`` controls placement; this
+# setting does not itself prove activation headroom.
+MAX_MEMORY = {0: "13GiB", 1: "13GiB"}
 QWEN_RESULT = ROOT / "results/cascadekv_v3_qwen3_1p7b_t1_4k_test_v2.json"
 QWEN_AUDIT = ROOT / "results/cascadekv_v3_qwen3_1p7b_t1_4k_test_v2_audit.json"
 IMMUTABLE_HASHES = {
@@ -106,6 +108,83 @@ def c1_manifest() -> dict[str, Any]:
     return manifest
 
 
+def _relative(path: Path) -> str:
+    return str(path.relative_to(ROOT))
+
+
+def validate_c2_protocol() -> dict[str, Any]:
+    """Validate the exact frozen C2 package contract without model/data access."""
+    try:
+        protocol = json.loads(C2_PROTOCOL_FILE.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise C2Error("cannot read C2 protocol") from exc
+    if not isinstance(protocol, dict):
+        raise C2Error("C2 protocol root is not an object")
+    expected = {
+        "schema_version": C2_PROTOCOL,
+        "target": {"model": TARGET_MODEL, "revision": TARGET_REVISION},
+        "geometry": {"context": 8192, "q_heads": 32, "kv_heads": 32, "head_dim": 96, "layers": list(LAYERS)},
+        "c1_freeze": {"tag": C1_TAG, "commit": C1_COMMIT, "source_manifest_path": _relative(C1_MANIFEST), "source_manifest_sha256": C1_MANIFEST_SHA256},
+        "phase_b_freeze": {"tag": PHASE_B_TAG, "commit": PHASE_B_COMMIT, "protocol_path": "configs/cascadekv_phi35_8k_phaseb_protocol.json", "protocol_sha256": PROTOCOL_SHA256, "runtime_manifest_path": "configs/cascadekv_phi35_8k_phaseb_runtime_manifest.json", "runtime_manifest_sha256": RUNTIME_MANIFEST_SHA256},
+        "capture_semantics": {"adapter_identity": Phi3CaptureAdapter.identity, "q_k": "post-RoPE", "v": "attention projection boundary"},
+        "capture": {"forbidden_until_separate_frozen_qualification_approval": True, "forwards_per_complete_run": 9, "layers_per_forward": list(LAYERS), "persistent_artifacts": 45, "source_manifest_sha256": C1_MANIFEST_SHA256},
+        "candidate_backend": {"accelerator": "NVIDIA T4 x2", "cuda_devices": 2, "compute_dtype": "float16", "attention_implementation": "sdpa", "use_cache": False, "quantization": "none", "device_map": {"model.embed_tokens": 0, "model.layers.0-15": 0, "model.layers.16-31": 1, "model.norm": 1, "lm_head": 1}, "max_memory": {"0": "13GiB", "1": "13GiB"}, "max_memory_semantics": "configured memory ceiling/policy recorded for provenance; explicit device_map controls placement and qualification peak-memory measurements establish fit"},
+    }
+    if protocol != expected:
+        raise C2Error("C2 protocol differs from the frozen C1/Phase-B/capture/backend contract")
+    return protocol
+
+
+def verify_c2_runtime_manifest() -> tuple[dict[str, str], ...]:
+    """Verify C2's v2 closure without changing the immutable Phase-A/B verifier."""
+    try:
+        manifest = json.loads(C2_RUNTIME_MANIFEST.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise C2Error("cannot read C2 runtime manifest") from exc
+    expected_state = {
+        "phi_source_identities_selected": True,
+        "phi_source_identity_manifest_sha256": C1_MANIFEST_SHA256,
+        "phi_source_semantics_inspected": False,
+        "phi_model_weights_loaded": False,
+        "phi_model_outputs_observed": False,
+        "phi_qkv_captured": False,
+        "phi_quality_metrics_observed": False,
+        "schedule_optimized": False,
+    }
+    expected_routing = {
+        "status": "FROZEN_IN_PHASE_B",
+        "protocol_path": "configs/cascadekv_phi35_8k_phaseb_protocol.json",
+        "protocol_sha256": PROTOCOL_SHA256,
+        "runtime_manifest_path": "configs/cascadekv_phi35_8k_phaseb_runtime_manifest.json",
+        "runtime_manifest_sha256": RUNTIME_MANIFEST_SHA256,
+    }
+    if not isinstance(manifest, dict) or manifest.get("schema_version") != 2 or manifest.get("target_family") != "phi3" or manifest.get("target_model") != {"name": TARGET_MODEL, "revision": TARGET_REVISION} or manifest.get("scientific_state") != expected_state or manifest.get("routing_protocol") != expected_routing:
+        raise C2Error("C2 runtime manifest scientific state or routing binding differs")
+    entries = manifest.get("bound_files")
+    if not isinstance(entries, list) or not entries:
+        raise C2Error("C2 runtime manifest binds no files")
+    verified: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != {"path", "sha256"}:
+            raise C2Error("C2 runtime manifest has malformed bound-file entry")
+        relative, expected = entry["path"], entry["sha256"]
+        if not isinstance(relative, str) or not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected) or relative in seen or Path(relative).is_absolute() or ".." in Path(relative).parts:
+            raise C2Error("C2 runtime manifest has unsafe bound-file entry")
+        seen.add(relative)
+        path = ROOT / relative
+        if not path.is_file():
+            raise C2Error(f"C2 bound runtime source is absent: {relative}")
+        tracked = subprocess.run(["git", "-C", str(ROOT), "ls-files", "--error-unmatch", "--", relative], text=True, capture_output=True, check=False)
+        if tracked.returncode != 0:
+            raise C2Error(f"C2 bound runtime source is untracked: {relative}")
+        actual = sha256_path(path)
+        if actual != expected:
+            raise C2Error(f"C2 bound runtime source hash mismatch: {relative}")
+        verified.append({"path": relative, "sha256": actual})
+    return tuple(verified)
+
+
 def preflight(*, require_c2_tag: bool = True) -> dict[str, Any]:
     """Validate only repository-local closure; this never imports HF or data code."""
     if git_commit(C1_TAG) != C1_COMMIT:
@@ -114,10 +193,8 @@ def preflight(*, require_c2_tag: bool = True) -> dict[str, Any]:
         raise C2Error("HEAD is not the required C2-prep freeze tag commit")
     if sha256_path(C2_PROTOCOL_FILE) != C2_PROTOCOL_SHA256:
         raise C2Error("C2 protocol SHA256 differs")
-    try:
-        verify_runtime_manifest(C2_RUNTIME_MANIFEST, ROOT, require_tracked=True)
-    except RuntimeProvenanceError as exc:
-        raise C2Error(f"C2 runtime closure differs: {exc}") from exc
+    validate_c2_protocol()
+    verify_c2_runtime_manifest()
     for path, expected in IMMUTABLE_HASHES.items():
         if sha256_path(path) != expected:
             raise C2Error(f"immutable prior SHA256 differs: {path.name}")
@@ -127,6 +204,8 @@ def preflight(*, require_c2_tag: bool = True) -> dict[str, Any]:
         "c2_runtime_manifest_sha256": sha256_path(C2_RUNTIME_MANIFEST),
         "c1_tag": C1_TAG, "c1_commit": C1_COMMIT,
         "c1_manifest_sha256": C1_MANIFEST_SHA256, "selected_source_count": len(manifest["selected_sources"]),
+        "phase_b_protocol_sha256": PROTOCOL_SHA256,
+        "phase_b_runtime_manifest_sha256": RUNTIME_MANIFEST_SHA256,
         "next_untouched_frontiers": {"narrative": 16, "report": 19, "qa": 16},
         "artifact_payload_bytes": ARTIFACT_PAYLOAD_BYTES,
         "total_artifact_payload_bytes": TOTAL_ARTIFACT_PAYLOAD_BYTES,
@@ -261,6 +340,13 @@ def _load_pinned_model() -> Any:
 
 
 def qualification_backend_id(record: Mapping[str, Any]) -> str:
+    """Identity of execution backend only, not the complete scientific package.
+
+    It covers target/config, FP16/SDPA/no-cache/no-quantization execution,
+    CUDA and software versions, T4 identities/VRAM, resolved device map, and
+    the recorded max-memory policy.  The exact qualification JSON SHA binds
+    this backend to C1, Phase-B, C2 package, and capture-adapter provenance.
+    """
     bound = {key: record[key] for key in (
         "target", "model_config_sha256", "model_compute_dtype", "attention_implementation",
         "use_cache", "quantization", "cuda_version", "gpu_count", "gpu_names",
@@ -277,9 +363,13 @@ def qualify(output: Path) -> dict[str, Any]:
     try:
         config_sha = _config_sha(model)
         shape_proof: dict[str, Any] = {}
+        peak_cuda_memory_by_length: dict[str, list[dict[str, int]]] = {}
         for length in LENGTHS:
             ids = synthetic_input_ids(length, int(model.config.vocab_size)).to(_first_device(model))
-            torch.cuda.reset_peak_memory_stats()
+            # Reset both devices after model placement.  The ensuing peaks include
+            # resident weights plus this sequence's execution allocations only.
+            for device_index in range(2):
+                torch.cuda.reset_peak_memory_stats(device_index)
             if length == 8192:
                 captured = capture_five_layers_post_rope_qkv(model, ids)
                 for layer, triplet in captured.items():
@@ -290,13 +380,26 @@ def qualify(output: Path) -> dict[str, Any]:
             else:
                 with torch.inference_mode():
                     model(input_ids=ids, use_cache=False)
+            measurements = []
+            for device_index in range(2):
+                total = int(devices[device_index]["total_vram_bytes"])
+                allocated = int(torch.cuda.max_memory_allocated(device_index))
+                reserved = int(torch.cuda.max_memory_reserved(device_index))
+                measurement = {"index": device_index, "total_vram_bytes": total,
+                               "allocated_bytes": allocated, "reserved_bytes": reserved}
+                if reserved <= total:
+                    measurement["headroom_reserved_bytes"] = total - reserved
+                measurements.append(measurement)
+            peak_cuda_memory_by_length[str(length)] = measurements
             del ids
             gc.collect()
-        peak = [{"index": index, "allocated_bytes": int(torch.cuda.max_memory_allocated(index)), "reserved_bytes": int(torch.cuda.max_memory_reserved(index))} for index in range(2)]
         result: dict[str, Any] = {
             "schema_version": QUALIFICATION_SCHEMA, "qualification_result": "QUALIFIED",
-            "repo_capture_prep": {"tag": C2_PREP_TAG, "commit": git_commit("HEAD")},
+            "repo_capture_prep": {"tag": C2_PREP_TAG, "commit": git_commit(C2_PREP_TAG)},
+            "c2_protocol_binding": {"path": _relative(C2_PROTOCOL_FILE), "sha256": C2_PROTOCOL_SHA256},
+            "c2_runtime_manifest_binding": {"path": _relative(C2_RUNTIME_MANIFEST), "sha256": sha256_path(C2_RUNTIME_MANIFEST)},
             "c1_manifest_binding": {"sha256": C1_MANIFEST_SHA256, "tag": C1_TAG, "commit": C1_COMMIT},
+            "phase_b_freeze": {"protocol_path": "configs/cascadekv_phi35_8k_phaseb_protocol.json", "protocol_sha256": PROTOCOL_SHA256, "runtime_manifest_path": "configs/cascadekv_phi35_8k_phaseb_runtime_manifest.json", "runtime_manifest_sha256": RUNTIME_MANIFEST_SHA256},
             "target": {"model": TARGET_MODEL, "revision": TARGET_REVISION, "tokenizer_revision": TARGET_REVISION},
             "model_config_sha256": config_sha, "model_compute_dtype": "float16",
             "attention_implementation": "sdpa", "use_cache": False, "quantization": "none",
@@ -306,7 +409,9 @@ def qualify(output: Path) -> dict[str, Any]:
             "software_versions": _versions(), "resolved_hf_device_map": _resolved_map(model),
             "max_memory": {str(key): value for key, value in MAX_MEMORY.items()},
             "synthetic_sequence_lengths": list(LENGTHS), "capture_shape_proof_8192": shape_proof,
-            "peak_cuda_memory": peak, "capture_adapter": Phi3CaptureAdapter.identity,
+            "peak_memory_reset_device_indices": [0, 1],
+            "peak_cuda_memory_by_length": peak_cuda_memory_by_length,
+            "capture_adapter": Phi3CaptureAdapter.identity,
         }
         result["backend_id"] = qualification_backend_id(result)
         atomic_json(output, result)
@@ -318,12 +423,23 @@ def qualify(output: Path) -> dict[str, Any]:
             torch.cuda.empty_cache()
 
 
-def validate_qualification(record: Mapping[str, Any]) -> None:
-    required = {"schema_version", "qualification_result", "repo_capture_prep", "c1_manifest_binding", "target", "model_config_sha256", "model_compute_dtype", "attention_implementation", "use_cache", "quantization", "cuda_version", "gpu_count", "gpu_names", "vram_per_gpu_bytes", "software_versions", "resolved_hf_device_map", "max_memory", "synthetic_sequence_lengths", "capture_shape_proof_8192", "peak_cuda_memory", "capture_adapter", "backend_id"}
+def validate_qualification(record: Mapping[str, Any], *, expected_c2_commit: str | None = None) -> None:
+    required = {"schema_version", "qualification_result", "repo_capture_prep", "c2_protocol_binding", "c2_runtime_manifest_binding", "c1_manifest_binding", "phase_b_freeze", "target", "model_config_sha256", "model_compute_dtype", "attention_implementation", "use_cache", "quantization", "cuda_version", "gpu_count", "gpu_names", "vram_per_gpu_bytes", "software_versions", "resolved_hf_device_map", "max_memory", "synthetic_sequence_lengths", "capture_shape_proof_8192", "peak_memory_reset_device_indices", "peak_cuda_memory_by_length", "capture_adapter", "backend_id"}
     if not isinstance(record, Mapping) or set(record) != required:
         raise C2Error("qualification schema is incomplete or permits unbound data")
     if record["schema_version"] != QUALIFICATION_SCHEMA or record["qualification_result"] != "QUALIFIED":
         raise C2Error("qualification did not pass")
+    expected_commit = git_commit(C2_PREP_TAG) if expected_c2_commit is None else expected_c2_commit
+    if record["repo_capture_prep"] != {"tag": C2_PREP_TAG, "commit": expected_commit}:
+        raise C2Error("qualification C2-prep tag/commit differs")
+    if record["c2_protocol_binding"] != {"path": _relative(C2_PROTOCOL_FILE), "sha256": C2_PROTOCOL_SHA256}:
+        raise C2Error("qualification C2 protocol binding differs")
+    if record["c2_runtime_manifest_binding"] != {"path": _relative(C2_RUNTIME_MANIFEST), "sha256": sha256_path(C2_RUNTIME_MANIFEST)}:
+        raise C2Error("qualification C2 runtime-manifest binding differs")
+    if record["c1_manifest_binding"] != {"sha256": C1_MANIFEST_SHA256, "tag": C1_TAG, "commit": C1_COMMIT}:
+        raise C2Error("qualification C1 manifest binding differs")
+    if record["phase_b_freeze"] != {"protocol_path": "configs/cascadekv_phi35_8k_phaseb_protocol.json", "protocol_sha256": PROTOCOL_SHA256, "runtime_manifest_path": "configs/cascadekv_phi35_8k_phaseb_runtime_manifest.json", "runtime_manifest_sha256": RUNTIME_MANIFEST_SHA256}:
+        raise C2Error("qualification Phase-B binding differs")
     if record["target"] != {"model": TARGET_MODEL, "revision": TARGET_REVISION, "tokenizer_revision": TARGET_REVISION}:
         raise C2Error("qualification target differs")
     if record["model_compute_dtype"] != "float16" or record["attention_implementation"] != "sdpa" or record["use_cache"] is not False or record["quantization"] != "none":
@@ -332,6 +448,31 @@ def validate_qualification(record: Mapping[str, Any]) -> None:
         raise C2Error("qualification does not prove T4 x2")
     if record["synthetic_sequence_lengths"] != list(LENGTHS) or record["capture_adapter"] != Phi3CaptureAdapter.identity:
         raise C2Error("qualification synthetic/capture adapter contract differs")
+    if record["peak_memory_reset_device_indices"] != [0, 1]:
+        raise C2Error("qualification did not explicitly reset both GPU peak counters")
+    peaks = record["peak_cuda_memory_by_length"]
+    if not isinstance(peaks, Mapping) or set(peaks) != {str(length) for length in LENGTHS}:
+        raise C2Error("qualification peak memory is missing a synthetic sequence length")
+    for length in LENGTHS:
+        measurements = peaks[str(length)]
+        if not isinstance(measurements, list) or len(measurements) != 2:
+            raise C2Error("qualification peak memory does not measure both GPUs")
+        by_index = {item.get("index"): item for item in measurements if isinstance(item, Mapping)}
+        if set(by_index) != {0, 1}:
+            raise C2Error("qualification peak memory GPU indices differ")
+        for device_index, measurement in by_index.items():
+            expected_total = record["vram_per_gpu_bytes"][device_index]
+            required_measurement = {"index", "total_vram_bytes", "allocated_bytes", "reserved_bytes"}
+            allowed_measurement = required_measurement | {"headroom_reserved_bytes"}
+            if not required_measurement.issubset(measurement) or set(measurement) - allowed_measurement or measurement["total_vram_bytes"] != expected_total:
+                raise C2Error("qualification peak memory VRAM binding differs")
+            numeric = tuple(key for key in ("total_vram_bytes", "allocated_bytes", "reserved_bytes", "headroom_reserved_bytes") if key in measurement)
+            if any(isinstance(measurement[key], bool) or not isinstance(measurement[key], int) or measurement[key] < 0 for key in numeric):
+                raise C2Error("qualification peak memory values are invalid")
+            if measurement["reserved_bytes"] < measurement["allocated_bytes"]:
+                raise C2Error("qualification reserved peak is below allocated peak")
+            if measurement.get("headroom_reserved_bytes") != (expected_total - measurement["reserved_bytes"] if measurement["reserved_bytes"] <= expected_total else None):
+                raise C2Error("qualification reserved-memory headroom differs")
     if qualification_backend_id(record) != record["backend_id"]:
         raise C2Error("qualification backend identity SHA differs")
     if not isinstance(record["model_config_sha256"], str) or len(record["model_config_sha256"]) != 64:

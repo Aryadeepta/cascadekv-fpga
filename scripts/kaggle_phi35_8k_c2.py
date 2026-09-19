@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Portable Kaggle entrypoint; see ``python -m cascadekv.phi35_kaggle_c2 --help``."""
+"""Portable Kaggle entrypoint; see ``uv run python3 -m cascadekv.phi35_kaggle_c2 --help``."""
 from cascadekv.phi35_kaggle_c2 import main
 
 
