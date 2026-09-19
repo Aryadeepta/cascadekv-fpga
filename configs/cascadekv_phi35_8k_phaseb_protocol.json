@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "protocol_id": "cascadekv-phi35-8k-phaseb-protocol-freeze",
+  "protocol_state": "FROZEN-PRE-DATA",
+  "target_model": {
+    "name": "microsoft/Phi-3.5-mini-instruct",
+    "revision": "2fe192450127e6a83f7441aef6e3ca586c338b77",
+    "target_family": "phi3"
+  },
+  "geometry": {
+    "context_length": 8192,
+    "sampled_layers": [0, 8, 16, 24, 31],
+    "sampled_query_positions": [4095, 6143, 8191],
+    "q_heads": 32,
+    "kv_heads": 32,
+    "head_dimension": 96,
+    "kv_head_mapping": "kv_head = q_head",
+    "static_schedule_cells": 160,
+    "observations_per_source_per_method": 480,
+    "observations_per_method_three_sources": 1440
+  },
+  "prior_qwen_provenance": {
+    "protocol_tag": "cascadekv-v3-qwen3-1p7b-wide-vaware-dev-protocol-freeze",
+    "protocol_tag_object_sha": "b2700ad5f5db835bf54b61e01166b5688ed8f394",
+    "protocol_commit": "f0c5b5666ad089531fca68862c5be959088d49ef",
+    "config_path": "configs/cascadekv_v3.json",
+    "config_sha256": "5d364bc4e351061c243a9166c0a9ccdd68c7cefd74265e4135d937b323e6e505",
+    "manifest_path": "results/cascadekv_v3_qwen3_1p7b_wide_vaware_dev_manifest.json",
+    "manifest_sha256": "654596830b06bfc6e9740c5363273bcbc408b769fabd92a69ef80fb182a84fb9",
+    "sampled_layers": [0, 7, 14, 21, 27]
+  },
+  "routing_profiles": {
+    "phi35-8k-depth-transfer-qwen5-v1": {
+      "source_fraction": 0.05,
+      "depth_mapping": {"0": 0, "8": 7, "16": 14, "24": 21, "31": 27},
+      "lambdas": {"0": 0.25, "8": 1.5, "16": 0.5, "24": 1.5, "31": 0.25},
+      "reserve": {"schema": "cascadekv-reserve-v1", "context_behavior": "absolute_tokens", "sink": 16, "local": 64}
+    },
+    "phi35-8k-depth-transfer-qwen10-v1": {
+      "source_fraction": 0.1,
+      "depth_mapping": {"0": 0, "8": 7, "16": 14, "24": 21, "31": 27},
+      "lambdas": {"0": 1.0, "8": 1.0, "16": 1.0, "24": 0.75, "31": 0.25},
+      "reserve": {"schema": "cascadekv-reserve-v1", "context_behavior": "absolute_tokens", "sink": 32, "local": 128}
+    }
+  },
+  "actions": {
+    "A0": {"kind": "hierarchy", "candidate_fraction": 0.05, "routing_profile": "phi35-8k-depth-transfer-qwen5-v1"},
+    "A1": {"kind": "hierarchy", "candidate_fraction": 0.075, "routing_profile": "phi35-8k-depth-transfer-qwen5-v1"},
+    "A2": {"kind": "hierarchy", "candidate_fraction": 0.1, "routing_profile": "phi35-8k-depth-transfer-qwen5-v1"},
+    "A3": {"kind": "hierarchy", "candidate_fraction": 0.15, "routing_profile": "phi35-8k-depth-transfer-qwen5-v1"},
+    "A4": {"kind": "flat_q8k4", "candidate_fraction": 0.05, "routing_profile": null}
+  },
+  "baselines": ["dense_exact", "flat_q8k4_5", "flat_q8k4_10", "uniform_hierarchy_5", "uniform_hierarchy_10", "target_static_cascadekv"],
+  "uniform_hierarchy_10": {"candidate_fraction": 0.1, "routing_profile": "phi35-8k-depth-transfer-qwen10-v1"},
+  "quality_gates": {"min_mean_cosine": 0.985, "max_mean_relative_l2": 0.12, "comparative_relative_l2": "strictly_less_than_uniform_hierarchy_10", "diagnostics": ["cosine_p5", "relative_l2_p95", "relative_l2_worst"]},
+  "bandwidth": {
+    "units": "mean total K+V bytes",
+    "primary_gate": "strictly_less_than_fresh_validation_flat_q8k4_5",
+    "report": ["total_k_bytes", "selected_v_bytes", "total_kv_bytes", "fraction_dense_kv", "savings_vs_flat5", "savings_vs_uniform10"],
+    "targets": {"T0": 0.115, "T1": 0.13, "T2": 0.145, "T3": 0.16, "T4": 0.18, "T5": "highest_traffic_strictly_below_calibration_flat5"}
+  },
+  "optimizer": {
+    "version": "qwen-wide-vaware-integer-microbyte-dp-generalized-160-v1",
+    "scope": "calibration_only",
+    "objective": "minimize final attention-output relative-L2",
+    "initialization": "single zero-traffic zero-error zero-cosine base state",
+    "ordering": "sampled layer ascending, then KV head ascending, then A0,A1,A2,A3,A4",
+    "tie_breaking": "relative-L2 ascending, cosine descending, traffic ascending, lexical/base-5 action table ascending",
+    "action_change_rule": "one of exactly A0..A4 per cell; no iterative parameter mutation",
+    "stopping": "after all 160 cells; retain Pareto-pruned feasible DP states",
+    "budget_feasibility": "mean calibration K+V <= T0..T4; T5 calibration K+V < calibration flat5"
+  },
+  "source_specs": {
+    "narrative": {"dataset": "emozilla/pg19", "config": null, "split": "train", "revision": "c021754c8e01c5b1cc83a1f549c1f97fbbb756b8", "text_field": "text", "first_permitted_index": 13},
+    "report": {"dataset": "ccdv/govreport-summarization", "config": null, "split": "train", "revision": "4e21184e01ae8017e2c036e180fe5e541fef60a0", "text_field": "report", "first_permitted_index": 14, "historically_ineligible": [4]},
+    "qa": {"dataset": "zai-org/LongBench", "config": "narrativeqa", "split": "test", "revision": "75b6d5bffbcaa2cf4da85a9fa99939b13ee5b00b", "text_field": "context", "first_permitted_index": 13}
+  },
+  "source_selection": {"identity": "dataset_index", "tokenizer_revision": "2fe192450127e6a83f7441aef6e3ca586c338b77", "minimum_bounded_tokenizer_length": 8192, "allowed_inspection": ["dataset/config/split/revision", "integer dataset index", "field existence", "Python string type", "character count", "bounded tokenizer eligibility predicate"], "order": "inspect ascending eligible candidates until exactly two calibration and one validation identities are accepted; stop immediately after the third acceptance; every actually inspected mechanically ineligible identity becomes permanently unavailable with proof"},
+  "development_inventory": {"calibration": {"narrative": 2, "report": 2, "qa": 2}, "validation": {"narrative": 1, "report": 1, "qa": 1}},
+  "firewall": {"calibration": ["per-action measurements", "schedule optimization", "traffic target feasibility", "select static action table"], "validation_only": ["one-shot candidate evaluation", "fixed-target pass/fail", "first passing target T0..T5"], "validation_forbidden": ["modify action cells", "lambda tuning", "reserve tuning", "target change", "architecture change", "source inventory change", "optimizer change"]},
+  "classifications": ["PHI35-8K-DEVELOPMENT-INVALID", "PHI35-8K-STATIC-NOT-PROMISING", "PHI35-8K-OUTPUT-GATE-NOT-PROMISING", "PHI35-8K-BANDWIDTH-NOT-PROMISING", "PHI35-8K-STATIC-PROMISING"]
+}

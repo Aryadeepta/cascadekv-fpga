@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "purpose": "Prospective, data-free Phi-3.5 8K Phase-B protocol/runtime closure.",
+  "phase_a": {
+    "tag": "cascadekv-phi35-8k-phasea-freeze",
+    "commit": "08084f65628b7204603f068e68bff074599a116b",
+    "runtime_manifest_sha256": "0b03521026350c45a3e2e37d4b9b1cfcb79a36f0988ab9efbf68cb00a3fa141e"
+  },
+  "target_model": {"name": "microsoft/Phi-3.5-mini-instruct", "revision": "2fe192450127e6a83f7441aef6e3ca586c338b77", "target_family": "phi3"},
+  "bound_files": [
+    {"path": "configs/cascadekv_phi35_phasea_runtime_manifest.json", "sha256": "0b03521026350c45a3e2e37d4b9b1cfcb79a36f0988ab9efbf68cb00a3fa141e"},
+    {"path": "configs/cascadekv_phi35_8k_phaseb_protocol.json", "sha256": "0e3a2e7b51e01c64dca292c7dd667ed9899c5bacc08e470e2b19e12433363c8b"},
+    {"path": "cascadekv/phi35_phaseb.py", "sha256": "0f1b858983503a4e56434de608b4f91e31eb2478c9522cf91ec062d206c3d8b1"},
+    {"path": "cascadekv/runtime_provenance.py", "sha256": "9b0d025e55d1d12d373eed570fafc90111251f2e6ac317834cb840fd5b3d70fa"},
+    {"path": "cascadekv/model_agnostic.py", "sha256": "24e113274c1f5ad4e163f575f9a0f7c53a73b33028a930151863018658391da5"},
+    {"path": "cascadekv/evaluation_core.py", "sha256": "a736298e657577cae44466e461270e91aedfce2e44626506587e7ea82409406a"},
+    {"path": "cascadekv/adaptive_lifting.py", "sha256": "ad47c76449840a19932ade1d1f60c730f4e270dab379159ca12234b1088b4919"},
+    {"path": "cascadekv/quantize.py", "sha256": "49dfbc10a02ecf11ad4fa6956976aab49f5177a4ef757a61e5e0fc918e81f059"},
+    {"path": "configs/cascadekv_v3.json", "sha256": "5d364bc4e351061c243a9166c0a9ccdd68c7cefd74265e4135d937b323e6e505"},
+    {"path": "results/cascadekv_v3_qwen3_1p7b_wide_vaware_dev_manifest.json", "sha256": "654596830b06bfc6e9740c5363273bcbc408b769fabd92a69ef80fb182a84fb9"},
+    {"path": "pyproject.toml", "sha256": "a6b0dca47df4790b897410892da143ce6f7cb485640ccabc79d69ca221b2d41a"},
+    {"path": "uv.lock", "sha256": "bd9858de274b586ed5f24ae38f279f684549741fc8f0fbbdc26b00a3dd897296"}
+  ]
+}
