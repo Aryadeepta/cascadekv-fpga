@@ -171,6 +171,79 @@ def test_qa14_forbidden_and_development_inventory_is_nine_sources(tmp_path):
     with pytest.raises(c4.C4Error): c4._validate_development_manifest(payload)
 
 
+def _canonical_corrected_manifest():
+    sources = []
+    for family in c4.FAMILIES:
+        for position, index in enumerate(c4.DEVELOPMENT[family]):
+            digest = c4.QA13_SHA if (family, index) == ("qa", 13) else c4.QA15_SHA if (family, index) == ("qa", 15) else h(f"{family}-{index}")
+            eligibility = {"field_exists": True, "is_python_string": True, "character_count": 8192 + index, "bounded_frozen_tokenizer_length": 8192, "at_least_8192": True}
+            proof = {"mechanical_eligibility": eligibility, "input_ids_length": 8192, "input_ids_sha256": digest}
+            sources.append({"family": family, **{key: c4.SOURCE_SPECS[family][key] for key in ("dataset", "config", "split", "revision", "field")}, "identity_kind": "dataset_index", "dataset_index": index, "role": c4.ROLE_ORDER[position], "input_ids_sha256": digest, "proof": proof, "reproof": copy.deepcopy(proof)})
+    qa13 = next(item for item in sources if item["family"] == "qa" and item["dataset_index"] == 13)
+    return {
+        "schema_version": "cascadekv-phi35-8k-dev-sources-v2",
+        "purpose": "C1 source-identity amendment: exact model-input deduplication only; no quality evaluation",
+        "amendment_reason": "C1 unique dataset indices did not ensure unique exact 8192-token model inputs",
+        "base_c1_freeze": {"tag": "cascadekv-phi35-8k-sources-freeze", "commit": "667900a5307fe231565033a774d7788942fb869d", "manifest_sha256": "af8e805bad5c85a1f9d6ae5571b378e4df46fdb1de778a5ec7b5b68b13dc4a8e"},
+        "phase_b_freeze": {"tag": "cascadekv-phi35-8k-phaseb-protocol-freeze", "commit": "d94cff8e1e11048ff3d8edc9fb1c605dfe422d6e", "protocol_sha256": "0e3a2e7b51e01c64dca292c7dd667ed9899c5bacc08e470e2b19e12433363c8b", "runtime_manifest_sha256": "e4e10f7659180471eb791eeafa97e8f525b6c14a3ff311798349c07438ec7c92"},
+        "c2_v2_freeze": {"tag": "cascadekv-phi35-8k-kaggle-c2-prep-v2", "commit": "fa54b581ee5ee581dd51b8085db8b5233467450a", "protocol_sha256": "315453e8446e8f41611fc23544a4a5093da13a7dba344dfc66a840eebf17857d", "runtime_manifest_sha256": "a5a96915f8cab588e5d1dd6af15855d4d090366f94282022bff7bc1b856957fd"},
+        "amendment_freeze": {"tag": c4.SOURCE_AMENDMENT["tag"], "commit": c4.SOURCE_AMENDMENT["commit"], "amendment_protocol_sha256": c4.SOURCE_AMENDMENT["protocol_sha256"], "amendment_runtime_manifest_sha256": c4.SOURCE_AMENDMENT["runtime_manifest_sha256"]},
+        "target": {"model": c4.MODEL, "model_revision": c4.REVISION, "tokenizer_revision": c4.REVISION},
+        "tokenization_contract": {"add_special_tokens": True, "truncation": True, "max_length": 8192, "required_input_ids_length": 8192, "canonicalization": "CPU contiguous int64 bytes"},
+        "identity_kind": "dataset_index", "uniqueness_kind": "input_ids_sha256", "source_text_stored": False, "source_specs": copy.deepcopy(c4.SOURCE_SPECS), "selected_sources": sources,
+        "rejected_sources": {"narrative": [], "report": [], "qa": [{"dataset_index": 14, "rejection_reason": "duplicate_input", "duplicate_of_dataset_index": 13, "input_ids_sha256": c4.QA13_SHA, "proof": copy.deepcopy(qa13["proof"])}]},
+        "last_inspected_index": {family: c4.DEVELOPMENT[family][-1] for family in c4.FAMILIES},
+        "unavailable_inventory": {family: {"base_c1_unavailable_indices": c4.BASE_UNAVAILABLE[family], "amendment_inspected_indices": list(c4.DEVELOPMENT[family]) if family != "qa" else [13, 14, 15, 16], "indices": list(range(16)) if family == "narrative" else list(range(19)) if family == "report" else list(range(17)), "next_untouched_index": c4.DEVELOPMENT[family][-1] + 1} for family in c4.FAMILIES},
+        "reproof_status": {"all_selected_sources_equal": True, "selected_source_count": 9, "global_input_ids_sha256_unique": True},
+    }
+
+
+def test_c4_local_corrected_manifest_validator_is_cross_tag_safe_and_fail_closed(monkeypatch, tmp_path):
+    payload = _canonical_corrected_manifest()
+    commits = {c4.C3["tag"]: c4.C3["commit"], c4.SOURCE_AMENDMENT["tag"]: c4.SOURCE_AMENDMENT["commit"], c4.C4_TAG: "c4-v2-commit", "HEAD": "c4-v2-commit"}
+    monkeypatch.setattr(c4, "_git_commit", lambda ref: commits[ref])
+    monkeypatch.setattr(c4, "verify_runtime_closure", lambda **_kwargs: ())
+    assert c4.preflight()["local_only"] is True
+    assert commits[c4.SOURCE_AMENDMENT["tag"]] != commits["HEAD"]
+    validated = c4._validate_development_manifest(payload)
+    assert [item["role"] for item in validated] == ["development"] * 9
+    assert all(item["canonical_role"] in c4.ROLE_ORDER for item in validated)
+    for mutation in (
+        lambda value: value["amendment_freeze"].update(tag="wrong-amendment-tag"),
+        lambda value: value["amendment_freeze"].update(commit="0" * 40),
+        lambda value: value["amendment_freeze"].update(amendment_protocol_sha256="0" * 64),
+        lambda value: value["amendment_freeze"].update(amendment_runtime_manifest_sha256="0" * 64),
+        lambda value: value["selected_sources"].__setitem__(6, {**value["selected_sources"][6], "dataset_index": 14}),
+        lambda value: value["rejected_sources"].update(qa=[]),
+        lambda value: value["rejected_sources"]["qa"][0].update(duplicate_of_dataset_index=15),
+        lambda value: value["selected_sources"][1].update(input_ids_sha256=value["selected_sources"][0]["input_ids_sha256"]),
+        lambda value: value["selected_sources"][0].update(reproof={}),
+        lambda value: value["unavailable_inventory"]["qa"].update(next_untouched_index=18),
+        lambda value: value["last_inspected_index"].update(qa=17),
+    ):
+        broken = copy.deepcopy(payload); mutation(broken)
+        with pytest.raises(c4.C4Error): c4._validate_development_manifest(broken)
+    source = tmp_path / "corrected.json"; source.write_text(json.dumps(payload))
+    real_sha = c4.sha256_path
+    monkeypatch.setattr(c4, "sha256_path", lambda path: "0" * 64 if path == source else real_sha(path))
+    with pytest.raises(c4.C4Error, match="historical SHA"):
+        c4._validate_development_manifest(payload, source)
+
+
+def test_capture_development_reaches_capture_layer_under_c4_v2_head(monkeypatch, tmp_path):
+    payload, source = _canonical_corrected_manifest(), tmp_path / "corrected.json"
+    source.write_text(json.dumps(payload))
+    real_sha = c4.sha256_path
+    monkeypatch.setattr(c4, "preflight", lambda: {"local_only": True})
+    monkeypatch.setattr(c4, "sha256_path", lambda path: c4.SOURCE_SHA if path == source else real_sha(path))
+    reached = {}
+    monkeypatch.setattr(c4, "_capture_sources", lambda **kwargs: reached.update(kwargs) or {"capture": "reached"})
+    result = c4.capture_development(development_source_manifest=source, output=tmp_path / "capture", qualification=tmp_path / "qualification.json")
+    assert result == {"capture": "reached"}
+    assert len(reached["sources"]) == 9
+    assert reached["kind"] == "development"
+
+
 def _capture_manifest(kind: str, holdout=None, *, holdout_sha=None, development_sha=None, schedule_sha=None):
     ids = c4._expected_tensor_ids(kind, holdout)
     records = []
@@ -248,20 +321,20 @@ def test_preflight_remains_local_and_progress_is_stderr(monkeypatch):
     assert stderr.getvalue() == "C4: one layer\n"
 
 
-def test_runtime_closure_rejects_mutated_source_amendment_validator(monkeypatch, tmp_path):
+def test_runtime_closure_binds_source_amendment_provenance_files(monkeypatch, tmp_path):
     root, protocol, runtime = tmp_path / "repo", tmp_path / "repo/configs/protocol.json", tmp_path / "repo/configs/runtime.json"
-    validator = root / "cascadekv/phi35_8k_source_amendment.py"
+    validator = root / "configs/cascadekv_phi35_8k_source_amendment_protocol.json"
     validator.parent.mkdir(parents=True); protocol.parent.mkdir(exist_ok=True)
     protocol.write_text("{}")
     validator.write_text("validator-v1\n")
-    runtime.write_text(json.dumps({"schema_version": 1, "purpose": "test", "protocol": {"path": "configs/protocol.json", "sha256": c4.sha256_path(protocol)}, "bound_files": [{"path": "cascadekv/phi35_8k_source_amendment.py", "sha256": c4.sha256_path(validator)}]}))
+    runtime.write_text(json.dumps({"schema_version": 1, "purpose": "test", "protocol": {"path": "configs/protocol.json", "sha256": c4.sha256_path(protocol)}, "bound_files": [{"path": "configs/cascadekv_phi35_8k_source_amendment_protocol.json", "sha256": c4.sha256_path(validator)}]}))
     monkeypatch.setattr(c4, "ROOT", root)
     monkeypatch.setattr(c4, "PROTOCOL", protocol)
     monkeypatch.setattr(c4, "RUNTIME", runtime)
     monkeypatch.setattr(c4, "_tracked", lambda _relative: True)
-    assert c4.verify_runtime_closure() == ({"path": "cascadekv/phi35_8k_source_amendment.py", "sha256": c4.sha256_path(validator)},)
+    assert c4.verify_runtime_closure() == ({"path": "configs/cascadekv_phi35_8k_source_amendment_protocol.json", "sha256": c4.sha256_path(validator)},)
     validator.write_text("validator-v2\n")
-    with pytest.raises(c4.C4Error, match="runtime closure mismatch: cascadekv/phi35_8k_source_amendment.py"):
+    with pytest.raises(c4.C4Error, match="runtime closure mismatch: configs/cascadekv_phi35_8k_source_amendment_protocol.json"):
         c4.verify_runtime_closure()
 
 
@@ -273,7 +346,9 @@ def test_strict_preflight_requires_the_final_c4_tag():
 def test_final_preflight_defaults_to_the_c4_tag_and_tracking_gates(monkeypatch):
     calls = []
     def git_commit(ref):
-        return c4.C3["commit"] if ref == c4.C3["tag"] else "c4-head"
+        if ref == c4.C3["tag"]: return c4.C3["commit"]
+        if ref == c4.SOURCE_AMENDMENT["tag"]: return c4.SOURCE_AMENDMENT["commit"]
+        return "c4-head"
     monkeypatch.setattr(c4, "_git_commit", git_commit)
     monkeypatch.setattr(c4, "verify_runtime_closure", lambda *, require_tracked: calls.append(require_tracked) or ())
     assert c4.preflight()["local_only"] is True

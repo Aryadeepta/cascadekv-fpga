@@ -22,10 +22,11 @@ from typing import Any, Iterable, Mapping
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = ROOT / "configs/cascadekv_phi35_8k_c4_protocol.json"
 RUNTIME = ROOT / "configs/cascadekv_phi35_8k_c4_runtime_manifest.json"
-C4_TAG = "cascadekv-phi35-8k-c4-prep-v1"
+C4_TAG = "cascadekv-phi35-8k-c4-prep-v2"
 C3 = {"tag": "cascadekv-phi35-8k-c3-prep-v1", "commit": "80e4a3a09dbdd3f506a617c0a0607077e20926c8", "protocol_sha256": "ec16166a0adb88dff4e8739a78ed3a42896dba2ded2f94868ec5d7f5a1a4089e", "runtime_sha256": "2e579784bcd29d7e393b236acb7958596d7d9bc86f43737da4bf61f1d290c7ee"}
 C3_RESULTS = {"calibration_result_sha256": "a2a48a677f6da7bf7c887a51b12ab9f73588fbca70314c485854ce05495c8f34", "validation_result_sha256": "175d7156a5969f68b35fa4d69919a85a08de2c389a91f21ff5a8ce255a3fefb2"}
 SOURCE_SHA = "31f1d14d4b33b6e5b6a48d34e294f0effbab2eeadf6c4d4eabfabe16ae879478"
+SOURCE_AMENDMENT = {"tag": "cascadekv-phi35-8k-source-dedup-amendment-prep-v1", "commit": "a26c76de596d6f0074556ae630679ffca0021e69", "protocol_sha256": "f43b2311d0decf2a579bf886848572bf53d58ab98e058b1da1be5a2912b85e8e", "runtime_manifest_sha256": "d35817df8a7c8a7a48539cac252344dbe4f94cf97b9a3a50aa307e88a3640edf"}
 QUALIFICATION_SHA = "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e"
 BACKEND_ID = "184109f4e8edec3c34455bd86a787e7838bef2eb75424cf0a4f57a183f313a95"
 MODEL, REVISION = "microsoft/Phi-3.5-mini-instruct", "2fe192450127e6a83f7441aef6e3ca586c338b77"
@@ -33,6 +34,15 @@ LAYERS, POSITIONS, HEADS, SHAPE = (0, 8, 16, 24, 31), (4095, 6143, 8191), tuple(
 FAMILIES = ("narrative", "report", "qa")
 DEVELOPMENT = {"narrative": (13, 14, 15), "report": (16, 17, 18), "qa": (13, 15, 16)}
 HOLDOUT_STARTS = {"narrative": 16, "report": 19, "qa": 17}
+SOURCE_SPECS = {
+    "narrative": {"dataset": "emozilla/pg19", "config": None, "split": "train", "revision": "c021754c8e01c5b1cc83a1f549c1f97fbbb756b8", "field": "text", "first_permitted_index": 13},
+    "report": {"dataset": "ccdv/govreport-summarization", "config": None, "split": "train", "revision": "4e21184e01ae8017e2c036e180fe5e541fef60a0", "field": "report", "first_permitted_index": 14},
+    "qa": {"dataset": "zai-org/LongBench", "config": "narrativeqa", "split": "test", "revision": "75b6d5bffbcaa2cf4da85a9fa99939b13ee5b00b", "field": "context", "first_permitted_index": 13},
+}
+BASE_UNAVAILABLE = {"narrative": list(range(16)), "report": list(range(19)), "qa": list(range(16))}
+ROLE_ORDER = ("calibration_1", "calibration_2", "validation")
+QA13_SHA = "6efe85ed32e8f8e28ba946fa301f65bb7559f7ed596da3f62a519833ce3a80a4"
+QA15_SHA = "29e61e009d96dc7e70261a07b197aaee190073884aaf8a8e1a53d4c1265b62b7"
 ACTIONS, TARGETS = ("A0", "A1", "A2", "A3", "A4", "A5", "A6"), ("T0", "T1", "T2", "T3", "T4", "T5")
 BASELINES = ("dense", "flat5", "flat10", "uniform5", "uniform10")
 SCHEDULE_FIELDS = ("feasible", "target_mean_kv_bytes", "strict", "integer_microbyte_cap", "integer_microbytes_used", "table")
@@ -144,13 +154,14 @@ def _protocol_actions() -> dict[str, dict[str, Any]]:
 
 def validate_protocol(payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
     p = dict(_json(PROTOCOL) if payload is None else payload)
-    required = {"schema_version", "c4_freeze", "c3_freeze", "c3_observed_no_pass", "corrected_development_sources", "c2_qualification", "geometry", "methods", "targets", "quality_gates", "optimizer", "holdout_selection", "capture", "firewall", "scientific_state"}
+    required = {"schema_version", "c4_freeze", "c3_freeze", "c3_observed_no_pass", "corrected_development_sources", "source_amendment_freeze", "c2_qualification", "geometry", "methods", "targets", "quality_gates", "optimizer", "holdout_selection", "capture", "firewall", "scientific_state"}
     if set(p) != required or p["schema_version"] != "cascadekv-phi35-8k-c4-protocol-v1": raise C4Error("C4 protocol schema differs")
     if p["c4_freeze"] != {"tag": C4_TAG}: raise C4Error("C4 freeze tag binding differs")
     if p["c3_freeze"] != C3 or p["c3_observed_no_pass"].get("calibration_result_sha256") != C3_RESULTS["calibration_result_sha256"] or p["c3_observed_no_pass"].get("validation_result_sha256") != C3_RESULTS["validation_result_sha256"]: raise C4Error("C3 frozen no-pass provenance differs")
     no_pass = p["c3_observed_no_pass"]
     if any(no_pass.get(key) != value for key, value in {"first_passing_target": None, "optimizer_rerun": False, "schedule_unchanged": True, "opened_calibration_tensors_during_validation": 0, "opened_validation_tensors": 15, "all_targets_feasible": True, "all_targets_lower_relative_l2_than_uniform10": True, "all_targets_lower_modeled_kv_than_flat5": True, "absolute_gates_passed": False}.items()): raise C4Error("C3 must be recorded as a no-pass")
     if p["corrected_development_sources"] != {"manifest_sha256": SOURCE_SHA, "identities": {family: list(DEVELOPMENT[family]) for family in FAMILIES}, "forbidden": ["qa:14"]}: raise C4Error("corrected nine-source C4 development inventory differs")
+    if p["source_amendment_freeze"] != SOURCE_AMENDMENT: raise C4Error("source-amendment freeze binding differs")
     if p["c2_qualification"] != {"qualification_sha256": QUALIFICATION_SHA, "backend_id": BACKEND_ID, "target_model": MODEL, "target_revision": REVISION}: raise C4Error("C2 qualification/backend binding differs")
     if p["geometry"] != {"context_length": 8192, "layers": list(LAYERS), "query_positions": list(POSITIONS), "heads": 32, "head_dim": 96, "schedule_cells": 160, "observations_per_source_per_method": 480, "development_observations_per_method": 4320, "holdout_observations_per_method": 1440}: raise C4Error("C4 geometry differs")
     methods = p["methods"]
@@ -189,6 +200,8 @@ def preflight(*, require_c4_tag: bool = True, require_c4_tracked: bool = True) -
     """Fully local: no model, tokenizer, datasets, tensor payloads, or network."""
     if _git_commit(C3["tag"]) != C3["commit"]: raise C4Error("C3 freeze tag differs")
     if sha256_path(ROOT / "configs/cascadekv_phi35_8k_c3_protocol.json") != C3["protocol_sha256"] or sha256_path(ROOT / "configs/cascadekv_phi35_8k_c3_runtime_manifest.json") != C3["runtime_sha256"]: raise C4Error("C3 protocol/runtime freeze differs")
+    if _git_commit(SOURCE_AMENDMENT["tag"]) != SOURCE_AMENDMENT["commit"]: raise C4Error("source-amendment freeze tag differs")
+    if sha256_path(ROOT / "configs/cascadekv_phi35_8k_source_amendment_protocol.json") != SOURCE_AMENDMENT["protocol_sha256"] or sha256_path(ROOT / "configs/cascadekv_phi35_8k_source_amendment_runtime_manifest.json") != SOURCE_AMENDMENT["runtime_manifest_sha256"]: raise C4Error("source-amendment protocol/runtime freeze differs")
     if require_c4_tag:
         try:
             c4_tag_commit = _git_commit(C4_TAG)
@@ -215,26 +228,60 @@ def _source_identity(source: Mapping[str, Any], role: str) -> str:
 
 
 def _validate_development_manifest(payload: Mapping[str, Any], path: Path | None = None) -> list[dict[str, Any]]:
+    """Validate the frozen corrected-source content without another phase's HEAD gate.
+
+    This is intentionally a C4-local, text-free validation surface.  It binds
+    the amendment as immutable historical provenance, but never imports its
+    validator or asks the amendment tag to equal the C4 checkout's HEAD.
+    """
     if path is not None and sha256_path(path) != SOURCE_SHA: raise C4Error("development source manifest historical SHA differs")
-    # Reuse the frozen amendment's complete text-free schema validator.  C4
-    # must not turn its selected-input proof into a weaker, parallel surface.
-    try:
-        from cascadekv import phi35_8k_source_amendment as amendment
-        amendment.validate_manifest(payload)
-    except Exception as exc:
-        raise C4Error("canonical corrected development source manifest differs") from exc
     _no_raw_text(payload)
+    required = {"schema_version", "purpose", "amendment_reason", "base_c1_freeze", "phase_b_freeze", "c2_v2_freeze", "amendment_freeze", "target", "tokenization_contract", "identity_kind", "uniqueness_kind", "source_text_stored", "source_specs", "selected_sources", "rejected_sources", "last_inspected_index", "unavailable_inventory", "reproof_status"}
+    if not isinstance(payload, Mapping) or set(payload) != required or payload.get("schema_version") != "cascadekv-phi35-8k-dev-sources-v2": raise C4Error("canonical corrected development manifest schema differs")
+    if payload.get("purpose") != "C1 source-identity amendment: exact model-input deduplication only; no quality evaluation" or payload.get("amendment_reason") != "C1 unique dataset indices did not ensure unique exact 8192-token model inputs": raise C4Error("canonical corrected development manifest purpose differs")
+    if payload.get("base_c1_freeze") != {"tag": "cascadekv-phi35-8k-sources-freeze", "commit": "667900a5307fe231565033a774d7788942fb869d", "manifest_sha256": "af8e805bad5c85a1f9d6ae5571b378e4df46fdb1de778a5ec7b5b68b13dc4a8e"}: raise C4Error("canonical corrected development C1 binding differs")
+    if payload.get("phase_b_freeze") != {"tag": "cascadekv-phi35-8k-phaseb-protocol-freeze", "commit": "d94cff8e1e11048ff3d8edc9fb1c605dfe422d6e", "protocol_sha256": "0e3a2e7b51e01c64dca292c7dd667ed9899c5bacc08e470e2b19e12433363c8b", "runtime_manifest_sha256": "e4e10f7659180471eb791eeafa97e8f525b6c14a3ff311798349c07438ec7c92"}: raise C4Error("canonical corrected development Phase-B binding differs")
+    if payload.get("c2_v2_freeze") != {"tag": "cascadekv-phi35-8k-kaggle-c2-prep-v2", "commit": "fa54b581ee5ee581dd51b8085db8b5233467450a", "protocol_sha256": "315453e8446e8f41611fc23544a4a5093da13a7dba344dfc66a840eebf17857d", "runtime_manifest_sha256": "a5a96915f8cab588e5d1dd6af15855d4d090366f94282022bff7bc1b856957fd"}: raise C4Error("canonical corrected development C2-v2 binding differs")
+    if payload.get("amendment_freeze") != {"tag": SOURCE_AMENDMENT["tag"], "commit": SOURCE_AMENDMENT["commit"], "amendment_protocol_sha256": SOURCE_AMENDMENT["protocol_sha256"], "amendment_runtime_manifest_sha256": SOURCE_AMENDMENT["runtime_manifest_sha256"]}: raise C4Error("canonical corrected development source-amendment binding differs")
+    if payload.get("target") != {"model": MODEL, "model_revision": REVISION, "tokenizer_revision": REVISION}: raise C4Error("canonical corrected development target binding differs")
+    if payload.get("tokenization_contract") != {"add_special_tokens": True, "truncation": True, "max_length": 8192, "required_input_ids_length": 8192, "canonicalization": "CPU contiguous int64 bytes"}: raise C4Error("canonical corrected development tokenization contract differs")
+    if payload.get("identity_kind") != "dataset_index" or payload.get("uniqueness_kind") != "input_ids_sha256" or payload.get("source_text_stored") is not False or payload.get("source_specs") != SOURCE_SPECS: raise C4Error("canonical corrected development identity/specification differs")
     sources = payload.get("selected_sources")
     if not isinstance(sources, list) or len(sources) != 9: raise C4Error("C4 development requires exactly nine sources")
-    out = []
+    source_keys = {"family", "dataset", "config", "split", "revision", "field", "identity_kind", "dataset_index", "role", "input_ids_sha256", "proof", "reproof"}
+    proof_keys = {"mechanical_eligibility", "input_ids_length", "input_ids_sha256"}
+    eligibility_keys = {"field_exists", "is_python_string", "character_count", "bounded_frozen_tokenizer_length", "at_least_8192"}
+    out, hashes = [], set()
     for family in FAMILIES:
         rows = [x for x in sources if isinstance(x, Mapping) and x.get("family") == family]
-        if [x.get("dataset_index") for x in rows] != list(DEVELOPMENT[family]): raise C4Error("C4 corrected development identities differ")
+        if len(rows) != 3 or [x.get("dataset_index") for x in rows] != list(DEVELOPMENT[family]) or [x.get("role") for x in rows] != list(ROLE_ORDER): raise C4Error("C4 corrected development identities differ")
         for source in rows:
-            if source.get("dataset_index") == 14 and family == "qa": raise C4Error("QA14 is forbidden")
+            if set(source) != source_keys or any(source.get(key) != SOURCE_SPECS[family][key] for key in ("dataset", "config", "split", "revision", "field")) or source.get("identity_kind") != "dataset_index": raise C4Error("canonical corrected development source record differs")
+            digest, proof = source.get("input_ids_sha256"), source.get("proof")
+            if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest) or digest in hashes: raise C4Error("canonical corrected development selected input hashes differ")
+            if not isinstance(proof, Mapping) or set(proof) != proof_keys or source.get("reproof") != proof or proof.get("input_ids_length") != 8192 or proof.get("input_ids_sha256") != digest: raise C4Error("canonical corrected development proof/reproof differs")
+            eligibility = proof.get("mechanical_eligibility")
+            if not isinstance(eligibility, Mapping) or set(eligibility) != eligibility_keys or eligibility.get("field_exists") is not True or eligibility.get("is_python_string") is not True or eligibility.get("at_least_8192") is not True: raise C4Error("canonical corrected development mechanical eligibility differs")
+            if not isinstance(eligibility.get("character_count"), int) or isinstance(eligibility["character_count"], bool) or eligibility["character_count"] < 0 or eligibility.get("bounded_frozen_tokenizer_length") != 8192: raise C4Error("canonical corrected development mechanical proof differs")
+            hashes.add(digest)
             out.append(dict(source, canonical_role=source["role"], role="development"))
-    rejected = payload.get("rejected_sources", {}).get("qa", [])
-    if not any(x.get("dataset_index") == 14 for x in rejected if isinstance(x, Mapping)): raise C4Error("QA14 rejection proof missing")
+    if len(hashes) != 9: raise C4Error("canonical corrected development hash inventory differs")
+    qa = [source for source in sources if source["family"] == "qa"]
+    if qa[0]["input_ids_sha256"] != QA13_SHA or qa[1]["input_ids_sha256"] != QA15_SHA or qa[2]["dataset_index"] != 16: raise C4Error("QA 13/15/16 frozen input transition differs")
+    rejected = payload.get("rejected_sources")
+    if not isinstance(rejected, Mapping) or set(rejected) != set(FAMILIES) or rejected.get("narrative") != [] or rejected.get("report") != [] or not isinstance(rejected.get("qa"), list) or len(rejected["qa"]) != 1: raise C4Error("canonical corrected development rejection inventory differs")
+    qa14 = rejected["qa"][0]
+    if not isinstance(qa14, Mapping) or set(qa14) != {"dataset_index", "rejection_reason", "duplicate_of_dataset_index", "input_ids_sha256", "proof"} or qa14.get("dataset_index") != 14 or qa14.get("rejection_reason") != "duplicate_input" or qa14.get("duplicate_of_dataset_index") != 13 or qa14.get("input_ids_sha256") != QA13_SHA or qa14.get("proof") != qa[0]["proof"]: raise C4Error("QA14 rejection proof differs")
+    last = payload.get("last_inspected_index")
+    expected_last = {family: DEVELOPMENT[family][-1] for family in FAMILIES}
+    if last != expected_last: raise C4Error("canonical corrected development stop inventory differs")
+    inventories = payload.get("unavailable_inventory")
+    if not isinstance(inventories, Mapping) or set(inventories) != set(FAMILIES): raise C4Error("canonical corrected development unavailable inventory differs")
+    for family in FAMILIES:
+        inspected = list(DEVELOPMENT[family]) if family != "qa" else [13, 14, 15, 16]
+        expected_inventory = {"base_c1_unavailable_indices": BASE_UNAVAILABLE[family], "amendment_inspected_indices": inspected, "indices": sorted(set(BASE_UNAVAILABLE[family] + inspected)), "next_untouched_index": expected_last[family] + 1}
+        if inventories.get(family) != expected_inventory: raise C4Error("canonical corrected development unavailable inventory differs")
+    if payload.get("reproof_status") != {"all_selected_sources_equal": True, "selected_source_count": 9, "global_input_ids_sha256_unique": True}: raise C4Error("canonical corrected development reproof status differs")
     return out
 
 

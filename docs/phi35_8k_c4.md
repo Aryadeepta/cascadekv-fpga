@@ -15,7 +15,12 @@ five-action Phase-B optimizer.
 `preflight` is completely local and imports no model, tokenizer, dataset, or
 tensor stack. It verifies the C3 binding, the C4 runtime closure, and the
 final C4 tag/HEAD identity. The final tag is
-`cascadekv-phi35-8k-c4-prep-v1`.
+`cascadekv-phi35-8k-c4-prep-v2`.
+
+The corrected nine-source manifest is validated by a C4-local, text-free
+validator. C4 binds the frozen source-amendment tag, commit, protocol, and
+runtime manifest as historical provenance, verifies that tag resolves to its
+frozen commit, and never requires it to equal the C4 checkout HEAD.
 
 Before the final commit and tag exist, use the explicitly preparation-only
 Python validation path (for local checks and unit tests):
