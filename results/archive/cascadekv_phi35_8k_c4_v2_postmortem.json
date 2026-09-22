@@ -1,0 +1,250 @@
+{
+  "candidate_c5_hypothesis": "If evaluated later, add a small fixed set of hierarchy actions using already-frozen phi35-8k-depth-transfer-qwen10-v1 while retaining C4 candidate fractions; do not broaden the sweep or touch the protected frontier.",
+  "development_to_holdout": {
+    "T0": {
+      "holdout_minus_development_cosine": 0.0006992277499563437,
+      "holdout_minus_development_kv": -425.7203703703708,
+      "holdout_minus_development_relative_l2": 0.007074009386070806,
+      "relative_l2_percent_change": 4.012064510622038
+    },
+    "T1": {
+      "holdout_minus_development_cosine": 0.0009138705933259272,
+      "holdout_minus_development_kv": -446.37592592590954,
+      "holdout_minus_development_relative_l2": 0.00429077647403428,
+      "relative_l2_percent_change": 2.661501990354753
+    },
+    "T2": {
+      "holdout_minus_development_cosine": 0.0008169847264609675,
+      "holdout_minus_development_kv": -384.71481481485534,
+      "holdout_minus_development_relative_l2": 0.003496251084997265,
+      "relative_l2_percent_change": 2.3420135955210197
+    },
+    "T3": {
+      "holdout_minus_development_cosine": 0.0010938448934919576,
+      "holdout_minus_development_kv": -342.6296296296641,
+      "holdout_minus_development_relative_l2": 0.002596868971671884,
+      "relative_l2_percent_change": 1.854065725751064
+    },
+    "T4": {
+      "holdout_minus_development_cosine": 0.0010743377419809574,
+      "holdout_minus_development_kv": -273.9000000000233,
+      "holdout_minus_development_relative_l2": 0.0031107674997083445,
+      "relative_l2_percent_change": 2.391024461278768
+    },
+    "T5": {
+      "holdout_minus_development_cosine": 0.0014493606467214093,
+      "holdout_minus_development_kv": -251.79814814816928,
+      "holdout_minus_development_relative_l2": 0.0020655953628202356,
+      "relative_l2_percent_change": 1.7113972590757864
+    }
+  },
+  "evidence_basis": "Recovered from preserved Kaggle stdout; original result tar archive unavailable.",
+  "first_passing_target": null,
+  "gate_margins": {
+    "T0": {
+      "cosine_margin": -0.007946402399490293,
+      "flat5_traffic_margin": 214482.93333333335,
+      "mean_cosine": 0.9770535976005097,
+      "mean_modeled_kv": 270893.06666666665,
+      "mean_relative_l2": 0.1833924451276247,
+      "relative_l2_margin": -0.06339244512762471,
+      "uniform10_margin": 0.04404454947056441
+    },
+    "T1": {
+      "cosine_margin": -0.004725144768340739,
+      "flat5_traffic_margin": 179120.42777777778,
+      "mean_cosine": 0.9802748552316592,
+      "mean_modeled_kv": 306255.5722222222,
+      "mean_relative_l2": 0.16550713060730157,
+      "relative_l2_margin": -0.04550713060730158,
+      "uniform10_margin": 0.06192986399088754
+    },
+    "T2": {
+      "cosine_margin": -0.00284037685849603,
+      "flat5_traffic_margin": 143687.4888888889,
+      "mean_cosine": 0.982159623141504,
+      "mean_modeled_kv": 341688.5111111111,
+      "mean_relative_l2": 0.1527802301226788,
+      "relative_l2_margin": -0.032780230122678805,
+      "uniform10_margin": 0.07465676447551031
+    },
+    "T3": {
+      "cosine_margin": -0.0013215187999109368,
+      "flat5_traffic_margin": 108232.75555555557,
+      "mean_cosine": 0.983678481200089,
+      "mean_modeled_kv": 377143.2444444444,
+      "mean_relative_l2": 0.14266034868568944,
+      "relative_l2_margin": -0.022660348685689446,
+      "uniform10_margin": 0.08477664591249967
+    },
+    "T4": {
+      "cosine_margin": -0.0003672126328779779,
+      "flat5_traffic_margin": 60983.3277777778,
+      "mean_cosine": 0.984632787367122,
+      "mean_modeled_kv": 424392.6722222222,
+      "mean_relative_l2": 0.1332126359701233,
+      "relative_l2_margin": -0.013212635970123315,
+      "uniform10_margin": 0.0942243586280658
+    },
+    "T5": {
+      "cosine_margin": 0.0007685571846862693,
+      "flat5_traffic_margin": 379.2222222222481,
+      "mean_cosine": 0.9857685571846863,
+      "mean_modeled_kv": 484996.77777777775,
+      "mean_relative_l2": 0.12276202349288161,
+      "relative_l2_margin": -0.002762023492881613,
+      "uniform10_margin": 0.1046749711053075
+    }
+  },
+  "optimizer": {
+    "action_change_rule": "one of exactly A0..A6 per 160 layer/head cells; no iterative parameter mutation",
+    "budget_feasibility": "integer microbytes; T0..T4 <= development fraction and T5 < development flat5",
+    "objective": "summed_mean_final_attention_output_relative_l2",
+    "ordering": "sampled layer ascending, then head ascending, then A0,A1,A2,A3,A4,A5,A6",
+    "scope": "development_only",
+    "tie_breaking": "relative-L2 ascending, cosine descending, traffic ascending, lexical action table ascending",
+    "version": "c4-seven-action-integer-microbyte-dp-v1"
+  },
+  "optimizer_conclusion": "Exact optimum within the frozen finite A0-A6 action space at each stated traffic cap; not a global optimum over all CascadeKV policies. Re-running deterministically on unchanged development statistics cannot improve its development relative-L2 objective.",
+  "routing_profiles": {
+    "phi35-8k-depth-transfer-qwen10-v1": {
+      "depth_mapping": {
+        "0": 0,
+        "16": 14,
+        "24": 21,
+        "31": 27,
+        "8": 7
+      },
+      "lambdas": {
+        "0": 1.0,
+        "16": 1.0,
+        "24": 0.75,
+        "31": 0.25,
+        "8": 1.0
+      },
+      "reserve": {
+        "context_behavior": "absolute_tokens",
+        "local": 128,
+        "schema": "cascadekv-reserve-v1",
+        "sink": 32
+      },
+      "source_fraction": 0.1
+    },
+    "phi35-8k-depth-transfer-qwen5-v1": {
+      "depth_mapping": {
+        "0": 0,
+        "16": 14,
+        "24": 21,
+        "31": 27,
+        "8": 7
+      },
+      "lambdas": {
+        "0": 0.25,
+        "16": 0.5,
+        "24": 1.5,
+        "31": 0.25,
+        "8": 1.5
+      },
+      "reserve": {
+        "context_behavior": "absolute_tokens",
+        "local": 64,
+        "schema": "cascadekv-reserve-v1",
+        "sink": 16
+      },
+      "source_fraction": 0.05
+    }
+  },
+  "schema_version": "cascadekv-c4-v2-stdout-recovery-postmortem-v1",
+  "scientific_diagnosis": "Finite-action-space limitation is the leading explanation: the exact finite-space development optimum misses the absolute relative-L2 gate, while T5 holdout degradation is modest rather than catastrophic. Budget pressure also remains relevant because T5 is only 379.222 bytes below flat5 traffic.",
+  "stored_gate_table_verified": true,
+  "t5_development_layers": {
+    "0": {
+      "action_histogram": {
+        "A0": 1,
+        "A1": 2,
+        "A2": 1,
+        "A3": 1,
+        "A4": 0,
+        "A5": 2,
+        "A6": 25
+      },
+      "mean_cosine": 0.9392103000578504,
+      "mean_relative_l2": 0.3250309697233642,
+      "mean_total_kv_bytes": 509250.76851851854
+    },
+    "16": {
+      "action_histogram": {
+        "A0": 0,
+        "A1": 0,
+        "A2": 0,
+        "A3": 0,
+        "A4": 27,
+        "A5": 0,
+        "A6": 5
+      },
+      "mean_cosine": 0.995674212773641,
+      "mean_relative_l2": 0.06581590771141442,
+      "mean_total_kv_bytes": 498284.2037037037
+    },
+    "24": {
+      "action_histogram": {
+        "A0": 0,
+        "A1": 0,
+        "A2": 0,
+        "A3": 0,
+        "A4": 26,
+        "A5": 2,
+        "A6": 4
+      },
+      "mean_cosine": 0.9969336211129471,
+      "mean_relative_l2": 0.058465270290344505,
+      "mean_total_kv_bytes": 499627.60185185185
+    },
+    "31": {
+      "action_histogram": {
+        "A0": 0,
+        "A1": 0,
+        "A2": 2,
+        "A3": 0,
+        "A4": 29,
+        "A5": 0,
+        "A6": 1
+      },
+      "mean_cosine": 0.9944513467037015,
+      "mean_relative_l2": 0.08642970608557261,
+      "mean_total_kv_bytes": 474982.1203703704
+    },
+    "8": {
+      "action_histogram": {
+        "A0": 2,
+        "A1": 2,
+        "A2": 7,
+        "A3": 3,
+        "A4": 4,
+        "A5": 1,
+        "A6": 13
+      },
+      "mean_cosine": 0.9953265020416843,
+      "mean_relative_l2": 0.06774028683961111,
+      "mean_total_kv_bytes": 444098.18518518517
+    }
+  },
+  "t5_overall_action_histogram": {
+    "A0": 3,
+    "A1": 4,
+    "A2": 10,
+    "A3": 4,
+    "A4": 86,
+    "A5": 5,
+    "A6": 48
+  },
+  "t5_worst_layers_by_relative_l2": [
+    "0",
+    "31"
+  ],
+  "untouched_frontier": {
+    "narrative": 17,
+    "qa": 18,
+    "report": 20
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "members": {
+    "c4_protocol.json": {
+      "candidate_byte_count": 6074,
+      "candidate_sha256": "6e2f7c671d04f5dd650d71e62de23e8fff0697c32dfc837e2921535edfc59c1d",
+      "classification": "FROZEN_REPO_RECOVERED",
+      "expected_sha256": "6e2f7c671d04f5dd650d71e62de23e8fff0697c32dfc837e2921535edfc59c1d",
+      "extraction": {
+        "git_path": "configs/cascadekv_phi35_8k_c4_protocol.json",
+        "git_tag": "cascadekv-phi35-8k-c4-prep-v2"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/c4_protocol.json",
+      "verified_recovered_sha256": "6e2f7c671d04f5dd650d71e62de23e8fff0697c32dfc837e2921535edfc59c1d"
+    },
+    "c4_runtime_manifest.json": {
+      "candidate_byte_count": 3213,
+      "candidate_sha256": "76cd263efed206334b9de8e02c3355536893c565bdb20b12901567b8215bd589",
+      "classification": "FROZEN_REPO_RECOVERED",
+      "expected_sha256": "76cd263efed206334b9de8e02c3355536893c565bdb20b12901567b8215bd589",
+      "extraction": {
+        "git_path": "configs/cascadekv_phi35_8k_c4_runtime_manifest.json",
+        "git_tag": "cascadekv-phi35-8k-c4-prep-v2"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/c4_runtime_manifest.json",
+      "verified_recovered_sha256": "76cd263efed206334b9de8e02c3355536893c565bdb20b12901567b8215bd589"
+    },
+    "cascadekv_phi35_8k_dev_sources_v2.json": {
+      "candidate_byte_count": null,
+      "candidate_sha256": null,
+      "classification": "STDOUT_ATTESTED_ONLY",
+      "expected_sha256": "31f1d14d4b33b6e5b6a48d34e294f0effbab2eeadf6c4d4eabfabe16ae879478",
+      "extraction": null,
+      "reason": "stdout attests its SHA and generation, but does not print complete serialized contents",
+      "recovered_path": null,
+      "verified_recovered_sha256": null
+    },
+    "development.json": {
+      "candidate_byte_count": 139414,
+      "candidate_sha256": "964ca02923b0dc2438cb5041c7027bd00396ff10170e012b451d3a57eb4c4958",
+      "classification": "BYTE_RECOVERED",
+      "expected_sha256": "964ca02923b0dc2438cb5041c7027bd00396ff10170e012b451d3a57eb4c4958",
+      "extraction": {
+        "line": 449,
+        "variant": "exact one-line JSON plus LF"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/development.json",
+      "verified_recovered_sha256": "964ca02923b0dc2438cb5041c7027bd00396ff10170e012b451d3a57eb4c4958"
+    },
+    "development_capture_manifest.json": {
+      "candidate_byte_count": 25159,
+      "candidate_sha256": "e362713f36dc308fa44c4759b3e973a1f34f56561dc5b58fb0d72270fa3a8900",
+      "classification": "BYTE_RECOVERED",
+      "expected_sha256": "e362713f36dc308fa44c4759b3e973a1f34f56561dc5b58fb0d72270fa3a8900",
+      "extraction": {
+        "line": 387,
+        "variant": "exact one-line JSON plus LF"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/development_capture_manifest.json",
+      "verified_recovered_sha256": "e362713f36dc308fa44c4759b3e973a1f34f56561dc5b58fb0d72270fa3a8900"
+    },
+    "holdout.json": {
+      "candidate_byte_count": 2051,
+      "candidate_sha256": "45e6c2d09c53be9a4053c696349011786c9bb934ce49aea15561b7c92eaeeee6",
+      "classification": "BYTE_RECOVERED",
+      "expected_sha256": "45e6c2d09c53be9a4053c696349011786c9bb934ce49aea15561b7c92eaeeee6",
+      "extraction": {
+        "line": 488,
+        "variant": "exact one-line JSON plus LF"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/holdout.json",
+      "verified_recovered_sha256": "45e6c2d09c53be9a4053c696349011786c9bb934ce49aea15561b7c92eaeeee6"
+    },
+    "holdout_capture_manifest.json": {
+      "candidate_byte_count": 8645,
+      "candidate_sha256": "781c912c389dce576685d64c8f96a1cc8f134106fd294d82f6b23588ee99fbd3",
+      "classification": "BYTE_RECOVERED",
+      "expected_sha256": "781c912c389dce576685d64c8f96a1cc8f134106fd294d82f6b23588ee99fbd3",
+      "extraction": {
+        "line": 535,
+        "variant": "exact one-line JSON plus LF"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/holdout_capture_manifest.json",
+      "verified_recovered_sha256": "781c912c389dce576685d64c8f96a1cc8f134106fd294d82f6b23588ee99fbd3"
+    },
+    "qualification.json": {
+      "candidate_byte_count": 3945,
+      "candidate_sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e",
+      "classification": "BYTE_RECOVERED",
+      "expected_sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e",
+      "extraction": {
+        "line": 279,
+        "variant": "exact one-line JSON plus LF"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/qualification.json",
+      "verified_recovered_sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e"
+    },
+    "test.json": {
+      "candidate_byte_count": 4112,
+      "candidate_sha256": "945b54ec8307a4e590262b5945a98d897bddeffb6ea9b341b5097c7f1b75ef3c",
+      "classification": "BYTE_RECOVERED",
+      "expected_sha256": "945b54ec8307a4e590262b5945a98d897bddeffb6ea9b341b5097c7f1b75ef3c",
+      "extraction": {
+        "line": 567,
+        "variant": "exact one-line JSON plus LF"
+      },
+      "recovered_path": "results/archive/c4-v2-stdout-recovered/test.json",
+      "verified_recovered_sha256": "945b54ec8307a4e590262b5945a98d897bddeffb6ea9b341b5097c7f1b75ef3c"
+    }
+  },
+  "original_c4_commit": "1d23e5e893614e4dc54d5b1988126680c791efb8",
+  "original_c4_tag": "cascadekv-phi35-8k-c4-prep-v2",
+  "original_sha256sums": {
+    "c4_protocol.json": "6e2f7c671d04f5dd650d71e62de23e8fff0697c32dfc837e2921535edfc59c1d",
+    "c4_runtime_manifest.json": "76cd263efed206334b9de8e02c3355536893c565bdb20b12901567b8215bd589",
+    "cascadekv_phi35_8k_dev_sources_v2.json": "31f1d14d4b33b6e5b6a48d34e294f0effbab2eeadf6c4d4eabfabe16ae879478",
+    "development.json": "964ca02923b0dc2438cb5041c7027bd00396ff10170e012b451d3a57eb4c4958",
+    "development_capture_manifest.json": "e362713f36dc308fa44c4759b3e973a1f34f56561dc5b58fb0d72270fa3a8900",
+    "holdout.json": "45e6c2d09c53be9a4053c696349011786c9bb934ce49aea15561b7c92eaeeee6",
+    "holdout_capture_manifest.json": "781c912c389dce576685d64c8f96a1cc8f134106fd294d82f6b23588ee99fbd3",
+    "qualification.json": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e",
+    "test.json": "945b54ec8307a4e590262b5945a98d897bddeffb6ea9b341b5097c7f1b75ef3c"
+  },
+  "original_tar_gz_unavailable": true,
+  "raw_stdout": {
+    "byte_count": 225233,
+    "line_count": 647,
+    "path": "artifacts/c4-v2/evidence/c4_v2_kaggle_stdout.md",
+    "sha256": "5b718cf29a75fe66ff62fbcb02cc8e5885e8a513a8836e7d75b8f01fa9e65d3a"
+  },
+  "schema_version": "cascadekv-c4-v2-stdout-recovery-v1",
+  "tar_reconstructed_byte_for_byte": false
+}

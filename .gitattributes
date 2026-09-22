@@ -1,0 +1,2 @@
+# Preserved stdout is byte-evidence; its original trailing whitespace is intentional.
+artifacts/c4-v2/evidence/c4_v2_kaggle_stdout.md -whitespace
