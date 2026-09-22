@@ -4,6 +4,8 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 import tarfile
 import types
@@ -84,6 +86,11 @@ def test_runner_import_has_no_c2_heavy_import():
     assert "cascadekv.phi35_kaggle_c2" not in sys.modules
     assert callable(runner.run)
 
+def test_runner_script_path_imports_package_without_pythonpath(tmp_path):
+    environment=os.environ.copy(); environment.pop("PYTHONPATH",None)
+    result=subprocess.run([sys.executable,"-c",f"import runpy; runpy.run_path({str(RUNNER)!r})"],cwd=tmp_path,env=environment,text=True,capture_output=True)
+    assert result.returncode==0, result.stderr
+
 def test_actual_runner_no_go_order_bundle_recovery_and_banners(monkeypatch,tmp_path,capsys):
     runner,args,log,_=install_synthetic_lifecycle(monkeypatch,tmp_path,go=False)
     assert runner.run(args)==0; (tmp_path/"stdout.txt").write_text(capsys.readouterr().out)
@@ -113,25 +120,53 @@ def test_bundle_refuses_existing_result_tarball(tmp_path):
     result=tmp_path/"result"; result.mkdir(); (result/"cascadekv-c5-result.tar.gz").write_bytes(b"old")
     with pytest.raises(c5.C5Error): load_runner().bundle(root,result)
 
-def test_lazy_canonical_qualification_success_and_failure_matrix(monkeypatch,tmp_path):
-    runner=load_runner(); assert "--qualification" not in RUNNER.read_text()
-    canonical=b'{"canonical":true}\n'; digest=hashlib.sha256(canonical).hexdigest(); calls=[]
-    fake=types.SimpleNamespace(qualify=lambda p:(p.write_bytes(canonical),calls.append("qualify")))
-    monkeypatch.setitem(sys.modules,"cascadekv.phi35_kaggle_c2",fake)
+def test_isolated_c2_qualification_orchestration_and_cleanup(monkeypatch,tmp_path):
+    runner=load_runner(); canonical=b'{"canonical":true}\n'; digest=hashlib.sha256(canonical).hexdigest(); calls=[]
+    worktree=tmp_path/"c2-worktree"; durable=tmp_path/"durable"/"c5_v2"/"qualification.json"
+    monkeypatch.setattr(runner,"C2_WORKTREE",worktree); monkeypatch.setattr(runner,"C2_DURABLE_QUALIFICATION",durable)
     monkeypatch.setattr(c5.c4,"QUALIFICATION_SHA",digest); monkeypatch.setattr(c5.c4,"BACKEND_ID","synthetic-backend")
     monkeypatch.setattr(c5.c4,"_validate_c2_qualification",lambda p:{"backend_id":"synthetic-backend"})
-    path=runner._qualification(tmp_path)
-    assert path==tmp_path/"qualification.json" and path.read_bytes()==canonical and calls==["qualify"]
-    variants={
-        "raises":lambda p:(_ for _ in ()).throw(RuntimeError("no")),
-        "absent":lambda p:None,
-        "wrong_bytes":lambda p:p.write_bytes(b"wrong"),
-    }
-    for name,qualify in variants.items():
-        root=tmp_path/name; root.mkdir(); monkeypatch.setattr(fake,"qualify",qualify)
-        with pytest.raises((c5.C5Error,RuntimeError,FileNotFoundError)): runner._qualification(root)
-    root=tmp_path/"validation"; root.mkdir(); fake.qualify=lambda p:p.write_bytes(canonical)
-    monkeypatch.setattr(c5.c4,"_validate_c2_qualification",lambda p:(_ for _ in ()).throw(c5.C5Error("bad validation")))
+    monkeypatch.setattr(c5,"_git",lambda ref:"active-c5" if ref=="HEAD" else "unexpected")
+    def check_output(command,**kw):
+        assert command==["git","-C",str(worktree),"rev-parse","HEAD"]
+        return runner.C2_COMMIT+"\n"
+    def run(command,**kw):
+        calls.append((command,kw))
+        if command[:5]==["git","-C",str(c5.ROOT),"worktree","add"]:
+            assert command[-1]==runner.C2_TAG
+        elif command[0]==sys.executable:
+            assert kw["cwd"]==worktree and kw["env"]["PYTHONPATH"].split(os.pathsep)[0]==str(worktree)
+            durable.write_bytes(canonical)
+        elif command[:5]==["git","-C",str(c5.ROOT),"worktree","remove"]:
+            pass
+        else: raise AssertionError(command)
+        return types.SimpleNamespace(returncode=0)
+    monkeypatch.setattr(runner.subprocess,"check_output",check_output); monkeypatch.setattr(runner.subprocess,"run",run)
+    root=tmp_path/"c5"; root.mkdir(); path=runner._qualification(root)
+    assert path==root/"qualification.json" and path.read_bytes()==canonical and digest==hashlib.sha256(path.read_bytes()).hexdigest()
+    assert any(command[0]==sys.executable for command,_ in calls)
+    assert calls[-1][0][:5]==["git","-C",str(c5.ROOT),"worktree","remove"]
+
+@pytest.mark.parametrize("failure",["wrong_commit","missing","subprocess","worktree_add"])
+def test_isolated_c2_qualification_fails_closed_and_cleans_up(monkeypatch,tmp_path,failure):
+    runner=load_runner(); worktree=tmp_path/"c2-worktree"; durable=tmp_path/"durable"/"c5_v2"/"qualification.json"; cleaned=[]
+    monkeypatch.setattr(runner,"C2_WORKTREE",worktree); monkeypatch.setattr(runner,"C2_DURABLE_QUALIFICATION",durable)
+    monkeypatch.setattr(c5,"_git",lambda _:"active-c5")
+    monkeypatch.setattr(runner.subprocess,"check_output",lambda *_a,**_k:("wrong\n" if failure=="wrong_commit" else runner.C2_COMMIT+"\n"))
+    def run(command,**kw):
+        if command[0]=="git" and "add" in command and failure=="worktree_add": raise subprocess.CalledProcessError(1,command)
+        if command[0]==sys.executable and failure=="subprocess": raise subprocess.CalledProcessError(1,command)
+        if command[0]=="git" and "remove" in command: cleaned.append(True)
+        return types.SimpleNamespace(returncode=0)
+    monkeypatch.setattr(runner.subprocess,"run",run)
+    root=tmp_path/"c5"; root.mkdir()
     with pytest.raises(c5.C5Error): runner._qualification(root)
-    root=tmp_path/"backend"; root.mkdir(); monkeypatch.setattr(c5.c4,"_validate_c2_qualification",lambda p:{"backend_id":"other"})
-    with pytest.raises(c5.C5Error): runner._qualification(root)
+    assert bool(cleaned) is (failure!="worktree_add")
+
+def test_isolated_c2_qualification_rejects_stale_paths(monkeypatch,tmp_path):
+    runner=load_runner(); worktree=tmp_path/"worktree"; durable=tmp_path/"durable"/"qualification.json"
+    monkeypatch.setattr(runner,"C2_WORKTREE",worktree); monkeypatch.setattr(runner,"C2_DURABLE_QUALIFICATION",durable)
+    root=tmp_path/"c5"; root.mkdir(); worktree.mkdir()
+    with pytest.raises(c5.C5Error,match="stale C2 worktree"): runner._qualification(root)
+    worktree.rmdir(); durable.parent.mkdir(); durable.write_text("old")
+    with pytest.raises(c5.C5Error,match="stale durable"): runner._qualification(root)

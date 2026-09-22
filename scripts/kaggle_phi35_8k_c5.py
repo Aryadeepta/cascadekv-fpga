@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
 """Audited, one-shot Kaggle executor for the frozen C5 lifecycle."""
 from __future__ import annotations
-import argparse, hashlib, json, shutil, subprocess, tarfile
+import argparse, hashlib, json, os, shutil, subprocess, sys, tarfile
 from pathlib import Path
+
+# This file is deliberately runnable by path (``python scripts/...``), where
+# Python otherwise places only ``scripts/`` on sys.path.
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
 from cascadekv import phi35_8k_c5 as c5
 from cascadekv.stdout_artifact_recovery import emit
 
 SMALL=("protocol.json","runtime_manifest.json","qualification.json","development_sources.json","development_capture_manifest.json","development.json","holdout.json","holdout_capture_manifest.json","test.json","SHA256SUMS")
+C2_TAG = "cascadekv-phi35-8k-kaggle-c2-prep-v2"
+C2_COMMIT = "fa54b581ee5ee581dd51b8085db8b5233467450a"
+C2_DURABLE_ROOT = Path("/kaggle/working/cascadekv_phi35_8k_capture")
+C2_DURABLE_QUALIFICATION = C2_DURABLE_ROOT / "c5_v2" / "qualification.json"
+C2_WORKTREE = Path("/kaggle/working/cascadekv_phi35_8k_c2_worktree_v2")
 def sha(p:Path)->str: return hashlib.sha256(p.read_bytes()).hexdigest()
 def _copy_new(src:Path,dst:Path)->None:
     if dst.exists(): raise c5.C5Error(f"stale output artifact: {dst.name}")
@@ -31,13 +43,43 @@ def bundle(root:Path,result_dir:Path)->str:
         for n,p in sorted(present.items()): archive.add(p,arcname=n,recursive=False)
     return emit(dict(sorted(present.items())))
 def _qualification(root:Path)->Path:
-    # C2 imports torch/model dependencies.  Keep them out of local runner
-    # import so the lifecycle can be tested with an injected canonical C2.
-    from cascadekv import phi35_kaggle_c2 as c2
-    path=root/"qualification.json"; c2.qualify(path)
-    record=c5.c4._validate_c2_qualification(path)
-    if sha(path)!=c5.c4.QUALIFICATION_SHA or record["backend_id"]!=c5.c4.BACKEND_ID: raise c5.C5Error("canonical C2 qualification differs")
-    return path
+    """Run the unmodified C2 qualifier from its frozen detached checkout."""
+    if C2_WORKTREE.exists() or C2_WORKTREE.is_symlink():
+        raise c5.C5Error(f"stale C2 worktree path: {C2_WORKTREE}")
+    if C2_DURABLE_QUALIFICATION.exists() or C2_DURABLE_QUALIFICATION.is_symlink():
+        raise c5.C5Error(f"stale durable C2 qualification: {C2_DURABLE_QUALIFICATION}")
+    active_head=c5._git("HEAD")
+    added=False
+    try:
+        subprocess.run(["git", "-C", str(c5.ROOT), "worktree", "add", "--detach", str(C2_WORKTREE), C2_TAG], check=True)
+        added=True
+        resolved=subprocess.check_output(["git", "-C", str(C2_WORKTREE), "rev-parse", "HEAD"], text=True).strip()
+        if resolved != C2_COMMIT:
+            raise c5.C5Error("isolated C2 worktree commit differs from frozen C2 tag")
+        C2_DURABLE_QUALIFICATION.parent.mkdir(parents=True, exist_ok=False)
+        environment=os.environ.copy()
+        environment["PYTHONPATH"]=str(C2_WORKTREE)+os.pathsep+environment.get("PYTHONPATH", "")
+        program="from pathlib import Path; import sys; from cascadekv import phi35_kaggle_c2 as c2; c2.qualify(Path(sys.argv[1]))"
+        subprocess.run([sys.executable, "-c", program, str(C2_DURABLE_QUALIFICATION)], cwd=C2_WORKTREE, env=environment, check=True)
+        if not C2_DURABLE_QUALIFICATION.is_file():
+            raise c5.C5Error("canonical C2 qualification output is missing")
+        record=c5.c4._validate_c2_qualification(C2_DURABLE_QUALIFICATION)
+        digest=sha(C2_DURABLE_QUALIFICATION)
+        if digest != c5.c4.QUALIFICATION_SHA or record.get("backend_id") != c5.c4.BACKEND_ID:
+            raise c5.C5Error("canonical C2 qualification differs")
+        destination=root/"qualification.json"
+        _copy_new(C2_DURABLE_QUALIFICATION, destination)
+        if sha(destination) != digest:
+            raise c5.C5Error("copied C2 qualification SHA differs")
+        if c5._git("HEAD") != active_head:
+            raise c5.C5Error("active C5 checkout changed during C2 qualification")
+        print("C5-C2-QUALIFICATION "+json.dumps({"c2_worktree_tag":C2_TAG,"c2_worktree_commit":resolved,"c2_durable_qualification_path":str(C2_DURABLE_QUALIFICATION),"qualification_sha256":digest,"backend_id":record["backend_id"]},sort_keys=True))
+        return destination
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise c5.C5Error("isolated canonical C2 qualification failed") from exc
+    finally:
+        if added:
+            subprocess.run(["git", "-C", str(c5.ROOT), "worktree", "remove", "--force", str(C2_WORKTREE)], check=False)
 def _print_audit(root:Path,result:dict,test:dict|None=None,result_dir:Path|None=None)->None:
     fields={"c5_tag":c5.C5_TAG,"c5_commit":c5._git("HEAD"),"protocol_sha256":sha(c5.PROTOCOL),"runtime_manifest_sha256":sha(c5.RUNTIME),"qualification_sha256":sha(root/"qualification.json"),"development_source_sha256":sha(root/"development_sources.json"),"development_capture_sha256":sha(root/"development_capture_manifest.json"),"development_result_sha256":sha(root/"development.json"),"schedule_sha256":result["schedule_sha256"],"development_classification":result["classification"],"development_passing_targets":result["development_passing_targets"],"selected_target":result["selected_target"],"optimizer_rerun":False}
     if (root/"holdout.json").is_file(): fields["holdout_sha256"]=sha(root/"holdout.json")

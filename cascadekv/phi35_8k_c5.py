@@ -21,7 +21,7 @@ from . import phi35_8k_c4 as c4
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = ROOT / "configs/cascadekv_phi35_8k_c5_protocol.json"
 RUNTIME = ROOT / "configs/cascadekv_phi35_8k_c5_runtime_manifest.json"
-C5_TAG = "cascadekv-phi35-8k-c5-freeze-v1"
+C5_TAG = "cascadekv-phi35-8k-c5-freeze-v2"
 C4_PARENT = {"tag": "cascadekv-phi35-8k-c4-result-recovered-v1", "commit": "98beb485c2ac7d9e209b5f8f1dfe2fdb7e4bda75", "recovery_manifest_sha256": "d6715a952313873988236f3dd497d7eb1932725398415f01aaf8b96c12bf6d14", "postmortem_json_sha256": "89aa6fa3a45831df8e7f8a09c816e74cb78086d2eea92c6a535e88ea19804419"}
 ACTIONS = tuple(f"A{x}" for x in range(10)); TARGETS = c4.TARGETS
 DEVELOPMENT = {"narrative": (13, 14, 15, 16), "report": (16, 17, 18, 19), "qa": (13, 15, 16, 17)}
