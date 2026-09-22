@@ -1,0 +1,27 @@
+{
+  "schema_version": "cascadekv-phi35-8k-c5-v2-recovered-postmortem-v1",
+  "evidence_basis": "Exact small artifacts recovered from canonical stdout framing; original Kaggle result container is unavailable locally.",
+  "development": {
+    "classification": "C5-DEVELOPMENT-GO",
+    "passing_targets": ["T5"],
+    "selected_target": "T5",
+    "T5": {"cosine": 0.9850333360217822, "relative_l2": 0.11976855315762129, "mean_modeled_kv": 485339.77222222224, "cosine_margin": 0.0000333360217822376, "relative_l2_margin": 0.00023144684237870472, "uniform10_relative_l2_margin": 0.10820278247813579, "flat5_traffic_margin": 36.22777777776355}
+  },
+  "prospective": {
+    "classification": "C5-PROSPECTIVE-NO-PASS",
+    "selected_target": "T5",
+    "T5": {"cosine": 0.9843795528635383, "relative_l2": 0.1221502432927124, "mean_modeled_kv": 484990.2166666667, "cosine_margin": -0.0006204471364616992, "relative_l2_margin": -0.002150243292712406, "uniform10_relative_l2_margin": 0.11708677196613962, "flat5_traffic_margin": 385.7833333333256},
+    "firewall": {"optimizer_rerun": false, "schedule_sha256": "1dd4a48bb3596c2605cbbde7589c593500711b6cc85f8944ec97025595c0c646", "schedule_unchanged": true, "opened_development_tensor_identities": []}
+  },
+  "holdout": {"selected": {"narrative": 17, "qa": 18, "report": 21}, "report_20_rejected": {"bounded_frozen_tokenizer_length": 7218, "failed_requirement": ">=8192"}, "next_untouched_frontier": {"narrative": 18, "qa": 19, "report": 22}},
+  "T5_action_counts": {"A0": 3, "A1": 6, "A2": 8, "A3": 2, "A4": 81, "A5": 4, "A6": 36, "A7": 1, "A8": 3, "A9": 16},
+  "qwen10_A7_A9_cells": {"used": 20, "total": 160},
+  "T5_layers": {
+    "0": {"cosine": 0.9419126697337359, "relative_l2": 0.32451231299207656, "mean_modeled_kv": 515296.68055555556, "actions": {"A0": 1, "A1": 2, "A2": 1, "A5": 2, "A6": 20, "A9": 6}},
+    "8": {"cosine": 0.9953572440168096, "relative_l2": 0.06753797408620581, "mean_modeled_kv": 438632.75, "actions": {"A0": 2, "A1": 4, "A2": 5, "A3": 2, "A4": 4, "A5": 1, "A6": 11, "A8": 1, "A9": 2}},
+    "16": {"cosine": 0.9963906843525668, "relative_l2": 0.06278563768286476, "mean_modeled_kv": 504923.0208333333, "actions": {"A4": 22, "A8": 2, "A9": 8}},
+    "24": {"cosine": 0.9968340516918235, "relative_l2": 0.06016595295566815, "mean_modeled_kv": 492878.3958333333, "actions": {"A2": 1, "A4": 26, "A5": 1, "A6": 4}},
+    "31": {"cosine": 0.9946720303139753, "relative_l2": 0.08384088807129116, "mean_modeled_kv": 474968.0138888889, "actions": {"A2": 1, "A4": 29, "A6": 1, "A7": 1}}
+  },
+  "layer_interpretation": "Layer 0 is the dominant observed relative-L2 bottleneck. This is descriptive only: C5 development used 12 already-consumed sources rather than C4's 9, so it does not establish a causal C5-versus-C4 comparison."
+}

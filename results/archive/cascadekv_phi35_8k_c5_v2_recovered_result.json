@@ -1,0 +1,43 @@
+{
+  "schema_version": "cascadekv-phi35-8k-c5-v2-recovered-result-v1",
+  "frozen_scientific_execution": {
+    "freeze_tag": "cascadekv-phi35-8k-c5-freeze-v2",
+    "freeze_commit": "36783eb8c75e9d4006d8ef4bae7d527942e95331",
+    "protocol_sha256": "2ab29d9ef370ba2f9308763e916b0c15795fbe379e317bf95bba20ae27b412d1",
+    "runtime_manifest_sha256": "c6644332a676a839450814bcd2c8c22d5bfee4bb445c5e34099527b07511a818"
+  },
+  "stdout_evidence": {
+    "path": "artifacts/c5-v2/evidence/c5_v2_kaggle_stdout.md",
+    "sha256": "907bd5cafd940035f7114ab001c65aa4eb08ad198ca7728e1ada86e096bab6bf",
+    "preserved_without_normalization": true
+  },
+  "recovery": {
+    "method": "canonical cascadekv.stdout_artifact_recovery framing",
+    "all_small_artifacts_byte_exact_from_stdout": true,
+    "artifact_directory": "artifacts/c5-v2/recovered/files",
+    "artifact_hashes": {
+      "SHA256SUMS": "bf88cb65164ec903c2f41ea0f2ebe0ef6de38ca62d08abf31f44cd4a57c4c751",
+      "development.json": "edd5a43262582055d29cac3165982e8d69912150e1d22ce7e190660e6cc9360d",
+      "development_capture_manifest.json": "7a1b513127bff05bc4693623d344885762790ce86af8a36b1abbcad7bbf5ef13",
+      "development_sources.json": "493162dacc2cf36c53d3363ab3adaa6fe943366735e960d05824b47e29f1f3b4",
+      "holdout.json": "873955fa9a89d63f89033f2d90faf4919c63dbf1f68de707dfb2d9376d198ef8",
+      "holdout_capture_manifest.json": "96976aba7e2a6deb8a8a5f7826c9828c40b7a34636622b37be3c131f060a6bb6",
+      "protocol.json": "2ab29d9ef370ba2f9308763e916b0c15795fbe379e317bf95bba20ae27b412d1",
+      "qualification.json": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e",
+      "runtime_manifest.json": "c6644332a676a839450814bcd2c8c22d5bfee4bb445c5e34099527b07511a818",
+      "test.json": "6b42073b5984681bedf6c9d43bff1987145a398c1aa86bde3a978d2f96b8271a"
+    },
+    "sha256sums_verified_against_recovered_bytes": true
+  },
+  "container_provenance": {
+    "original_kaggle_tarball_available_locally": false,
+    "original_kaggle_tarball_sha256_transcript_attested": "9c87f801e1b037572e2c631b00f959bc01ae578ed0fe0d98028c585a387de2b0",
+    "original_kaggle_tarball_sha256_locally_verified": false,
+    "stdout_reconstructed_convenience_archive": {
+      "path": "artifacts/c5-v2/recovered/cascadekv_phi35_8k_c5_stdout_recovery.tar.gz",
+      "sha256": "b7ba80ae227c9b557d9ef1e39cc493fb6294c08686cdc5e371ec27c532e4347b",
+      "members_equal_stdout_recovered_bytes": true,
+      "is_original_kaggle_result_tarball": false
+    }
+  }
+}
