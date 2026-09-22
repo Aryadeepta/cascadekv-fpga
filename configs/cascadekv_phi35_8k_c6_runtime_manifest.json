@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "purpose": "C6 complete local execution closure",
+  "protocol": {
+    "path": "configs/cascadekv_phi35_8k_c6_protocol.json",
+    "sha256": "78b7b61e0cf4f3304496a9277e6f2fd966c93403f56349d235bf3ecf0fdc615a"
+  },
+  "bound_files": [
+    {
+      "path": "cascadekv/phi35_8k_c6.py",
+      "sha256": "4a022483b1608042ff6140798762ca9e408190328d0906bfcacac088ba33542d"
+    },
+    {
+      "path": "scripts/kaggle_phi35_8k_c6.py",
+      "sha256": "4a4dbcc7d5c9a1bc6137e527d539c38eb675c6152ebb4060e620462dfc5f674a"
+    },
+    {
+      "path": "cascadekv/phi35_8k_c5.py",
+      "sha256": "a269c49d41c340b77e8da34025da59c45ee1ecaf3e943205e7bc619b2888d1c6"
+    },
+    {
+      "path": "cascadekv/phi35_8k_c4.py",
+      "sha256": "db6f36c4cdada69d571b5c254ecf74136a42eb266c6175d85279ab1fd4f28613"
+    },
+    {
+      "path": "cascadekv/phi35_8k_source_selection.py",
+      "sha256": "45e7ebc0927a225e540e415d43bb67587bbbbc465e4b0382019b13cfa67d5c44"
+    },
+    {
+      "path": "cascadekv/phi35_kaggle_c2.py",
+      "sha256": "81303b6bbd2a8ee3e851b8138294243eb4cda7aca0536699ba673fa56265db9f"
+    },
+    {
+      "path": "cascadekv/phi35_phaseb.py",
+      "sha256": "0f1b858983503a4e56434de608b4f91e31eb2478c9522cf91ec062d206c3d8b1"
+    },
+    {
+      "path": "cascadekv/model_agnostic.py",
+      "sha256": "24e113274c1f5ad4e163f575f9a0f7c53a73b33028a930151863018658391da5"
+    },
+    {
+      "path": "cascadekv/evaluation_core.py",
+      "sha256": "a736298e657577cae44466e461270e91aedfce2e44626506587e7ea82409406a"
+    },
+    {
+      "path": "cascadekv/adaptive_lifting.py",
+      "sha256": "ad47c76449840a19932ade1d1f60c730f4e270dab379159ca12234b1088b4919"
+    },
+    {
+      "path": "cascadekv/quantize.py",
+      "sha256": "49dfbc10a02ecf11ad4fa6956976aab49f5177a4ef757a61e5e0fc918e81f059"
+    },
+    {
+      "path": "cascadekv/runtime_provenance.py",
+      "sha256": "9b0d025e55d1d12d373eed570fafc90111251f2e6ac317834cb840fd5b3d70fa"
+    },
+    {
+      "path": "cascadekv/stdout_artifact_recovery.py",
+      "sha256": "cce6ca7a6899b79f03c4e4490ec2987457e339b0c09dce17c9d8a0318b929c3a"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_c5_protocol.json",
+      "sha256": "2ab29d9ef370ba2f9308763e916b0c15795fbe379e317bf95bba20ae27b412d1"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_c5_runtime_manifest.json",
+      "sha256": "c6644332a676a839450814bcd2c8c22d5bfee4bb445c5e34099527b07511a818"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_c4_protocol.json",
+      "sha256": "6e2f7c671d04f5dd650d71e62de23e8fff0697c32dfc837e2921535edfc59c1d"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_c4_runtime_manifest.json",
+      "sha256": "76cd263efed206334b9de8e02c3355536893c565bdb20b12901567b8215bd589"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_kaggle_c2_protocol.json",
+      "sha256": "315453e8446e8f41611fc23544a4a5093da13a7dba344dfc66a840eebf17857d"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_kaggle_c2_runtime_manifest.json",
+      "sha256": "a5a96915f8cab588e5d1dd6af15855d4d090366f94282022bff7bc1b856957fd"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_phaseb_protocol.json",
+      "sha256": "0e3a2e7b51e01c64dca292c7dd667ed9899c5bacc08e470e2b19e12433363c8b"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_phaseb_runtime_manifest.json",
+      "sha256": "e4e10f7659180471eb791eeafa97e8f525b6c14a3ff311798349c07438ec7c92"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_source_amendment_protocol.json",
+      "sha256": "f43b2311d0decf2a579bf886848572bf53d58ab98e058b1da1be5a2912b85e8e"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_source_amendment_runtime_manifest.json",
+      "sha256": "d35817df8a7c8a7a48539cac252344dbe4f94cf97b9a3a50aa307e88a3640edf"
+    },
+    {
+      "path": "results/archive/cascadekv_phi35_8k_c5_v2_recovered_result.json",
+      "sha256": "024869d35ee3956a58cf2dec7fec6ada3f629259d7bc557861b7a43e6e82754f"
+    },
+    {
+      "path": "results/archive/cascadekv_phi35_8k_c5_v2_recovered_postmortem.json",
+      "sha256": "df95eefbac6b726c454f0c5261e85928ed45127295dd027b9b591a2b5208d117"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "a6b0dca47df4790b897410892da143ce6f7cb485640ccabc79d69ca221b2d41a"
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "bd9858de274b586ed5f24ae38f279f684549741fc8f0fbbdc26b00a3dd897296"
+    }
+  ]
+}
