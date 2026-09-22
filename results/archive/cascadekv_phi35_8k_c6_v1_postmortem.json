@@ -1,0 +1,9 @@
+{
+  "schema_version": "cascadekv-phi35-8k-c6-v1-postmortem-v1",
+  "selected_target": "T5",
+  "development_t5": {"cosine": 0.9863149033600671, "relative_l2": 0.11671852580316984, "modeled_kv_bytes": 485372.5788888889, "cosine_margin": 0.0013149033600671048, "relative_l2_headroom": 0.003281474196830154, "flat5_traffic_margin": 3.421111111121718},
+  "prospective_t5": {"cosine": 0.9847454029756287, "relative_l2": 0.12684388312686273, "modeled_kv_bytes": 485284.0777777778, "cosine_margin": -0.0002545970243712735, "relative_l2_headroom": -0.006843883126862734, "flat5_traffic_margin": 91.92222222220153},
+  "holdout": {"selected": {"narrative": {"index": 18, "sha256": "f1a03f658277e09e34ba9ef2cfdd660da932ff2fb82c2e0f05958584b57746b2"}, "qa": {"index": 19, "sha256": "6cf71fff9851c3a858f563e3b12d5f4d24ad1f0ca8bc726147aa29b50d76bb28"}, "report": {"index": 22, "sha256": "eb76c0dde3ee100dbfeba31ab3d9cbe018712568c8ab1e9b8ca4297d5c2ce63b"}}, "rejected_candidates": [], "next_untouched_frontier": {"narrative": 19, "qa": 20, "report": 23}},
+  "schedule_diagnosis": {"action_counts": {"A0": 5, "A1": 11, "A2": 6, "A3": 9, "A4": 80, "A5": 0, "A6": 11, "A7": 1, "A8": 6, "A9": 9, "A10": 17, "A11": 5}, "new_actions_layer0_cells": "22/32", "a10_a11_only_layer0": true, "selected_t5_layer_relative_l2": {"L0": 0.29791271631291294, "L8": 0.069572871993719, "L16": 0.06630654037917003, "L24": 0.06250550337153506, "L31": 0.08729499695851221}},
+  "interpretation": "C6 development passed T5, but the pre-locked prospective T5 did not pass its cosine and relative-L2 gates. The C5 label in stdout recovery is inherited transport framing only; it does not rename this C6 experiment or change its result."
+}

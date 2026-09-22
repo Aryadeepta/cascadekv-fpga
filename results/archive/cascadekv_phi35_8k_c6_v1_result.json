@@ -1,0 +1,54 @@
+{
+  "schema_version": "cascadekv-phi35-8k-c6-v1-result-v1",
+  "frozen_scientific_execution": {
+    "freeze_tag": "cascadekv-phi35-8k-c6-freeze-v1",
+    "freeze_commit": "f9dfdfffb5f2922a471f2bb955645ed52dda096c",
+    "protocol_sha256": "78b7b61e0cf4f3304496a9277e6f2fd966c93403f56349d235bf3ecf0fdc615a",
+    "runtime_manifest_sha256": "c19665dae088682758880a0b9dd8635b08de89339835bc737a13c5538f250cf2",
+    "qualification_sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e",
+    "backend_sha256": "184109f4e8edec3c34455bd86a787e7838bef2eb75424cf0a4f57a183f313a95"
+  },
+  "original_kaggle_result_tarball": {
+    "path": "artifacts/c6-v1/cascadekv-c6-result.tar.gz",
+    "locally_present": true,
+    "locally_byte_verified": true,
+    "byte_count": 74912,
+    "sha256": "4e95dfde98e1e35a61dd08dffed9e7ef93ca466791485f9068392d1b2bded685"
+  },
+  "repository_stdout_evidence": {
+    "path": "artifacts/c6-v1/evidence/c6_v1_kaggle_stdout.md",
+    "locally_present": true,
+    "locally_byte_verified": true,
+    "sha256": "c8efdf27958af3de3c31f68456bedc7debb6ed9b067e273e155519097c391af4",
+    "preserved_without_normalization": true,
+    "not_the_separate_uploaded_or_rendered_representation_sha256": "c8b43eb0d8d0a809a207f49ce29ddc584948228d2db53c0ba30ffa0536ee44ad"
+  },
+  "stdout_recovery": {
+    "canonical_transport_schema_label": "cascadekv-c5-stdout-recovery-v1",
+    "transport_label_is_historical_c5_framing_not_experiment_identity": true,
+    "recovers_all_original_tar_members": true,
+    "member_bytes_equal_original_tar_members": true,
+    "sha256sums_independently_verified": true
+  },
+  "tar_members_sha256": {
+    "SHA256SUMS": "bd8beaff33248bd09ebbf1af52e68d8dc9546893163bbdf395c927e6bd4d181e",
+    "development.json": "88bed81c5e92a38c2d252f39de1c7f7c91c812ceceafff91ceda04c015c93e47",
+    "development_capture_manifest.json": "67c166fb16127846004b81879db1b0d0b3537d24f73e04a4cc43b5e17a003f98",
+    "development_sources.json": "4dc6ddce6146f5e5150faccb14d29bbd7a7e054b472e60fbef83320a3d96925e",
+    "holdout.json": "ed4a8a8fc56655249f0e2b996dc14fffcab8ad08935d46836bc19113e4c54f49",
+    "holdout_capture_manifest.json": "6ec0f682b48e8e5facb73d29699a33f53e1eb908038027a23df01f0404ea9658",
+    "protocol.json": "78b7b61e0cf4f3304496a9277e6f2fd966c93403f56349d235bf3ecf0fdc615a",
+    "qualification.json": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e",
+    "runtime_manifest.json": "c19665dae088682758880a0b9dd8635b08de89339835bc737a13c5538f250cf2",
+    "test.json": "122a3480c44072d886d6bcb4f379aaf3d3d13cb3c0d0be7ab79a67b91916a9d3"
+  },
+  "result": {
+    "development_classification": "C6-DEVELOPMENT-GO",
+    "development_passing_targets": ["T5"],
+    "selected_target": "T5",
+    "prospective_classification": "C6-PROSPECTIVE-NO-PASS",
+    "schedule_sha256": "0f90a03895a02ce1efe2619cba25995ec7e6118e28a9fb5592cd3a15f03dbbdd",
+    "prospective_firewall": {"optimizer_rerun": false, "schedule_unchanged": true, "opened_development_tensor_identities": []},
+    "raw_text_persisted": false
+  }
+}
