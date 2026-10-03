@@ -2,11 +2,213 @@
 import copy
 import hashlib
 import json
+import sys
+import types
 
 import pytest
 
 from cascadekv import phi35_8k_c6 as c6
 from cascadekv import phi35_8k_c7 as c7
+
+
+def test_c7_v2_execution_tag_binds_exactly_to_head(monkeypatch):
+    """v1 would reject the remediation commit; execution must bind only v2 to HEAD."""
+    assert c7.C7_TAG == "cascadekv-phi35-8k-c7-freeze-v2"
+
+    def git(ref):
+        if ref == c7.C6_PARENT["result_tag"]: return c7.C6_PARENT["result_commit"]
+        if ref == c7.C6_PARENT["freeze_tag"]: return c7.C6_PARENT["freeze_commit"]
+        return "future-v2-commit" if ref in (c7.C7_TAG, "HEAD") else "unexpected"
+
+    monkeypatch.setattr(c7, "_git", git)
+    monkeypatch.setattr(c7, "validate_protocol", lambda: {})
+    monkeypatch.setattr(c7, "verify_runtime_closure", lambda: ())
+    assert not c7.preflight(execution=True)["local_only"]
+
+    def stale_v1_git(ref):
+        return "v1-commit" if ref == c7.C7_TAG else git(ref)
+
+    monkeypatch.setattr(c7, "_git", stale_v1_git)
+    with pytest.raises(c7.C7Error, match="matching freeze tag"):
+        c7.preflight(execution=True)
+
+
+def _tensor_access_fixture(tmp_path,monkeypatch):
+    """Build synthetic C7-provenanced files; no model, source, or tensor payload."""
+    root=tmp_path/"capture"; artifacts=root/"artifacts"; artifacts.mkdir(parents=True)
+    sources=[]
+    for family in c7.c4.FAMILIES:
+        for index in c7.DEVELOPMENT[family]:
+            sources.append({"family":family,**c7.c4.SOURCE_SPECS[family],"identity_kind":"dataset_index","dataset_index":index,"role":"development","input_ids_sha256":hashlib.sha256(f"{family}:{index}".encode()).hexdigest()})
+    source_manifest=tmp_path/"development_sources.json"; source_manifest.write_text("{}")
+    monkeypatch.setattr(c7,"validate_development_manifest",lambda payload,path: [dict(x) for x in sources])
+    records=[]
+    for source in sources:
+        identity=f"{source['family']}:{source['dataset_index']}:development"
+        expected_source={**{k:source[k] for k in ("family","dataset","config","split","revision","field","identity_kind","dataset_index")},"role":"development"}
+        for layer in c7.c4.LAYERS:
+            stem=f"{source['family']}_{source['dataset_index']}_{layer}"
+            artifact_rel=f"artifacts/{stem}.safetensors"; provenance_rel=f"artifacts/{stem}.provenance.json"
+            artifact=root/artifact_rel; artifact.write_bytes(f"synthetic:{stem}".encode())
+            detail={"schema_version":"cascadekv-phi35-8k-c7-artifact-v1","protocol_sha256":c7.sha256_path(c7.PROTOCOL),"qualification_sha256":c7.c4.QUALIFICATION_SHA,"backend_id":c7.c4.BACKEND_ID,"identity":identity,"layer":layer,"input_ids_sha256":source["input_ids_sha256"],"artifact_sha256":c7.sha256_path(artifact),"source":expected_source,"target":{"model":c7.c4.MODEL,"revision":c7.c4.REVISION,"tokenizer_revision":c7.c4.REVISION},"q_shape":list(c7.c4.SHAPE),"k_shape":list(c7.c4.SHAPE),"v_shape":list(c7.c4.SHAPE),"storage_dtype":"float16","model_compute_dtype":"float16","attention_implementation":"sdpa","use_cache":False,"quantization":"none","capture_adapter":"phi3-post-rope-qkv-v1"}
+            provenance=root/provenance_rel; provenance.write_text(json.dumps(detail,sort_keys=True))
+            records.append({"identity":identity,"layer":layer,"artifact_relative_path":artifact_rel,"artifact_sha256":c7.sha256_path(artifact),"provenance_relative_path":provenance_rel,"provenance_sha256":c7.sha256_path(provenance),"input_ids_sha256":source["input_ids_sha256"],"source":{"family":source["family"],"dataset_index":source["dataset_index"],"role":"development"}})
+    manifest={"schema_version":"cascadekv-phi35-8k-c7-capture-v1","kind":"development","protocol_sha256":c7.sha256_path(c7.PROTOCOL),"qualification_sha256":c7.c4.QUALIFICATION_SHA,"backend_id":c7.c4.BACKEND_ID,"development_source_manifest_sha256":c7.sha256_path(source_manifest),"holdout_manifest_sha256":None,"development_result_sha256":None,"schedule_sha256":None,"artifact_count":90,"forwards":18,"artifacts":records}
+    manifest_path=root/"final_capture_manifest.json"; manifest_path.write_text(json.dumps(manifest,sort_keys=True))
+    resolver=c7.CaptureResolver(root,manifest_path,"development",development_source_manifest=source_manifest)
+    return root,resolver,resolver.ordered()[0]
+
+
+def test_c7_tensor_access_uses_c7_provenance_and_rejects_post_resolution_tampering(tmp_path,monkeypatch):
+    """C7 v1 inherited c6.TensorAccess.open, which compared against c6.PROTOCOL."""
+    root,resolver,record=_tensor_access_fixture(tmp_path,monkeypatch)
+    assert c7.sha256_path(c7.PROTOCOL)!=c7.sha256_path(c6.PROTOCOL)
+    detail=json.loads((root/record["provenance_relative_path"]).read_text())
+    source=resolver._authorized_sources[f"{record['identity']}:L{record['layer']}"]
+    assert detail["protocol_sha256"]==c7.sha256_path(c7.PROTOCOL)
+    assert not c7._c7_artifact_provenance_matches({**detail,"protocol_sha256":c7.sha256_path(c6.PROTOCOL)},record,source)
+    assert c7._c7_artifact_provenance_matches(detail,record,source)
+    payload_calls=[]
+    class Tensor:
+        dtype="float16"; shape=c7.c4.SHAPE
+    class Handle:
+        def __enter__(self): return self
+        def __exit__(self,*_): return False
+        def keys(self): return ("q","k","v")
+        def get_tensor(self,name): return Tensor()
+    def safe_open(*args,**kwargs):
+        payload_calls.append((args,kwargs)); return Handle()
+    monkeypatch.setitem(sys.modules,"safetensors",types.SimpleNamespace(safe_open=safe_open))
+    monkeypatch.setitem(sys.modules,"torch",types.SimpleNamespace(float16="float16"))
+    access=c7.TensorAccess(resolver,allowed_kind="development")
+    assert access.open(record) and access.opened==[f"{record['identity']}:L{record['layer']}"]
+    assert len(payload_calls)==1
+
+    provenance=root/record["provenance_relative_path"]
+    original_provenance=provenance.read_text(); mutated=json.loads(original_provenance)
+    mutated["protocol_sha256"]=c7.sha256_path(c6.PROTOCOL); provenance.write_text(json.dumps(mutated,sort_keys=True))
+    # Updating a caller-visible manifest record cannot alter the resolver snapshot.
+    resolver.records[f"{record['identity']}:L{record['layer']}"]["provenance_sha256"]=c7.sha256_path(provenance)
+    with pytest.raises(c7.C7Error): access.open(resolver.ordered()[0])
+    assert len(payload_calls)==1
+    provenance.write_text(original_provenance)
+
+    artifact=root/record["artifact_relative_path"]; original_artifact=artifact.read_bytes(); artifact.write_bytes(original_artifact+b"!")
+    with pytest.raises(c7.C7Error): access.open(record)
+    assert len(payload_calls)==1
+    artifact.write_bytes(original_artifact)
+
+    mutated_record=copy.deepcopy(record); mutated_record["layer"]=999
+    with pytest.raises(c7.C7Error): access.open(mutated_record)
+    assert len(payload_calls)==1
+
+    artifact.unlink(); artifact.symlink_to(root/"artifacts"/"replacement.safetensors")
+    (root/"artifacts"/"replacement.safetensors").write_bytes(original_artifact)
+    with pytest.raises(c7.C7Error): access.open(record)
+    assert len(payload_calls)==1
+    artifact.unlink(); artifact.write_bytes(original_artifact)
+
+    provenance.unlink(); provenance.symlink_to(root/"artifacts"/"replacement.provenance.json")
+    (root/"artifacts"/"replacement.provenance.json").write_text(original_provenance)
+    with pytest.raises(c7.C7Error): access.open(record)
+    assert len(payload_calls)==1
+
+
+def _fake_payload_boundary(monkeypatch):
+    """A final-boundary-only stand-in: no tensor file is ever decoded."""
+    calls=[]
+    class Tensor:
+        dtype="float16"; shape=c7.c4.SHAPE
+    class Handle:
+        def __enter__(self): return self
+        def __exit__(self,*_): return False
+        def keys(self): return ("q","k","v")
+        def get_tensor(self,name): return Tensor()
+    def safe_open(*args,**kwargs):
+        calls.append((args,kwargs)); return Handle()
+    monkeypatch.setitem(sys.modules,"safetensors",types.SimpleNamespace(safe_open=safe_open))
+    monkeypatch.setitem(sys.modules,"torch",types.SimpleNamespace(float16="float16"))
+    return calls
+
+
+def test_c7_tensor_access_authorization_snapshot_is_independent(tmp_path,monkeypatch):
+    root,resolver,record=_tensor_access_fixture(tmp_path,monkeypatch); calls=_fake_payload_boundary(monkeypatch)
+    key=f"{record['identity']}:L{record['layer']}"; access=c7.TensorAccess(resolver,allowed_kind="development")
+    resolver.records[key]["source"]["family"]="attacker"
+    visible=resolver.ordered()[0]; visible["artifact_sha256"]="0"*64
+    assert resolver._authorized_records[key]["source"]["family"] != "attacker"
+    with pytest.raises(TypeError): resolver._authorized_records[key]["source"]["family"]="attacker"
+    with pytest.raises(TypeError): resolver._authorized_sources[key]["family"]="attacker"
+    with pytest.raises(c7.C7Error): access.open(visible)
+    assert calls == []
+    assert access.open(record) and len(calls)==1
+
+
+def test_c7_tensor_access_rechecks_artifact_and_provenance_digests(tmp_path,monkeypatch):
+    root,resolver,record=_tensor_access_fixture(tmp_path,monkeypatch); calls=_fake_payload_boundary(monkeypatch)
+    access=c7.TensorAccess(resolver,allowed_kind="development")
+    artifact=root/record["artifact_relative_path"]; original_artifact=artifact.read_bytes()
+    artifact.write_bytes(original_artifact+b"!")
+    with pytest.raises(c7.C7Error): access.open(record)
+    assert calls == []
+    artifact.write_bytes(original_artifact)
+    assert access.open(record) and len(calls)==1
+    provenance=root/record["provenance_relative_path"]; original_provenance=provenance.read_text()
+    provenance.write_text(original_provenance+" ")
+    with pytest.raises(c7.C7Error): access.open(record)
+    assert len(calls)==1
+    provenance.write_text(original_provenance)
+    assert access.open(record) and len(calls)==2
+
+
+def test_c7_provenance_predicate_binds_every_c7_field(tmp_path,monkeypatch):
+    root,resolver,record=_tensor_access_fixture(tmp_path,monkeypatch)
+    detail=json.loads((root/record["provenance_relative_path"]).read_text())
+    source=resolver._authorized_sources[f"{record['identity']}:L{record['layer']}"]
+    assert c7._c7_artifact_provenance_matches(detail,record,source)
+    mutations={
+        "protocol_sha256":c7.sha256_path(c6.PROTOCOL), "qualification_sha256":"0"*64,
+        "backend_id":"other", "identity":"other", "layer":999,
+        "input_ids_sha256":"0"*64, "artifact_sha256":"0"*64,
+        "source":{**source,"role":"holdout"}, "target":{"model":"other"},
+        "q_shape":[0], "k_shape":[0], "v_shape":[0], "storage_dtype":"float32",
+        "model_compute_dtype":"float32", "attention_implementation":"eager",
+        "use_cache":True, "quantization":"int8", "capture_adapter":"other",
+        "schema_version":"other",
+    }
+    for field,value in mutations.items():
+        assert not c7._c7_artifact_provenance_matches({**detail,field:value},record,source), field
+
+
+def test_c7_tensor_access_rejects_consistent_visible_c6_substitution_and_path_edges(tmp_path,monkeypatch):
+    root,resolver,record=_tensor_access_fixture(tmp_path,monkeypatch); calls=_fake_payload_boundary(monkeypatch)
+    access=c7.TensorAccess(resolver,allowed_kind="development"); key=f"{record['identity']}:L{record['layer']}"
+    provenance=root/record["provenance_relative_path"]; original=provenance.read_text(); detail=json.loads(original)
+    detail["protocol_sha256"]=c7.sha256_path(c6.PROTOCOL); provenance.write_text(json.dumps(detail,sort_keys=True))
+    resolver.records[key]["provenance_sha256"]=c7.sha256_path(provenance)
+    with pytest.raises(c7.C7Error): access.open(resolver.ordered()[0])
+    with pytest.raises(c7.C7Error): access.open(record)
+    assert calls == []
+    provenance.write_text(original)
+    for field,value in (
+        ("artifact_relative_path","/tmp/evil"), ("provenance_relative_path","/tmp/evil"),
+        ("artifact_relative_path","../evil"), ("provenance_relative_path","../evil"),
+        ("identity","other:0:development"), ("layer",999),
+        ("artifact_sha256","0"*64), ("provenance_sha256","0"*64),
+    ):
+        bad=copy.deepcopy(record); bad[field]=value
+        with pytest.raises(c7.C7Error): access.open(bad)
+    assert calls == []
+
+
+def test_c7_tensor_access_leaf_symlinks_fail_before_payload(tmp_path,monkeypatch):
+    root,resolver,record=_tensor_access_fixture(tmp_path,monkeypatch); calls=_fake_payload_boundary(monkeypatch)
+    access=c7.TensorAccess(resolver,allowed_kind="development")
+    for field in ("artifact_relative_path","provenance_relative_path"):
+        leaf=root/record[field]; saved=leaf.read_bytes(); replacement=leaf.with_name("replacement-"+leaf.name)
+        replacement.write_bytes(saved); leaf.unlink(); leaf.symlink_to(replacement)
+        with pytest.raises(c7.C7Error): access.open(record)
+        assert calls == []
 
 
 def _manifest(tmp_path):

@@ -4,11 +4,12 @@ import hashlib,json,math,re,subprocess,tarfile
 from pathlib import Path
 from statistics import mean
 from typing import Any,Iterable,Mapping
+from types import MappingProxyType
 from . import phi35_8k_c4 as c4
 from . import phi35_8k_c6 as c6
 
 ROOT=Path(__file__).resolve().parents[1]; PROTOCOL=ROOT/"configs/cascadekv_phi35_8k_c7_protocol.json"; RUNTIME=ROOT/"configs/cascadekv_phi35_8k_c7_runtime_manifest.json"
-ARCHIVE=ROOT/"artifacts/c6-v1/cascadekv-c6-result.tar.gz"; C7_TAG="cascadekv-phi35-8k-c7-freeze-v1"; RAW_TEXT_SENTINEL="SHOULD_NOT_PERSIST_RAW_SOURCE_TEXT_C7_6B29"
+ARCHIVE=ROOT/"artifacts/c6-v1/cascadekv-c6-result.tar.gz"; C7_TAG="cascadekv-phi35-8k-c7-freeze-v2"; RAW_TEXT_SENTINEL="SHOULD_NOT_PERSIST_RAW_SOURCE_TEXT_C7_6B29"
 C6_PARENT={"result_tag":"cascadekv-phi35-8k-c6-result-v1","result_commit":"de7fdda55ae567442d26c525b974a5e32649b8f1","freeze_tag":"cascadekv-phi35-8k-c6-freeze-v1","freeze_commit":"f9dfdfffb5f2922a471f2bb955645ed52dda096c","protocol_sha256":"78b7b61e0cf4f3304496a9277e6f2fd966c93403f56349d235bf3ecf0fdc615a","runtime_sha256":"c19665dae088682758880a0b9dd8635b08de89339835bc737a13c5538f250cf2","original_kaggle_tarball_sha256":"4e95dfde98e1e35a61dd08dffed9e7ef93ca466791485f9068392d1b2bded685","repository_stdout_sha256":"c8efdf27958af3de3c31f68456bedc7debb6ed9b067e273e155519097c391af4","result_archive_sha256":"f63d8e563462c0876836d7858a00435daf55fd0f48542e7a0944fa8092daf587","postmortem_archive_sha256":"39160d77722e0af5dd68f27d234f420db35b68798420418f6f477dc4672fd417","postmortem_markdown_sha256":"d5308375e08eae376d0fc075855be394261f778a40641d8cb83ffe8a397a11eb"}
 DEVELOPMENT={"narrative":(13,14,15,16,17,18),"report":(16,17,18,19,21,22),"qa":(13,15,16,17,18,19)}; FRONTIER={"narrative":19,"qa":20,"report":23}
 ACTIONS,BASE_ACTIONS,TARGETS=c6.ACTIONS,c6.BASE_ACTIONS,c6.TARGETS
@@ -28,6 +29,10 @@ def _finite(x):return isinstance(x,(int,float)) and not isinstance(x,bool) and m
 def _no_raw(x):
  if RAW_TEXT_SENTINEL in canonical_json(x):raise C7Error("raw text persisted")
  c4._no_raw_text(x)
+def _freeze(x):
+ if isinstance(x,Mapping):return MappingProxyType({k:_freeze(v) for k,v in x.items()})
+ if isinstance(x,list):return tuple(_freeze(v) for v in x)
+ return x
 
 def validate_protocol(payload=None):
  p=dict(_json(PROTOCOL) if payload is None else payload);req={"schema_version","c6_result_parent","geometry","methods","development_sources","prospective_frontier","targets","quality_gates","optimizer","action_validity","lifecycle","raw_text_persisted"}
@@ -321,26 +326,57 @@ class CaptureResolver:
     if not p.is_relative_to(self.root) or raw.is_symlink() or not p.is_file() or sha256_path(p)!=row[digest]: raise C7Error("capture artifact missing or differs")
    detail=_json((self.root/row["provenance_relative_path"]).resolve());_no_raw(detail)
    expected_source={**{k:source[k] for k in ("family","dataset","config","split","revision","field","identity_kind","dataset_index")},"role":kind}
-   if (detail.get("schema_version")!="cascadekv-phi35-8k-c7-artifact-v1" or
-       detail.get("protocol_sha256")!=sha256_path(PROTOCOL) or detail.get("qualification_sha256")!=c4.QUALIFICATION_SHA or
-       detail.get("backend_id")!=c4.BACKEND_ID or detail.get("identity")!=row["identity"] or detail.get("layer")!=row["layer"] or
-       detail.get("input_ids_sha256")!=row["input_ids_sha256"] or detail.get("artifact_sha256")!=row["artifact_sha256"] or
-       detail.get("source")!=expected_source or
-       detail.get("target")!={"model":c4.MODEL,"revision":c4.REVISION,"tokenizer_revision":c4.REVISION} or
-       detail.get("q_shape")!=list(c4.SHAPE) or detail.get("k_shape")!=list(c4.SHAPE) or detail.get("v_shape")!=list(c4.SHAPE) or
-       detail.get("storage_dtype")!="float16" or detail.get("model_compute_dtype")!="float16" or
-       detail.get("attention_implementation")!="sdpa" or detail.get("use_cache") is not False or
-       detail.get("quantization")!="none" or detail.get("capture_adapter")!="phi3-post-rope-qkv-v1"):
+   if not _c7_artifact_provenance_matches(detail,row,expected_source):
     raise C7Error("capture provenance differs")
    records[key]=dict(row)
   if set(records)!=expected: raise C7Error("capture inventory incomplete")
   self.records=records
- def ordered(self): return [self.records[k] for k in sorted(self.records)]
+  # TensorAccess compares caller-supplied records to this independent snapshot.
+  # ``ordered`` also returns copies so a caller cannot mutate its authorization.
+  self._authorized_records=_freeze({k:json.loads(canonical_json(v)) for k,v in records.items()})
+  self._authorized_sources=_freeze({k:{**{name:source_map[v["identity"]][name] for name in ("family","dataset","config","split","revision","field","identity_kind","dataset_index")},"role":kind} for k,v in records.items()})
+ def ordered(self): return [json.loads(canonical_json(self.records[k])) for k in sorted(self.records)]
+
+def _c7_artifact_provenance_matches(detail,row,expected_source):
+ return (detail.get("schema_version")=="cascadekv-phi35-8k-c7-artifact-v1" and
+         detail.get("protocol_sha256")==sha256_path(PROTOCOL) and detail.get("qualification_sha256")==c4.QUALIFICATION_SHA and
+         detail.get("backend_id")==c4.BACKEND_ID and detail.get("identity")==row["identity"] and detail.get("layer")==row["layer"] and
+         detail.get("input_ids_sha256")==row["input_ids_sha256"] and detail.get("artifact_sha256")==row["artifact_sha256"] and
+         detail.get("source")==expected_source and
+         detail.get("target")=={"model":c4.MODEL,"revision":c4.REVISION,"tokenizer_revision":c4.REVISION} and
+         detail.get("q_shape")==list(c4.SHAPE) and detail.get("k_shape")==list(c4.SHAPE) and detail.get("v_shape")==list(c4.SHAPE) and
+         detail.get("storage_dtype")=="float16" and detail.get("model_compute_dtype")=="float16" and
+         detail.get("attention_implementation")=="sdpa" and detail.get("use_cache") is False and
+         detail.get("quantization")=="none" and detail.get("capture_adapter")=="phi3-post-rope-qkv-v1")
 
 class TensorAccess(c6.TensorAccess):
  def __init__(self,resolver,*,allowed_kind):
   if resolver.kind!=allowed_kind: raise C7Error("tensor firewall denied capture kind")
   self.resolver=resolver;self.allowed_kind=allowed_kind;self.opened=[]
+ def open(self,record):
+  """Open only the resolver-authorized C7 artifact, immediately rechecking it."""
+  if not isinstance(record,Mapping):raise C7Error("tensor record differs")
+  key=f"{record.get('identity')}:L{record.get('layer')}"
+  authorized=self.resolver._authorized_records.get(key)
+  expected_source=self.resolver._authorized_sources.get(key)
+  if authorized is None or expected_source is None or dict(record)!=authorized:raise C7Error("tensor record differs")
+  root=self.resolver.root
+  def safe(field):
+   rel=authorized[field]
+   raw=root/rel;p=raw.resolve()
+   if raw.is_symlink() or not p.is_relative_to(root) or not p.is_file():raise C7Error("artifact path escapes root")
+   return p
+  artifact,provenance=safe("artifact_relative_path"),safe("provenance_relative_path")
+  if sha256_path(artifact)!=authorized["artifact_sha256"] or sha256_path(provenance)!=authorized["provenance_sha256"]:raise C7Error("artifact digest differs")
+  detail=_json(provenance);_no_raw(detail)
+  if not _c7_artifact_provenance_matches(detail,authorized,expected_source):raise C7Error("artifact provenance differs")
+  from safetensors import safe_open
+  import torch
+  with safe_open(str(artifact),framework="pt",device="cpu") as h:
+   if set(h.keys())!={"q","k","v"}:raise C7Error("tensor keys differ")
+   q,k,v=(h.get_tensor(x) for x in ("q","k","v"))
+  if any(x.dtype!=torch.float16 or tuple(x.shape)!=c4.SHAPE for x in (q,k,v)):raise C7Error("tensor shape/dtype differs")
+  self.opened.append(f"{authorized['identity']}:L{authorized['layer']}");return q,k,v
 
 def audit_prospective_test(*,opened_development,opened_holdout,optimizer_rerun,schedule_before,schedule_after):
  if opened_development or optimizer_rerun or schedule_before!=schedule_after: raise C7Error("prospective test firewall failed")
