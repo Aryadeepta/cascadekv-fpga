@@ -1,0 +1,23 @@
+{
+  "schema_version": "cascadekv-phi35-8k-c7-v2-postmortem-v1",
+  "result": "C7-PROSPECTIVE-NO-PASS",
+  "summary": "C7's frozen robust-objective schedule passed development at T5 but did not pass the fresh prospective selected-target quality gates.",
+  "comparison_scope": {
+    "c7_changed_development_population": "from 15 to 18 already-consumed eligible sources",
+    "c7_changed_optimizer_objective": "from global mean relative-L2 to the equal-family cellwise max-of-family-means robust objective",
+    "conclusion": "C6 to C7 does not causally isolate the objective change; the C7 prospective frontier also differs from C6."
+  },
+  "demonstrated": {
+    "development_go_at_T5": true,
+    "frozen_T5_schedule": true,
+    "optimizer_rerun_during_prospective": false,
+    "prospective_no_pass_reason": "T5 failed the absolute cosine and relative-L2 gates"
+  },
+  "not_claimed": [
+    "the robust objective is proven worse",
+    "the action set mathematically cannot pass",
+    "larger capacity will pass",
+    "C7 disproves robust optimization generally"
+  ],
+  "evidence_provenance": "Exact member bytes were stdout-recovered and verified. The original Kaggle result-tar container bytes, SHA-256, and byte size remain unavailable and unknown."
+}

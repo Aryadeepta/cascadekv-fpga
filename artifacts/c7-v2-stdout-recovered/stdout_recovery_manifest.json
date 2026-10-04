@@ -1,0 +1,55 @@
+{
+  "artifacts": [
+    {
+      "byte_count": 778,
+      "filename": "SHA256SUMS",
+      "sha256": "68b215fc76acd96f2dceb0fe5ca237555694735c5a80ceaa664de183a5c599d0"
+    },
+    {
+      "byte_count": 725986,
+      "filename": "development.json",
+      "sha256": "dbbcf35bbecee0a220be28fc57ff19206095c5e4ce4d522027c22aad6c6c4109"
+    },
+    {
+      "byte_count": 49751,
+      "filename": "development_capture_manifest.json",
+      "sha256": "2be863548153e4f54f5a729f02fda14e415bc6e2caf4fd176df58fb6578917e1"
+    },
+    {
+      "byte_count": 9349,
+      "filename": "development_sources.json",
+      "sha256": "9fe2583e36951e45f2674e57adbfc0b3df23d0f0666baa2c1e6e801508628db9"
+    },
+    {
+      "byte_count": 2061,
+      "filename": "holdout.json",
+      "sha256": "caaecb5bd627fd47a54934412e5a8246ad879b7d6cfeacfde745c142bdfd6041"
+    },
+    {
+      "byte_count": 8645,
+      "filename": "holdout_capture_manifest.json",
+      "sha256": "d75c1003bcb8dfbe36389696eedfb4cbf41b9642af7975b90e50c4654e810587"
+    },
+    {
+      "byte_count": 4745,
+      "filename": "protocol.json",
+      "sha256": "7b583bd58abd99f5529907943cd4af9a24c15503f145f0695ce00d715096c23c"
+    },
+    {
+      "byte_count": 3945,
+      "filename": "qualification.json",
+      "sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e"
+    },
+    {
+      "byte_count": 3636,
+      "filename": "runtime_manifest.json",
+      "sha256": "61a393178dced57ee69f1b2c50971468691d79e00049a6465964e8b5d8b92154"
+    },
+    {
+      "byte_count": 3923,
+      "filename": "test.json",
+      "sha256": "5e2a7bc4df51fc9c2b99ced1c0a5c9a28fceac8f5b3144cf717c35d23bb4bb76"
+    }
+  ],
+  "schema_version": "cascadekv-c5-stdout-recovery-v1"
+}

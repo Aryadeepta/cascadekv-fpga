@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "purpose": "C7 complete local execution closure",
+  "protocol": {
+    "path": "configs/cascadekv_phi35_8k_c7_protocol.json",
+    "sha256": "7b583bd58abd99f5529907943cd4af9a24c15503f145f0695ce00d715096c23c"
+  },
+  "bound_files": [
+    {
+      "path": "cascadekv/phi35_8k_c7.py",
+      "sha256": "445bcc34639ff046eb7918ddccdbdfb3499f826695c75a612618a8f654f6168e"
+    },
+    {
+      "path": "scripts/kaggle_phi35_8k_c7.py",
+      "sha256": "53b679795e367d6e3182f0ae73f715e6bd772ef8a40ec2d34eaacc18ad9dce64"
+    },
+    {
+      "path": "cascadekv/phi35_8k_c6.py",
+      "sha256": "4a022483b1608042ff6140798762ca9e408190328d0906bfcacac088ba33542d"
+    },
+    {
+      "path": "cascadekv/phi35_8k_c5.py",
+      "sha256": "a269c49d41c340b77e8da34025da59c45ee1ecaf3e943205e7bc619b2888d1c6"
+    },
+    {
+      "path": "cascadekv/phi35_8k_c4.py",
+      "sha256": "db6f36c4cdada69d571b5c254ecf74136a42eb266c6175d85279ab1fd4f28613"
+    },
+    {
+      "path": "cascadekv/phi35_8k_source_selection.py",
+      "sha256": "45e7ebc0927a225e540e415d43bb67587bbbbc465e4b0382019b13cfa67d5c44"
+    },
+    {
+      "path": "cascadekv/phi35_kaggle_c2.py",
+      "sha256": "81303b6bbd2a8ee3e851b8138294243eb4cda7aca0536699ba673fa56265db9f"
+    },
+    {
+      "path": "cascadekv/phi35_phaseb.py",
+      "sha256": "0f1b858983503a4e56434de608b4f91e31eb2478c9522cf91ec062d206c3d8b1"
+    },
+    {
+      "path": "cascadekv/evaluation_core.py",
+      "sha256": "a736298e657577cae44466e461270e91aedfce2e44626506587e7ea82409406a"
+    },
+    {
+      "path": "cascadekv/model_agnostic.py",
+      "sha256": "24e113274c1f5ad4e163f575f9a0f7c53a73b33028a930151863018658391da5"
+    },
+    {
+      "path": "cascadekv/adaptive_lifting.py",
+      "sha256": "ad47c76449840a19932ade1d1f60c730f4e270dab379159ca12234b1088b4919"
+    },
+    {
+      "path": "cascadekv/quantize.py",
+      "sha256": "49dfbc10a02ecf11ad4fa6956976aab49f5177a4ef757a61e5e0fc918e81f059"
+    },
+    {
+      "path": "cascadekv/runtime_provenance.py",
+      "sha256": "9b0d025e55d1d12d373eed570fafc90111251f2e6ac317834cb840fd5b3d70fa"
+    },
+    {
+      "path": "cascadekv/stdout_artifact_recovery.py",
+      "sha256": "cce6ca7a6899b79f03c4e4490ec2987457e339b0c09dce17c9d8a0318b929c3a"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_c6_protocol.json",
+      "sha256": "78b7b61e0cf4f3304496a9277e6f2fd966c93403f56349d235bf3ecf0fdc615a"
+    },
+    {
+      "path": "configs/cascadekv_phi35_8k_c6_runtime_manifest.json",
+      "sha256": "c19665dae088682758880a0b9dd8635b08de89339835bc737a13c5538f250cf2"
+    },
+    {
+      "path": "results/archive/cascadekv_phi35_8k_c6_v1_result.json",
+      "sha256": "f63d8e563462c0876836d7858a00435daf55fd0f48542e7a0944fa8092daf587"
+    },
+    {
+      "path": "results/archive/cascadekv_phi35_8k_c6_v1_postmortem.json",
+      "sha256": "39160d77722e0af5dd68f27d234f420db35b68798420418f6f477dc4672fd417"
+    },
+    {
+      "path": "docs/archive/cascadekv_phi35_8k_c6_v1_postmortem.md",
+      "sha256": "d5308375e08eae376d0fc075855be394261f778a40641d8cb83ffe8a397a11eb"
+    },
+    {
+      "path": "artifacts/c6-v1/cascadekv-c6-result.tar.gz",
+      "sha256": "4e95dfde98e1e35a61dd08dffed9e7ef93ca466791485f9068392d1b2bded685"
+    },
+    {
+      "path": "artifacts/c6-v1/evidence/c6_v1_kaggle_stdout.md",
+      "sha256": "c8efdf27958af3de3c31f68456bedc7debb6ed9b067e273e155519097c391af4"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "a6b0dca47df4790b897410892da143ce6f7cb485640ccabc79d69ca221b2d41a"
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "bd9858de274b586ed5f24ae38f279f684549741fc8f0fbbdc26b00a3dd897296"
+    }
+  ]
+}

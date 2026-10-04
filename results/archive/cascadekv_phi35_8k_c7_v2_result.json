@@ -1,0 +1,88 @@
+{
+  "schema_version": "cascadekv-phi35-8k-c7-v2-stdout-recovered-result-v1",
+  "scientific_result": {
+    "evidence_class": "exact recovered member bytes from retained Kaggle stdout",
+    "development": {
+      "classification": "C7-DEVELOPMENT-GO",
+      "passing_targets": ["T5"],
+      "selected_target": "T5",
+      "schedule_sha256": "5262a5fef3f4f155675d7d6ebfebfd3488830d0f4cc7447054a937a7157bac3d",
+      "selected_target_metrics": {
+        "mean_cosine": 0.9862068743953757,
+        "mean_relative_l2": 0.11932256654509622,
+        "mean_total_kv_bytes": 485373.81296296295,
+        "observation_count": 8640
+      }
+    },
+    "prospective": {
+      "classification": "C7-PROSPECTIVE-NO-PASS",
+      "selected_target": "T5",
+      "selected_target_metrics": {
+        "mean_cosine": 0.9838954824333389,
+        "mean_relative_l2": 0.12859527330471188,
+        "mean_total_kv_bytes": 485226.61666666664,
+        "observation_count": 1440
+      },
+      "selected_target_gates": {
+        "feasible": true,
+        "mean_cosine_gte": false,
+        "mean_relative_l2_lte": false,
+        "relative_l2_lt_uniform10": true,
+        "modeled_kv_traffic_lt_flat5": true,
+        "passes": false
+      },
+      "firewall_evidence": {
+        "optimizer_rerun": false,
+        "schedule_unchanged": true,
+        "opened_development_tensor_identities": [],
+        "schedule_sha256_before": "5262a5fef3f4f155675d7d6ebfebfd3488830d0f4cc7447054a937a7157bac3d",
+        "schedule_sha256_after": "5262a5fef3f4f155675d7d6ebfebfd3488830d0f4cc7447054a937a7157bac3d"
+      }
+    },
+    "holdout": {
+      "selected_identities": {
+        "narrative": {"index": 19, "input_ids_sha256": "a6b529320fde0030d85da0ce1e897f71d194da74038eaa1319fde7e3370cb5b4"},
+        "report": {"index": 23, "input_ids_sha256": "e8b8240f11ef4de3a08679b49235f9bfe4f7ceb7cfcae86cee7d29a71760c515"},
+        "qa": {"index": 20, "input_ids_sha256": "d8b2b56c723bd1be15b9827a39b02e0491427243b102500fcd2b8c836f37f8db"}
+      },
+      "rejected_frontier_rows": "none",
+      "next_untouched_frontier": {"narrative": 20, "report": 24, "qa": 21}
+    }
+  },
+  "container_provenance": {
+    "original_kaggle_result_tar_filename": "cascadekv-c7-result.tar.gz",
+    "original_kaggle_result_tar_bytes": "unavailable after Kaggle session restart",
+    "original_kaggle_result_tar_sha256": "unknown",
+    "original_kaggle_result_tar_byte_size": "unknown",
+    "exact_result_members": "recovered from stdout and verified",
+    "recovery_zip": {
+      "path": "artifacts/c7-v2-stdout-recovered/c7_v2_stdout_recovery_evidence.zip",
+      "sha256": "ff91e0ce32fc1b22dd28a2ec5740424948b2c8cdc1ceb089d7523d3ae33cff3f",
+      "is_original_kaggle_result_tar": false
+    },
+    "retained_notebook_output": {
+      "path": "artifacts/c7-v2-stdout-recovered/source/retained_notebook_output.txt",
+      "sha256": "cf3b1feff1dfbc13a833a95a05cc80097e7c3b85158f9e5b7225ead312a7ec42"
+    },
+    "recovery_manifest": "artifacts/c7-v2-stdout-recovered/stdout_recovery_manifest.json",
+    "member_directory": "artifacts/c7-v2-stdout-recovered/recovered_members"
+  },
+  "recovered_members": [
+    {"filename": "SHA256SUMS", "byte_count": 778, "sha256": "68b215fc76acd96f2dceb0fe5ca237555694735c5a80ceaa664de183a5c599d0"},
+    {"filename": "development.json", "byte_count": 725986, "sha256": "dbbcf35bbecee0a220be28fc57ff19206095c5e4ce4d522027c22aad6c6c4109"},
+    {"filename": "development_capture_manifest.json", "byte_count": 49751, "sha256": "2be863548153e4f54f5a729f02fda14e415bc6e2caf4fd176df58fb6578917e1"},
+    {"filename": "development_sources.json", "byte_count": 9349, "sha256": "9fe2583e36951e45f2674e57adbfc0b3df23d0f0666baa2c1e6e801508628db9"},
+    {"filename": "holdout.json", "byte_count": 2061, "sha256": "caaecb5bd627fd47a54934412e5a8246ad879b7d6cfeacfde745c142bdfd6041"},
+    {"filename": "holdout_capture_manifest.json", "byte_count": 8645, "sha256": "d75c1003bcb8dfbe36389696eedfb4cbf41b9642af7975b90e50c4654e810587"},
+    {"filename": "protocol.json", "byte_count": 4745, "sha256": "7b583bd58abd99f5529907943cd4af9a24c15503f145f0695ce00d715096c23c"},
+    {"filename": "qualification.json", "byte_count": 3945, "sha256": "f4703bdcd477ee91f108dde4415e14831ec20a8b156fe59876d8e3a7699bc07e"},
+    {"filename": "runtime_manifest.json", "byte_count": 3636, "sha256": "61a393178dced57ee69f1b2c50971468691d79e00049a6465964e8b5d8b92154"},
+    {"filename": "test.json", "byte_count": 3923, "sha256": "5e2a7bc4df51fc9c2b99ced1c0a5c9a28fceac8f5b3144cf717c35d23bb4bb76"}
+  ],
+  "verification": {
+    "recovered_member_count": 10,
+    "recovery_manifest_verified": true,
+    "recovered_sha256sums_verified": true,
+    "offline_final_audit": "C7-PROSPECTIVE-NO-PASS"
+  }
+}
